@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مهامي - نظام إدارة المهام</title>
+    <title>مهامي - نظام إدارة المهام المتقدم</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
         --primary: #4361ee; --secondary: #3a0ca3; --accent: #7209b7;
-        --success: #4cc9f0; --danger: #f72585; --light: #f8f9fa;
-        --dark: #212529; --gray: #6c757d;
+        --success: #4cc9f0; --danger: #f72585; --warning: #f8961e;
+        --light: #f8f9fa; --dark: #212529; --gray: #6c757d;
     }
     body { font-family: 'Segoe UI', sans-serif; background: #f5f7fb; min-height: 100vh; }
     .container { display: flex; min-height: 100vh; direction: rtl; }
@@ -36,7 +36,9 @@
     .btn-primary:hover { background: var(--secondary); transform: translateY(-2px); }
     .btn-secondary { background: var(--light); color: var(--dark); border: 1px solid #dee2e6; }
     .btn-danger { background: var(--danger); color: white; }
-    .btn-warning { background: #f8961e; color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-info { background: #3a86ff; color: white; }
     .btn-sm { padding: 6px 12px; font-size: 0.9rem; }
     
     /* شريط الوقت */
@@ -52,7 +54,17 @@
     
     /* المهام */
     .tasks-list { display: flex; flex-direction: column; gap: 10px; }
-    .task-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: var(--light); border-radius: 8px; border-right: 4px solid var(--primary); transition: 0.3s; }
+    .task-item { 
+        display: flex; 
+        align-items: center; 
+        gap: 15px; 
+        padding: 15px; 
+        background: var(--light); 
+        border-radius: 8px; 
+        border-right: 4px solid var(--primary); 
+        transition: 0.3s;
+        cursor: pointer;
+    }
     .task-item:hover { transform: translateX(-5px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     .task-item.completed { opacity: 0.7; border-color: var(--success); }
     .task-item.completed .task-title { text-decoration: line-through; }
@@ -60,8 +72,8 @@
     .task-content { flex: 1; }
     .task-title { font-weight: bold; margin-bottom: 5px; }
     .task-description { color: var(--gray); font-size: 0.9rem; margin-bottom: 10px; }
-    .task-meta { display: flex; gap: 15px; font-size: 0.85rem; color: var(--gray); }
-    .task-actions { display: flex; gap: 10px; }
+    .task-meta { display: flex; gap: 15px; font-size: 0.85rem; color: var(--gray); flex-wrap: wrap; }
+    .task-actions { display: flex; gap: 5px; }
     
     /* الفئات */
     .category-card { 
@@ -94,14 +106,118 @@
         transition: width 0.5s ease;
     }
     
+    /* الجدول الزمني */
+    .calendar-view { margin-top: 20px; }
+    .calendar-header { 
+        display: flex; 
+        justify-content: space-between; 
+        align-items: center; 
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #dee2e6;
+    }
+    .calendar-nav { display: flex; gap: 10px; }
+    .calendar-body { min-height: 400px; }
+    
+    /* عرض يومي */
+    .daily-view { display: flex; flex-direction: column; gap: 10px; }
+    .time-slot { 
+        display: flex; 
+        gap: 20px; 
+        padding: 10px; 
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .time-label { 
+        width: 80px; 
+        font-weight: bold; 
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+    }
+    .time-tasks { flex: 1; display: flex; flex-wrap: wrap; gap: 10px; }
+    .calendar-task { 
+        padding: 8px 12px; 
+        border-radius: 6px; 
+        font-size: 0.85rem;
+        color: white;
+        cursor: pointer;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    
+    /* عرض أسبوعي */
+    .weekly-view { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
+    .day-column { border: 1px solid #dee2e6; border-radius: 8px; padding: 10px; }
+    .day-header { 
+        text-align: center; 
+        padding-bottom: 10px; 
+        margin-bottom: 10px;
+        border-bottom: 1px solid #dee2e6;
+        font-weight: bold;
+    }
+    .day-today { background: #e7f5ff; border-color: var(--primary); }
+    .day-tasks { min-height: 200px; }
+    
+    /* عرض شهري */
+    .monthly-view { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .month-day { 
+        border: 1px solid #dee2e6; 
+        border-radius: 4px; 
+        padding: 8px; 
+        min-height: 100px;
+        position: relative;
+    }
+    .month-day-header { 
+        display: flex; 
+        justify-content: space-between; 
+        margin-bottom: 5px;
+        font-size: 0.9rem;
+    }
+    .day-number { font-weight: bold; }
+    .today-indicator { 
+        background: var(--primary); 
+        color: white; 
+        width: 24px; 
+        height: 24px; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+    }
+    .other-month { background: #f8f9fa; color: #adb5bd; }
+    
     /* النوافذ */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    .modal-content { background: white; border-radius: 10px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-content { background: white; border-radius: 10px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #dee2e6; }
     .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
     .modal-body { padding: 20px; }
     .modal-footer { padding: 20px; border-top: 1px solid #dee2e6; display: flex; justify-content: flex-end; gap: 10px; }
+    
+    /* نافذة إعدادات المهمة */
+    .task-settings-tabs { 
+        display: flex; 
+        border-bottom: 1px solid #dee2e6; 
+        margin-bottom: 20px;
+    }
+    .tab-btn { 
+        padding: 10px 20px; 
+        background: none; 
+        border: none; 
+        cursor: pointer; 
+        border-bottom: 3px solid transparent;
+        font-weight: 500;
+        transition: 0.3s;
+    }
+    .tab-btn.active { 
+        border-bottom-color: var(--primary); 
+        color: var(--primary);
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
     
     /* النماذج */
     .form-group { margin-bottom: 15px; }
@@ -136,6 +252,54 @@
     .alert-warning { background: #fff3cd; border: 1px solid #ffcd39; color: #856404; }
     .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
     .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+    .alert-info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    
+    /* التذكيرات */
+    .reminder-item { 
+        display: flex; 
+        align-items: center; 
+        gap: 10px; 
+        padding: 10px; 
+        background: #f8f9fa; 
+        border-radius: 8px; 
+        margin-bottom: 10px;
+    }
+    .reminder-icon { 
+        width: 36px; 
+        height: 36px; 
+        border-radius: 50%; 
+        display: flex; 
+        align-items: center; 
+        justify-content: center;
+        color: white;
+        font-size: 1.2rem;
+    }
+    
+    /* مؤشرات الوقت */
+    .time-indicator { 
+        display: inline-block; 
+        padding: 2px 8px; 
+        border-radius: 4px; 
+        font-size: 0.8rem; 
+        font-weight: bold;
+        margin-left: 5px;
+    }
+    .time-soon { background: #fff3cd; color: #856404; }
+    .time-overdue { background: #f8d7da; color: #721c24; }
+    .time-future { background: #d1ecf1; color: #0c5460; }
+    
+    /* شريط التصفية */
+    .filter-bar { 
+        display: flex; 
+        gap: 10px; 
+        margin-bottom: 20px; 
+        padding: 15px; 
+        background: #f8f9fa; 
+        border-radius: 8px;
+        flex-wrap: wrap;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group label { font-size: 0.85rem; color: var(--gray); }
     </style>
 </head>
 <body>
@@ -170,23 +334,56 @@
             <div class="content-area">
                 <!-- عرض المهام -->
                 <div id="tasks-view" class="view active-view">
-                    <div class="tasks-container">
-                        <h3>مهام اليوم</h3>
-                        <div id="time-alert" style="display: none;"></div>
-                        <div class="tasks-list" id="tasks-list">
-                            <div class="empty-state">
-                                <i class="fas fa-tasks fa-3x"></i>
-                                <h4>لا توجد مهام</h4>
-                                <p>اضغط على "إضافة مهمة" لإنشاء مهمتك الأولى</p>
-                            </div>
+                    <div class="filter-bar">
+                        <div class="filter-group">
+                            <label>تصفية حسب التاريخ:</label>
+                            <select id="date-filter" class="filter-select">
+                                <option value="all">جميع المهام</option>
+                                <option value="today">اليوم</option>
+                                <option value="week">هذا الأسبوع</option>
+                                <option value="month">هذا الشهر</option>
+                                <option value="overdue">متأخرة</option>
+                                <option value="upcoming">قادمة</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>تصفية حسب الحالة:</label>
+                            <select id="status-filter" class="filter-select">
+                                <option value="all">جميع الحالات</option>
+                                <option value="pending">قيد الانتظار</option>
+                                <option value="completed">مكتملة</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>تصفية حسب الفئة:</label>
+                            <select id="category-filter" class="filter-select">
+                                <option value="all">جميع الفئات</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-secondary" id="clear-filters"><i class="fas fa-times"></i> مسح الفلاتر</button>
+                    </div>
+                    
+                    <div id="time-alert" style="display: none;"></div>
+                    <div class="tasks-list" id="tasks-list">
+                        <div class="empty-state">
+                            <i class="fas fa-tasks fa-3x"></i>
+                            <h4>لا توجد مهام</h4>
+                            <p>اضغط على "إضافة مهمة" لإنشاء مهمتك الأولى</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- عرض الجدول -->
                 <div id="calendar-view" class="view">
-                    <div class="calendar-container">
-                        <h3>الجدول الزمني</h3>
+                    <div class="calendar-header">
+                        <h3 id="calendar-title">الجدول الزمني اليومي</h3>
+                        <div class="calendar-nav">
+                            <button class="btn btn-secondary" id="prev-period"><i class="fas fa-chevron-right"></i></button>
+                            <button class="btn btn-secondary" id="current-period">اليوم</button>
+                            <button class="btn btn-secondary" id="next-period"><i class="fas fa-chevron-left"></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-body" id="calendar-body">
                         <p>اختر عرضاً زمنياً من الأعلى</p>
                     </div>
                 </div>
@@ -230,12 +427,32 @@
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="task-category">الفئة</label>
-                            <select id="task-category"></select>
+                            <label for="task-category">الفئة *</label>
+                            <select id="task-category" required></select>
                         </div>
                         <div class="form-group">
                             <label for="task-duration">المدة (دقائق) *</label>
                             <input type="number" id="task-duration" min="1" value="30" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-start-date">تاريخ البدء *</label>
+                            <input type="date" id="task-start-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="task-end-date">تاريخ الانتهاء *</label>
+                            <input type="date" id="task-end-date" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="task-start-time">وقت البدء (اختياري)</label>
+                            <input type="time" id="task-start-time">
+                        </div>
+                        <div class="form-group">
+                            <label for="task-end-time">وقت الانتهاء (اختياري)</label>
+                            <input type="time" id="task-end-time">
                         </div>
                     </div>
                     <div id="time-check-result"></div>
@@ -244,6 +461,124 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancel-task">إلغاء</button>
                 <button class="btn btn-primary" id="save-task">حفظ المهمة</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- نافذة إعدادات المهمة -->
+    <div class="modal" id="task-settings-modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 id="task-settings-title">إعدادات المهمة</h3>
+                <button class="close-btn" id="close-task-settings">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="task-settings-tabs">
+                    <button class="tab-btn active" data-tab="basic">المعلومات الأساسية</button>
+                    <button class="tab-btn" data-tab="time">الوقت والتاريخ</button>
+                    <button class="tab-btn" data-tab="reminders">التذكيرات</button>
+                </div>
+                
+                <div id="basic-tab" class="tab-content active">
+                    <form id="task-settings-form">
+                        <input type="hidden" id="settings-task-id">
+                        <div class="form-group">
+                            <label for="settings-title">عنوان المهمة *</label>
+                            <input type="text" id="settings-title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-description">وصف المهمة</label>
+                            <textarea id="settings-description" rows="3"></textarea>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="settings-category">الفئة *</label>
+                                <select id="settings-category" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-duration">المدة (دقائق) *</label>
+                                <input type="number" id="settings-duration" min="1" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-priority">الأولوية</label>
+                            <select id="settings-priority">
+                                <option value="low">منخفضة</option>
+                                <option value="medium">متوسطة</option>
+                                <option value="high">عالية</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="time-tab" class="tab-content">
+                    <form id="time-settings-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="settings-start-date">تاريخ البدء *</label>
+                                <input type="date" id="settings-start-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-end-date">تاريخ الانتهاء *</label>
+                                <input type="date" id="settings-end-date" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="settings-start-time">وقت البدء</label>
+                                <input type="time" id="settings-start-time">
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-end-time">وقت الانتهاء</label>
+                                <input type="time" id="settings-end-time">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="settings-recurrence">التكرار</label>
+                            <select id="settings-recurrence">
+                                <option value="none">لا يوجد</option>
+                                <option value="daily">يومي</option>
+                                <option value="weekly">أسبوعي</option>
+                                <option value="monthly">شهري</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                
+                <div id="reminders-tab" class="tab-content">
+                    <div class="form-group">
+                        <label>إضافة تذكير</label>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <select id="reminder-type">
+                                    <option value="notification">إشعار</option>
+                                    <option value="email">بريد إلكتروني</option>
+                                    <option value="both">الاثنين معاً</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <select id="reminder-time">
+                                    <option value="5">5 دقائق قبل</option>
+                                    <option value="15">15 دقيقة قبل</option>
+                                    <option value="30">30 دقيقة قبل</option>
+                                    <option value="60">ساعة قبل</option>
+                                    <option value="1440">يوم قبل</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <button type="button" class="btn btn-secondary" id="add-reminder-btn"><i class="fas fa-plus"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="reminders-list">
+                        <p style="color: var(--gray); text-align: center; padding: 20px;">لا توجد تذكيرات</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" id="delete-task-btn">حذف المهمة</button>
+                <button class="btn btn-secondary" id="cancel-task-settings">إلغاء</button>
+                <button class="btn btn-primary" id="save-task-settings">حفظ التغييرات</button>
             </div>
         </div>
     </div>
@@ -272,6 +607,35 @@
                             <input type="number" id="category-time-limit" min="1" value="60" required>
                             <small style="color: #6c757d; font-size: 0.85rem;">الحد الأقصى من الدقائق يوميًا</small>
                         </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="category-icon">أيقونة الفئة</label>
+                        <select id="category-icon">
+                            <option value="fas fa-home">منزل</option>
+                            <option value="fas fa-briefcase">عمل</option>
+                            <option value="fas fa-graduation-cap">دراسة</option>
+                            <option value="fas fa-heartbeat">صحة</option>
+                            <option value="fas fa-shopping-cart">تسوق</option>
+                            <option value="fas fa-dumbbell">رياضة</option>
+                            <option value="fas fa-utensils">طعام</option>
+                            <option value="fas fa-users">اجتماعي</option>
+                        </select>
+                    </div>
+                    <h4 style="margin-top: 20px; margin-bottom: 10px;">إعدادات التذكيرات للفئة</h4>
+                    <div class="form-group">
+                        <label for="category-reminder-message">رسالة التذكير عند الامتلاء</label>
+                        <input type="text" id="category-reminder-message" placeholder="أدخل رسالة التذكير الخاصة بك">
+                        <small style="color: #6c757d; font-size: 0.85rem;">سيتم عرض هذه الرسالة عند امتلاء الفئة</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="category-warning-percentage">نسبة التحذير</label>
+                        <input type="range" id="category-warning-percentage" min="0" max="100" value="80">
+                        <div style="display: flex; justify-content: space-between;">
+                            <small style="color: #6c757d;">0%</small>
+                            <small id="warning-percentage-value" style="color: var(--primary); font-weight: bold;">80%</small>
+                            <small style="color: #6c757d;">100%</small>
+                        </div>
+                        <small style="color: #6c757d; font-size: 0.85rem;">سيتم إرسال تحذير عند وصول الفئة إلى هذه النسبة</small>
                     </div>
                 </form>
             </div>
@@ -313,6 +677,9 @@
             
             console.log("الفئات النهائية:", this.categories);
             this.initSampleData();
+            
+            // تحميل التذكيرات
+            this.reminders = this.loadFromStorage('reminders') || [];
         }
 
         loadFromStorage(key) {
@@ -340,45 +707,94 @@
                     id: 'personal',
                     name: 'مهام شخصية',
                     color: '#4361ee',
-                    timeLimit: 120, // ساعتين بالدقائق
-                    icon: 'fas fa-home'
+                    timeLimit: 120,
+                    icon: 'fas fa-home',
+                    reminderMessage: 'الفئة الشخصية ممتلئة! راجع مهامك اليومية.',
+                    warningPercentage: 80
                 },
                 {
                     id: 'work',
                     name: 'عمل',
                     color: '#f72585',
-                    timeLimit: 480, // 8 ساعات
-                    icon: 'fas fa-briefcase'
+                    timeLimit: 480,
+                    icon: 'fas fa-briefcase',
+                    reminderMessage: 'فئة العمل ممتلئة! لا يمكن إضافة مهام عمل جديدة اليوم.',
+                    warningPercentage: 90
                 },
                 {
                     id: 'study',
                     name: 'دراسة',
                     color: '#4cc9f0',
-                    timeLimit: 180, // 3 ساعات
-                    icon: 'fas fa-graduation-cap'
+                    timeLimit: 180,
+                    icon: 'fas fa-graduation-cap',
+                    reminderMessage: 'وقت الدراسة اليومي انتهى! راجع جدولك.',
+                    warningPercentage: 75
                 },
                 {
                     id: 'health',
                     name: 'صحية',
                     color: '#38b000',
-                    timeLimit: 60, // ساعة واحدة
-                    icon: 'fas fa-heartbeat'
+                    timeLimit: 60,
+                    icon: 'fas fa-heartbeat',
+                    reminderMessage: 'لقد استخدمت وقتك الصحي اليومي! حافظ على التوازن.',
+                    warningPercentage: 100
                 }
             ];
         }
 
         initSampleData() {
-            // إذا لم تكن هناك مهام، أضف مهمة تجريبية
+            // إذا لم تكن هناك مهام، أضف مهام تجريبية
             if (this.tasks.length === 0) {
-                this.tasks = [{
-                    id: '1',
-                    title: 'مهمة تجريبية',
-                    description: 'هذه مهمة للاختبار',
-                    categoryId: 'personal',
-                    duration: 30,
-                    date: this.getTodayDate(),
-                    completed: false
-                }];
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const nextWeek = new Date(today);
+                nextWeek.setDate(nextWeek.getDate() + 7);
+                
+                this.tasks = [
+                    {
+                        id: '1',
+                        title: 'مهمة تجريبية',
+                        description: 'هذه مهمة للاختبار',
+                        categoryId: 'personal',
+                        duration: 30,
+                        startDate: today.toISOString().split('T')[0],
+                        endDate: today.toISOString().split('T')[0],
+                        startTime: '09:00',
+                        endTime: '09:30',
+                        completed: false,
+                        priority: 'medium',
+                        recurrence: 'none',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: '2',
+                        title: 'اجتماع عمل',
+                        description: 'اجتماع فريق العمل الأسبوعي',
+                        categoryId: 'work',
+                        duration: 60,
+                        startDate: today.toISOString().split('T')[0],
+                        endDate: today.toISOString().split('T')[0],
+                        startTime: '14:00',
+                        endTime: '15:00',
+                        completed: false,
+                        priority: 'high',
+                        recurrence: 'weekly',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: '3',
+                        title: 'مذاكرة رياضيات',
+                        description: 'مراجعة الفصل الثالث',
+                        categoryId: 'study',
+                        duration: 45,
+                        startDate: tomorrow.toISOString().split('T')[0],
+                        endDate: tomorrow.toISOString().split('T')[0],
+                        completed: false,
+                        priority: 'medium',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
                 this.saveTasks();
             }
             
@@ -391,14 +807,52 @@
             return today.toISOString().split('T')[0];
         }
 
+        formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toISOString().split('T')[0];
+        }
+
+        getWeekRange(date = new Date()) {
+            const start = new Date(date);
+            start.setDate(start.getDate() - start.getDay()); // الأحد
+            const end = new Date(start);
+            end.setDate(end.getDate() + 6); // السبت
+            
+            return {
+                start: start.toISOString().split('T')[0],
+                end: end.toISOString().split('T')[0]
+            };
+        }
+
+        getMonthRange(date = new Date()) {
+            const start = new Date(date.getFullYear(), date.getMonth(), 1);
+            const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+            
+            return {
+                start: start.toISOString().split('T')[0],
+                end: end.toISOString().split('T')[0]
+            };
+        }
+
         // وظائف المهام
         addTask(task) {
             if (!task.id) task.id = Date.now().toString();
-            task.date = this.getTodayDate();
+            if (!task.createdAt) task.createdAt = new Date().toISOString();
             this.tasks.push(task);
             this.saveTasks();
             console.log("تمت إضافة مهمة:", task);
             return task;
+        }
+
+        updateTask(taskId, updatedData) {
+            const index = this.tasks.findIndex(task => task.id === taskId);
+            if (index !== -1) {
+                this.tasks[index] = { ...this.tasks[index], ...updatedData };
+                this.saveTasks();
+                console.log("تم تحديث المهمة:", this.tasks[index]);
+                return this.tasks[index];
+            }
+            return null;
         }
 
         deleteTask(taskId) {
@@ -406,9 +860,57 @@
             this.saveTasks();
         }
 
-        getTasks(date = null) {
-            if (!date) date = this.getTodayDate();
-            return this.tasks.filter(task => task.date === date);
+        getTasks(filters = {}) {
+            let filteredTasks = [...this.tasks];
+            
+            // تطبيق الفلاتر
+            if (filters.dateFilter) {
+                const today = this.getTodayDate();
+                
+                switch(filters.dateFilter) {
+                    case 'today':
+                        filteredTasks = filteredTasks.filter(task => 
+                            task.startDate === today || task.endDate === today
+                        );
+                        break;
+                    case 'week':
+                        const weekRange = this.getWeekRange();
+                        filteredTasks = filteredTasks.filter(task => 
+                            task.startDate >= weekRange.start && task.startDate <= weekRange.end
+                        );
+                        break;
+                    case 'month':
+                        const monthRange = this.getMonthRange();
+                        filteredTasks = filteredTasks.filter(task => 
+                            task.startDate >= monthRange.start && task.startDate <= monthRange.end
+                        );
+                        break;
+                    case 'overdue':
+                        filteredTasks = filteredTasks.filter(task => 
+                            !task.completed && task.endDate < today
+                        );
+                        break;
+                    case 'upcoming':
+                        filteredTasks = filteredTasks.filter(task => 
+                            !task.completed && task.startDate > today
+                        );
+                        break;
+                }
+            }
+            
+            if (filters.statusFilter && filters.statusFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => 
+                    filters.statusFilter === 'completed' ? task.completed : !task.completed
+                );
+            }
+            
+            if (filters.categoryFilter && filters.categoryFilter !== 'all') {
+                filteredTasks = filteredTasks.filter(task => 
+                    task.categoryId === filters.categoryFilter
+                );
+            }
+            
+            return filteredTasks.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
         }
 
         getTaskById(taskId) {
@@ -428,30 +930,36 @@
         }
 
         // التحقق من الوقت المتاح في الفئة
-        checkCategoryTimeAvailability(categoryId, taskDuration, excludeTaskId = null) {
+        checkCategoryTimeAvailability(categoryId, taskDuration, taskDate, excludeTaskId = null) {
             const category = this.getCategoryById(categoryId);
             if (!category || !category.timeLimit) return { available: true, remaining: 0 };
             
-            const todayTasks = this.getTasks().filter(task => 
+            const dateTasks = this.tasks.filter(task => 
                 task.categoryId === categoryId && 
+                task.startDate === taskDate &&
                 (!excludeTaskId || task.id !== excludeTaskId)
             );
             
-            const totalUsedTime = todayTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
+            const totalUsedTime = dateTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
             const remainingTime = category.timeLimit - totalUsedTime;
             
             return {
                 available: remainingTime >= taskDuration,
                 remaining: remainingTime,
                 used: totalUsedTime,
-                limit: category.timeLimit
+                limit: category.timeLimit,
+                percentage: Math.round((totalUsedTime / category.timeLimit) * 100)
             };
         }
 
         // وظائف الفئات
         addCategory(category) {
             if (!category.id) category.id = Date.now().toString();
-            if (!category.timeLimit) category.timeLimit = 60; // قيمة افتراضية: ساعة واحدة
+            if (!category.timeLimit) category.timeLimit = 60;
+            if (!category.reminderMessage) category.reminderMessage = `فئة ${category.name} ممتلئة!`;
+            if (!category.warningPercentage) category.warningPercentage = 80;
+            if (!category.icon) category.icon = 'fas fa-tag';
+            
             this.categories.push(category);
             this.saveCategories();
             console.log("تمت إضافة فئة:", category);
@@ -482,7 +990,6 @@
         }
 
         getCategories() {
-            // التأكد من إرجاع مصفوفة
             return Array.isArray(this.categories) ? [...this.categories] : [];
         }
 
@@ -498,14 +1005,33 @@
             this.saveToStorage('categories', this.categories);
         }
 
-        // إحصائيات بسيطة
-        getStatistics() {
-            const tasks = this.getTasks();
+        // إحصائيات
+        getStatistics(dateRange = 'today') {
+            let dateFilter = '';
+            const today = this.getTodayDate();
+            
+            switch(dateRange) {
+                case 'week':
+                    const weekRange = this.getWeekRange();
+                    dateFilter = { start: weekRange.start, end: weekRange.end };
+                    break;
+                case 'month':
+                    const monthRange = this.getMonthRange();
+                    dateFilter = { start: monthRange.start, end: monthRange.end };
+                    break;
+                default:
+                    dateFilter = { start: today, end: today };
+            }
+            
+            const filteredTasks = this.tasks.filter(task => 
+                task.startDate >= dateFilter.start && task.startDate <= dateFilter.end
+            );
+            
             const categories = this.getCategories();
             
             // حساب الإحصائيات لكل فئة
             const categoryStats = categories.map(cat => {
-                const catTasks = tasks.filter(t => t.categoryId === cat.id);
+                const catTasks = filteredTasks.filter(t => t.categoryId === cat.id);
                 const usedTime = catTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
                 const percentage = cat.timeLimit ? Math.min(100, Math.round((usedTime / cat.timeLimit) * 100)) : 0;
                 
@@ -515,17 +1041,42 @@
                     usedTime,
                     percentage,
                     remainingTime: cat.timeLimit - usedTime,
-                    isFull: cat.timeLimit ? usedTime >= cat.timeLimit : false
+                    isFull: cat.timeLimit ? usedTime >= cat.timeLimit : false,
+                    needsWarning: percentage >= (cat.warningPercentage || 80)
                 };
             });
             
             return {
-                totalTasks: tasks.length,
-                completedTasks: tasks.filter(t => t.completed).length,
-                pendingTasks: tasks.filter(t => !t.completed).length,
-                totalTime: tasks.reduce((sum, task) => sum + (task.duration || 0), 0),
-                categories: categoryStats
+                totalTasks: filteredTasks.length,
+                completedTasks: filteredTasks.filter(t => t.completed).length,
+                pendingTasks: filteredTasks.filter(t => !t.completed).length,
+                totalTime: filteredTasks.reduce((sum, task) => sum + (task.duration || 0), 0),
+                categories: categoryStats,
+                dateRange
             };
+        }
+
+        // التذكيرات
+        addReminder(taskId, reminder) {
+            reminder.id = Date.now().toString();
+            reminder.taskId = taskId;
+            reminder.createdAt = new Date().toISOString();
+            this.reminders.push(reminder);
+            this.saveReminders();
+            return reminder;
+        }
+
+        getTaskReminders(taskId) {
+            return this.reminders.filter(reminder => reminder.taskId === taskId);
+        }
+
+        deleteReminder(reminderId) {
+            this.reminders = this.reminders.filter(r => r.id !== reminderId);
+            this.saveReminders();
+        }
+
+        saveReminders() {
+            this.saveToStorage('reminders', this.reminders);
         }
     }
 
@@ -534,7 +1085,16 @@
         constructor(taskManager) {
             this.taskManager = taskManager;
             this.currentView = 'tasks';
+            this.currentCalendarRange = 'daily';
+            this.currentCalendarDate = new Date();
             this.editingCategoryId = null;
+            this.editingTaskId = null;
+            this.currentFilters = {
+                dateFilter: 'all',
+                statusFilter: 'all',
+                categoryFilter: 'all'
+            };
+            
             this.initializeElements();
             this.setupEventListeners();
             this.initializeApp();
@@ -552,10 +1112,44 @@
                 taskDescription: document.getElementById('task-description'),
                 taskCategory: document.getElementById('task-category'),
                 taskDuration: document.getElementById('task-duration'),
+                taskStartDate: document.getElementById('task-start-date'),
+                taskEndDate: document.getElementById('task-end-date'),
+                taskStartTime: document.getElementById('task-start-time'),
+                taskEndTime: document.getElementById('task-end-time'),
                 cancelTask: document.getElementById('cancel-task'),
                 timeCheckResult: document.getElementById('time-check-result'),
                 timeAlert: document.getElementById('time-alert'),
                 
+                // إعدادات المهمة
+                taskSettingsModal: document.getElementById('task-settings-modal'),
+                closeTaskSettings: document.getElementById('close-task-settings'),
+                taskSettingsTitle: document.getElementById('task-settings-title'),
+                settingsTaskId: document.getElementById('settings-task-id'),
+                settingsTitle: document.getElementById('settings-title'),
+                settingsDescription: document.getElementById('settings-description'),
+                settingsCategory: document.getElementById('settings-category'),
+                settingsDuration: document.getElementById('settings-duration'),
+                settingsPriority: document.getElementById('settings-priority'),
+                settingsStartDate: document.getElementById('settings-start-date'),
+                settingsEndDate: document.getElementById('settings-end-date'),
+                settingsStartTime: document.getElementById('settings-start-time'),
+                settingsEndTime: document.getElementById('settings-end-time'),
+                settingsRecurrence: document.getElementById('settings-recurrence'),
+                deleteTaskBtn: document.getElementById('delete-task-btn'),
+                cancelTaskSettings: document.getElementById('cancel-task-settings'),
+                saveTaskSettings: document.getElementById('save-task-settings'),
+                
+                // التذكيرات
+                reminderType: document.getElementById('reminder-type'),
+                reminderTime: document.getElementById('reminder-time'),
+                addReminderBtn: document.getElementById('add-reminder-btn'),
+                remindersList: document.getElementById('reminders-list'),
+                
+                // التبويبات
+                tabButtons: document.querySelectorAll('.tab-btn'),
+                tabContents: document.querySelectorAll('.tab-content'),
+                
+                // الفئات
                 categoryModal: document.getElementById('category-modal'),
                 categoryModalTitle: document.getElementById('category-modal-title'),
                 closeCategoryModal: document.getElementById('close-category-modal'),
@@ -564,13 +1158,31 @@
                 categoryName: document.getElementById('category-name'),
                 categoryColor: document.getElementById('category-color'),
                 categoryTimeLimit: document.getElementById('category-time-limit'),
+                categoryIcon: document.getElementById('category-icon'),
+                categoryReminderMessage: document.getElementById('category-reminder-message'),
+                categoryWarningPercentage: document.getElementById('category-warning-percentage'),
+                warningPercentageValue: document.getElementById('warning-percentage-value'),
                 cancelCategory: document.getElementById('cancel-category'),
                 addCategoryBtn: document.getElementById('add-category-btn'),
                 
-                navItems: document.querySelectorAll('.nav-item'),
-                views: document.querySelectorAll('.view'),
+                // الفلاتر
+                dateFilter: document.getElementById('date-filter'),
+                statusFilter: document.getElementById('status-filter'),
+                categoryFilter: document.getElementById('category-filter'),
+                clearFilters: document.getElementById('clear-filters'),
+                
+                // الجدول
                 timeNavigation: document.getElementById('time-navigation'),
                 timeButtons: document.querySelectorAll('.time-btn'),
+                calendarTitle: document.getElementById('calendar-title'),
+                prevPeriod: document.getElementById('prev-period'),
+                currentPeriod: document.getElementById('current-period'),
+                nextPeriod: document.getElementById('next-period'),
+                calendarBody: document.getElementById('calendar-body'),
+                
+                // القوائم
+                navItems: document.querySelectorAll('.nav-item'),
+                views: document.querySelectorAll('.view'),
                 tasksList: document.getElementById('tasks-list'),
                 statsGrid: document.getElementById('stats-grid'),
                 categoriesList: document.getElementById('categories-list')
@@ -592,29 +1204,79 @@
             this.elements.saveTaskBtn.addEventListener('click', () => this.saveTask());
             this.elements.cancelTask.addEventListener('click', () => this.closeModal('add-task-modal'));
             
-            // التحقق من الوقت عند تغيير الفئة أو المدة
+            // التحقق من الوقت
             this.elements.taskCategory.addEventListener('change', () => this.checkTimeAvailability());
             this.elements.taskDuration.addEventListener('input', () => this.checkTimeAvailability());
-
-            // إدارة الفئات
+            this.elements.taskStartDate.addEventListener('change', () => this.checkTimeAvailability());
+            
+            // تحديث تاريخ الانتهاء عند تغيير تاريخ البدء
+            this.elements.taskStartDate.addEventListener('change', () => {
+                this.elements.taskEndDate.min = this.elements.taskStartDate.value;
+                if (this.elements.taskEndDate.value < this.elements.taskStartDate.value) {
+                    this.elements.taskEndDate.value = this.elements.taskStartDate.value;
+                }
+            });
+            
+            // إعدادات المهمة
+            this.elements.closeTaskSettings.addEventListener('click', () => this.closeModal('task-settings-modal'));
+            this.elements.deleteTaskBtn.addEventListener('click', () => this.deleteTask());
+            this.elements.cancelTaskSettings.addEventListener('click', () => this.closeModal('task-settings-modal'));
+            this.elements.saveTaskSettings.addEventListener('click', () => this.saveTaskSettings());
+            
+            // التبويبات
+            this.elements.tabButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabId = btn.dataset.tab;
+                    this.switchTab(tabId);
+                });
+            });
+            
+            // التذكيرات
+            this.elements.addReminderBtn.addEventListener('click', () => this.addReminder());
+            
+            // الفئات
             this.elements.addCategoryBtn.addEventListener('click', () => this.openCategoryModal());
             this.elements.closeCategoryModal.addEventListener('click', () => this.closeModal('category-modal'));
             this.elements.saveCategoryBtn.addEventListener('click', () => this.saveCategory());
             this.elements.cancelCategory.addEventListener('click', () => this.closeModal('category-modal'));
-
-            // الوقت
+            
+            // شريط التحذير
+            this.elements.categoryWarningPercentage.addEventListener('input', (e) => {
+                this.elements.warningPercentageValue.textContent = `${e.target.value}%`;
+            });
+            
+            // الفلاتر
+            this.elements.dateFilter.addEventListener('change', () => this.applyFilters());
+            this.elements.statusFilter.addEventListener('change', () => this.applyFilters());
+            this.elements.categoryFilter.addEventListener('change', () => this.applyFilters());
+            this.elements.clearFilters.addEventListener('click', () => this.clearAllFilters());
+            
+            // الجدول الزمني
             this.elements.timeButtons.forEach(btn => {
                 btn.addEventListener('click', () => {
+                    this.currentCalendarRange = btn.dataset.range;
                     this.elements.timeButtons.forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
+                    this.loadCalendarView();
                 });
             });
+            
+            this.elements.prevPeriod.addEventListener('click', () => this.navigateCalendar(-1));
+            this.elements.nextPeriod.addEventListener('click', () => this.navigateCalendar(1));
+            this.elements.currentPeriod.addEventListener('click', () => this.resetCalendar());
         }
 
         initializeApp() {
             console.log("تهيئة التطبيق...");
             this.updateDate();
             this.switchView('tasks');
+            
+            // تعيين التواريخ الافتراضية
+            const today = new Date().toISOString().split('T')[0];
+            this.elements.taskStartDate.value = today;
+            this.elements.taskEndDate.value = today;
+            this.elements.taskStartDate.min = today;
+            this.elements.taskEndDate.min = today;
         }
 
         updateDate() {
@@ -665,6 +1327,9 @@
                 case 'tasks':
                     this.loadTasksView();
                     break;
+                case 'calendar':
+                    this.loadCalendarView();
+                    break;
                 case 'stats':
                     this.loadStatsView();
                     break;
@@ -674,11 +1339,33 @@
             }
         }
 
+        switchTab(tabId) {
+            // تحديث التبويبات
+            this.elements.tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // تحديث المحتوى
+            this.elements.tabContents.forEach(content => {
+                content.classList.remove('active');
+                if (content.id === `${tabId}-tab`) {
+                    content.classList.add('active');
+                }
+            });
+        }
+
         // تحميل المهام
         loadTasksView() {
             console.log("تحميل عرض المهام...");
-            const tasks = this.taskManager.getTasks();
-            console.log("المهام:", tasks);
+            
+            // تحديث خيارات الفلاتر
+            this.updateFilterOptions();
+            
+            const tasks = this.taskManager.getTasks(this.currentFilters);
+            console.log("المهام المفلترة:", tasks);
             
             // عرض التحذيرات الزمنية
             this.showTimeWarnings();
@@ -695,24 +1382,44 @@
             }
             
             let html = '';
+            const today = this.taskManager.getTodayDate();
+            
             tasks.forEach(task => {
                 const category = this.taskManager.getCategoryById(task.categoryId);
-                console.log(`المهمة ${task.id} - الفئة:`, category);
+                
+                // تحديد حالة الوقت
+                let timeStatus = '';
+                if (task.completed) {
+                    timeStatus = `<span class="time-indicator" style="background: #d4edda; color: #155724;">مكتملة</span>`;
+                } else if (task.endDate < today) {
+                    timeStatus = `<span class="time-indicator time-overdue">متأخرة</span>`;
+                } else if (task.startDate === today) {
+                    timeStatus = `<span class="time-indicator time-soon">اليوم</span>`;
+                } else if (task.startDate > today) {
+                    const daysDiff = Math.ceil((new Date(task.startDate) - new Date(today)) / (1000 * 60 * 60 * 24));
+                    timeStatus = `<span class="time-indicator time-future">بعد ${daysDiff} يوم</span>`;
+                }
                 
                 html += `
-                    <div class="task-item ${task.completed ? 'completed' : ''}" data-id="${task.id}">
+                    <div class="task-item ${task.completed ? 'completed' : ''}" data-id="${task.id}" style="border-right-color: ${category?.color || '#4361ee'}">
                         <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
                         <div class="task-content">
-                            <div class="task-title">${task.title || 'بدون عنوان'}</div>
+                            <div class="task-title">${task.title || 'بدون عنوان'} ${timeStatus}</div>
                             ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                             <div class="task-meta">
                                 <span><i class="fas fa-tag" style="color: ${category?.color || '#000'}"></i> ${category?.name || 'عام'}</span>
                                 <span><i class="fas fa-clock"></i> ${task.duration || 30} دقيقة</span>
-                                <span><i class="fas ${task.completed ? 'fa-check-circle' : 'fa-hourglass-half'}"></i> ${task.completed ? 'مكتملة' : 'قيد التنفيذ'}</span>
+                                <span><i class="fas fa-calendar"></i> ${this.formatArabicDate(task.startDate)}</span>
+                                ${task.startTime ? `<span><i class="fas fa-clock"></i> ${task.startTime}</span>` : ''}
+                                ${task.priority === 'high' ? '<span style="color: #f72585;"><i class="fas fa-exclamation-circle"></i> عالية</span>' : ''}
+                                ${task.priority === 'medium' ? '<span style="color: #f8961e;"><i class="fas fa-exclamation-circle"></i> متوسطة</span>' : ''}
                             </div>
                         </div>
                         <div class="task-actions">
-                            <button class="btn btn-danger btn-sm delete-task" data-id="${task.id}">
+                            <button class="btn btn-sm btn-info edit-task" data-id="${task.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-task" data-id="${task.id}">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -741,29 +1448,87 @@
                     }
                 });
             });
+            
+            document.querySelectorAll('.edit-task').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const taskId = e.target.closest('button').dataset.id;
+                    this.openTaskSettings(taskId);
+                });
+            });
+            
+            // فتح إعدادات المهمة عند النقر عليها
+            document.querySelectorAll('.task-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (!e.target.closest('.task-actions') && !e.target.classList.contains('task-checkbox')) {
+                        const taskId = item.dataset.id;
+                        this.openTaskSettings(taskId);
+                    }
+                });
+            });
+        }
+
+        updateFilterOptions() {
+            // تحديث خيارات تصفية الفئات
+            const categorySelect = this.elements.categoryFilter;
+            categorySelect.innerHTML = '<option value="all">جميع الفئات</option>';
+            
+            const categories = this.taskManager.getCategories();
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                option.selected = this.currentFilters.categoryFilter === category.id;
+                categorySelect.appendChild(option);
+            });
+            
+            // تحديث قيم الفلاتر الحالية
+            this.elements.dateFilter.value = this.currentFilters.dateFilter;
+            this.elements.statusFilter.value = this.currentFilters.statusFilter;
+        }
+
+        applyFilters() {
+            this.currentFilters = {
+                dateFilter: this.elements.dateFilter.value,
+                statusFilter: this.elements.statusFilter.value,
+                categoryFilter: this.elements.categoryFilter.value
+            };
+            
+            this.loadTasksView();
+        }
+
+        clearAllFilters() {
+            this.currentFilters = {
+                dateFilter: 'all',
+                statusFilter: 'all',
+                categoryFilter: 'all'
+            };
+            
+            this.loadTasksView();
         }
 
         // عرض التحذيرات الزمنية
         showTimeWarnings() {
             const categories = this.taskManager.getCategories();
+            const today = this.taskManager.getTodayDate();
             let warningsHtml = '';
             
             categories.forEach(category => {
-                const timeCheck = this.taskManager.checkCategoryTimeAvailability(category.id, 0);
-                const percentage = timeCheck.limit ? Math.round((timeCheck.used / timeCheck.limit) * 100) : 0;
+                const timeCheck = this.taskManager.checkCategoryTimeAvailability(category.id, 0, today);
                 
-                if (percentage >= 100) {
+                if (timeCheck.percentage >= 100) {
+                    // فئة ممتلئة بالكامل
                     warningsHtml += `
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle"></i>
-                            <strong>${category.name}</strong> ممتلئة بالكامل! (${timeCheck.used}/${timeCheck.limit} دقيقة)
+                            <strong>${category.name}</strong> ${category.reminderMessage || 'ممتلئة بالكامل!'} (${timeCheck.used}/${timeCheck.limit} دقيقة)
                         </div>
                     `;
-                } else if (percentage >= 80) {
+                } else if (timeCheck.percentage >= (category.warningPercentage || 80)) {
+                    // فئة قريبة من الامتلاء
                     warningsHtml += `
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-circle"></i>
-                            <strong>${category.name}</strong> قريبة من الامتلاء (${percentage}% - ${timeCheck.remaining} دقيقة متبقية)
+                            <strong>${category.name}</strong> قريبة من الامتلاء (${timeCheck.percentage}% - ${timeCheck.remaining} دقيقة متبقية)
                         </div>
                     `;
                 }
@@ -771,6 +1536,231 @@
             
             this.elements.timeAlert.innerHTML = warningsHtml;
             this.elements.timeAlert.style.display = warningsHtml ? 'block' : 'none';
+        }
+
+        // تحميل الجدول الزمني
+        loadCalendarView() {
+            console.log("تحميل الجدول الزمني:", this.currentCalendarRange);
+            
+            let title = '';
+            let content = '';
+            
+            switch(this.currentCalendarRange) {
+                case 'daily':
+                    title = this.getArabicDateString(this.currentCalendarDate);
+                    content = this.generateDailyView(this.currentCalendarDate);
+                    break;
+                case 'weekly':
+                    const weekRange = this.taskManager.getWeekRange(this.currentCalendarDate);
+                    title = `أسبوع ${this.formatArabicDate(weekRange.start)} - ${this.formatArabicDate(weekRange.end)}`;
+                    content = this.generateWeeklyView(this.currentCalendarDate);
+                    break;
+                case 'monthly':
+                    const monthName = this.currentCalendarDate.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
+                    title = monthName;
+                    content = this.generateMonthlyView(this.currentCalendarDate);
+                    break;
+            }
+            
+            this.elements.calendarTitle.textContent = title;
+            this.elements.currentPeriod.textContent = this.currentCalendarRange === 'daily' ? 'اليوم' : 
+                                                   this.currentCalendarRange === 'weekly' ? 'هذا الأسبوع' : 'هذا الشهر';
+            this.elements.calendarBody.innerHTML = content;
+            
+            // إضافة أحداث للمهام في الجدول
+            this.addCalendarTaskEvents();
+        }
+
+        generateDailyView(date) {
+            const dateStr = date.toISOString().split('T')[0];
+            const tasks = this.taskManager.getTasks({ dateFilter: 'today' }).filter(task => 
+                task.startDate === dateStr || task.endDate === dateStr
+            );
+            
+            let html = '<div class="daily-view">';
+            
+            // إنشاء فترات زمنية من 8 صباحاً إلى 8 مساءً
+            for (let hour = 8; hour <= 20; hour++) {
+                const timeLabel = `${hour}:00`;
+                const hourTasks = tasks.filter(task => {
+                    if (!task.startTime) return false;
+                    const taskHour = parseInt(task.startTime.split(':')[0]);
+                    return taskHour === hour;
+                });
+                
+                html += `
+                    <div class="time-slot">
+                        <div class="time-label">${timeLabel}</div>
+                        <div class="time-tasks">
+                            ${hourTasks.map(task => {
+                                const category = this.taskManager.getCategoryById(task.categoryId);
+                                return `
+                                    <div class="calendar-task" 
+                                         data-id="${task.id}"
+                                         style="background: ${category?.color || '#4361ee'}">
+                                        ${task.title} (${task.duration} دقيقة)
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        generateWeeklyView(date) {
+            const weekStart = new Date(date);
+            weekStart.setDate(weekStart.getDate() - weekStart.getDay()); // الأحد
+            const today = new Date().toISOString().split('T')[0];
+            
+            let html = '<div class="weekly-view">';
+            
+            // أيام الأسبوع
+            const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            
+            for (let i = 0; i < 7; i++) {
+                const currentDay = new Date(weekStart);
+                currentDay.setDate(currentDay.getDate() + i);
+                const dateStr = currentDay.toISOString().split('T')[0];
+                const dayName = days[i];
+                const isToday = dateStr === today;
+                
+                const dayTasks = this.taskManager.getTasks().filter(task => task.startDate === dateStr);
+                
+                html += `
+                    <div class="day-column ${isToday ? 'day-today' : ''}">
+                        <div class="day-header">
+                            ${dayName}<br>
+                            <small>${currentDay.getDate()}/${currentDay.getMonth() + 1}</small>
+                        </div>
+                        <div class="day-tasks">
+                            ${dayTasks.map(task => {
+                                const category = this.taskManager.getCategoryById(task.categoryId);
+                                return `
+                                    <div class="calendar-task" 
+                                         data-id="${task.id}"
+                                         style="background: ${category?.color || '#4361ee'}; margin-bottom: 5px;">
+                                        ${task.title} ${task.startTime ? `(${task.startTime})` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        generateMonthlyView(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const today = new Date().toISOString().split('T')[0];
+            
+            // أول يوم من الشهر
+            const firstDay = new Date(year, month, 1);
+            // آخر يوم من الشهر
+            const lastDay = new Date(year, month + 1, 0);
+            // يوم الأسبوع لأول يوم (0 = الأحد)
+            const firstDayOfWeek = firstDay.getDay();
+            
+            let html = '<div class="monthly-view">';
+            
+            // رؤوس الأيام
+            const dayHeaders = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+            dayHeaders.forEach(day => {
+                html += `<div class="month-day-header" style="text-align: center; font-weight: bold;">${day}</div>`;
+            });
+            
+            // أيام الشهر السابقة
+            const prevMonthLastDay = new Date(year, month, 0).getDate();
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = prevMonthLastDay - i;
+                html += `<div class="month-day other-month">${day}</div>`;
+            }
+            
+            // أيام الشهر الحالي
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const isToday = dateStr === today;
+                
+                const dayTasks = this.taskManager.getTasks().filter(task => task.startDate === dateStr);
+                
+                html += `
+                    <div class="month-day">
+                        <div class="month-day-header">
+                            <span class="day-number">${day}</span>
+                            ${isToday ? '<span class="today-indicator">'+day+'</span>' : ''}
+                        </div>
+                        ${dayTasks.slice(0, 3).map(task => {
+                            const category = this.taskManager.getCategoryById(task.categoryId);
+                            return `
+                                <div class="calendar-task" 
+                                     data-id="${task.id}"
+                                     style="background: ${category?.color || '#4361ee'}; 
+                                            font-size: 0.7rem; 
+                                            padding: 2px 5px; 
+                                            margin-bottom: 2px;">
+                                    ${task.title}
+                                </div>
+                            `;
+                        }).join('')}
+                        ${dayTasks.length > 3 ? `<small style="color: var(--gray);">+ ${dayTasks.length - 3} مهمة</small>` : ''}
+                    </div>
+                `;
+            }
+            
+            html += '</div>';
+            return html;
+        }
+
+        addCalendarTaskEvents() {
+            // إضافة أحداث النقر للمهام في الجدول
+            document.querySelectorAll('.calendar-task').forEach(taskElement => {
+                taskElement.addEventListener('click', (e) => {
+                    const taskId = e.currentTarget.dataset.id;
+                    this.openTaskSettings(taskId);
+                });
+            });
+        }
+
+        navigateCalendar(direction) {
+            switch(this.currentCalendarRange) {
+                case 'daily':
+                    this.currentCalendarDate.setDate(this.currentCalendarDate.getDate() + direction);
+                    break;
+                case 'weekly':
+                    this.currentCalendarDate.setDate(this.currentCalendarDate.getDate() + (direction * 7));
+                    break;
+                case 'monthly':
+                    this.currentCalendarDate.setMonth(this.currentCalendarDate.getMonth() + direction);
+                    break;
+            }
+            
+            this.loadCalendarView();
+        }
+
+        resetCalendar() {
+            this.currentCalendarDate = new Date();
+            this.loadCalendarView();
+        }
+
+        getArabicDateString(date) {
+            return date.toLocaleDateString('ar-SA', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        formatArabicDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ar-SA');
         }
 
         // تحميل الإحصائيات
@@ -807,20 +1797,26 @@
                     `${category.remainingTime} دقيقة متبقية` : 
                     'ممتلئة بالكامل';
                 
+                const warningClass = category.needsWarning ? 'alert-warning' : '';
+                
                 html += `
-                    <div class="stat-card" style="border-color: ${category.color}; margin-bottom: 15px;">
+                    <div class="stat-card ${warningClass}" style="border-color: ${category.color}; margin-bottom: 15px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                             <div>
-                                <div style="font-weight: bold; color: ${category.color};">${category.name}</div>
+                                <div style="font-weight: bold; color: ${category.color}; display: flex; align-items: center; gap: 8px;">
+                                    <i class="${category.icon || 'fas fa-tag'}"></i>
+                                    ${category.name}
+                                </div>
                                 <div style="font-size: 0.9rem; color: #6c757d;">${category.taskCount} مهمة - ${category.usedTime}/${category.timeLimit} دقيقة</div>
                             </div>
-                            <div style="font-weight: bold;">${percentage}%</div>
+                            <div style="font-weight: bold; font-size: 1.2rem;">${percentage}%</div>
                         </div>
                         <div class="progress-container">
                             <div class="progress-bar" style="width: ${percentage}%; background: ${category.color};"></div>
                         </div>
                         <div style="font-size: 0.85rem; color: #6c757d; margin-top: 5px;">
                             ${remainingText}
+                            ${category.needsWarning ? `<br><small><i class="fas fa-exclamation-circle"></i> تحذير عند ${category.warningPercentage}%</small>` : ''}
                         </div>
                     </div>
                 `;
@@ -833,7 +1829,6 @@
         loadCategoriesView() {
             console.log("تحميل الفئات...");
             const categories = this.taskManager.getCategories();
-            console.log("الفئات المحملة:", categories);
             
             if (!categories || categories.length === 0) {
                 this.elements.categoriesList.innerHTML = `
@@ -848,25 +1843,30 @@
             
             let html = '';
             categories.forEach(category => {
-                // حساب الوقت المستخدم
-                const tasks = this.taskManager.getTasks();
+                // حساب الوقت المستخدم اليوم
+                const today = this.taskManager.getTodayDate();
+                const tasks = this.taskManager.getTasks({ dateFilter: 'today' });
                 const categoryTasks = tasks.filter(task => task.categoryId === category.id);
                 const usedTime = categoryTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
                 const percentage = category.timeLimit ? Math.min(100, Math.round((usedTime / category.timeLimit) * 100)) : 0;
                 
                 html += `
                     <div class="category-card" style="border-right-color: ${category.color}">
-                        <div style="width: 40px; height: 40px; background: ${category.color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
-                            <i class="fas fa-tag"></i>
+                        <div style="width: 50px; height: 50px; background: ${category.color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                            <i class="${category.icon || 'fas fa-tag'}"></i>
                         </div>
                         <div class="category-info">
                             <div class="category-name">${category.name}</div>
                             <div class="category-stats">
-                                <div>${categoryTasks.length} مهمة</div>
-                                <div>${usedTime}/${category.timeLimit} دقيقة (${percentage}%)</div>
+                                <div><i class="fas fa-tasks"></i> ${categoryTasks.length} مهمة اليوم</div>
+                                <div><i class="fas fa-clock"></i> ${usedTime}/${category.timeLimit} دقيقة (${percentage}%)</div>
+                                ${category.reminderMessage ? `<div><i class="fas fa-bell"></i> "${category.reminderMessage}"</div>` : ''}
                             </div>
                             <div class="progress-container">
                                 <div class="progress-bar" style="width: ${percentage}%; background: ${category.color};"></div>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #6c757d; margin-top: 5px;">
+                                تحذير عند ${category.warningPercentage || 80}%
                             </div>
                         </div>
                         <div class="category-actions">
@@ -902,11 +1902,18 @@
         // فتح نافذة إضافة مهمة
         openAddTaskModal() {
             console.log("فتح نافذة إضافة مهمة");
-            this.loadCategoryOptions();
+            this.loadCategoryOptions(this.elements.taskCategory);
+            
+            const today = this.taskManager.getTodayDate();
+            this.elements.taskStartDate.value = today;
+            this.elements.taskEndDate.value = today;
+            this.elements.taskStartTime.value = '';
+            this.elements.taskEndTime.value = '';
             this.elements.taskTitle.value = '';
             this.elements.taskDescription.value = '';
             this.elements.taskDuration.value = '30';
             this.elements.timeCheckResult.innerHTML = '';
+            
             this.elements.addTaskModal.classList.add('active');
         }
 
@@ -914,13 +1921,14 @@
         checkTimeAvailability() {
             const categoryId = this.elements.taskCategory.value;
             const duration = parseInt(this.elements.taskDuration.value) || 0;
+            const date = this.elements.taskStartDate.value;
             
-            if (!categoryId || duration <= 0) {
+            if (!categoryId || duration <= 0 || !date) {
                 this.elements.timeCheckResult.innerHTML = '';
                 return;
             }
             
-            const timeCheck = this.taskManager.checkCategoryTimeAvailability(categoryId, duration);
+            const timeCheck = this.taskManager.checkCategoryTimeAvailability(categoryId, duration, date);
             const category = this.taskManager.getCategoryById(categoryId);
             
             let message = '';
@@ -947,18 +1955,17 @@
             `;
         }
 
-        loadCategoryOptions() {
+        loadCategoryOptions(selectElement) {
             const categories = this.taskManager.getCategories();
             console.log("خيارات الفئات:", categories);
             
-            const select = this.elements.taskCategory;
-            select.innerHTML = '';
+            selectElement.innerHTML = '';
             
             categories.forEach(category => {
                 const option = document.createElement('option');
                 option.value = category.id;
                 option.textContent = category.name;
-                select.appendChild(option);
+                selectElement.appendChild(option);
             });
             
             // إذا لم تكن هناك فئات، أضف خياراً افتراضياً
@@ -966,11 +1973,13 @@
                 const option = document.createElement('option');
                 option.value = 'general';
                 option.textContent = 'عام';
-                select.appendChild(option);
+                selectElement.appendChild(option);
             }
             
             // تحقق من الوقت بعد تحميل الخيارات
-            setTimeout(() => this.checkTimeAvailability(), 100);
+            if (selectElement === this.elements.taskCategory) {
+                setTimeout(() => this.checkTimeAvailability(), 100);
+            }
         }
 
         saveTask() {
@@ -992,8 +2001,16 @@
                 return;
             }
             
+            const startDate = this.elements.taskStartDate.value;
+            const endDate = this.elements.taskEndDate.value;
+            
+            if (!startDate || !endDate) {
+                alert('يرجى إدخال تاريخي البدء والانتهاء');
+                return;
+            }
+            
             // التحقق من الوقت المتاح
-            const timeCheck = this.taskManager.checkCategoryTimeAvailability(categoryId, duration);
+            const timeCheck = this.taskManager.checkCategoryTimeAvailability(categoryId, duration, startDate);
             if (!timeCheck.available) {
                 alert(`لا يمكن إضافة المهمة. الحصة اليومية للفئة ممتلئة. الوقت المتاح: ${timeCheck.remaining} دقيقة فقط`);
                 return;
@@ -1005,7 +2022,14 @@
                 description: this.elements.taskDescription.value.trim(),
                 categoryId: categoryId,
                 duration: duration,
-                completed: false
+                startDate: startDate,
+                endDate: endDate,
+                startTime: this.elements.taskStartTime.value || null,
+                endTime: this.elements.taskEndTime.value || null,
+                completed: false,
+                priority: 'medium',
+                recurrence: 'none',
+                createdAt: new Date().toISOString()
             };
             
             console.log("حفظ المهمة:", task);
@@ -1015,8 +2039,180 @@
             // تحديث العرض
             if (this.currentView === 'tasks') {
                 this.loadTasksView();
+            } else if (this.currentView === 'calendar') {
+                this.loadCalendarView();
             } else if (this.currentView === 'stats') {
                 this.loadStatsView();
+            }
+        }
+
+        // فتح إعدادات المهمة
+        openTaskSettings(taskId) {
+            this.editingTaskId = taskId;
+            const task = this.taskManager.getTaskById(taskId);
+            
+            if (!task) {
+                alert('المهمة غير موجودة');
+                return;
+            }
+            
+            this.elements.taskSettingsTitle.textContent = `إعدادات: ${task.title}`;
+            this.elements.settingsTaskId.value = task.id;
+            this.elements.settingsTitle.value = task.title;
+            this.elements.settingsDescription.value = task.description || '';
+            
+            this.loadCategoryOptions(this.elements.settingsCategory);
+            this.elements.settingsCategory.value = task.categoryId;
+            
+            this.elements.settingsDuration.value = task.duration || 30;
+            this.elements.settingsPriority.value = task.priority || 'medium';
+            this.elements.settingsStartDate.value = task.startDate;
+            this.elements.settingsEndDate.value = task.endDate;
+            this.elements.settingsStartTime.value = task.startTime || '';
+            this.elements.settingsEndTime.value = task.endTime || '';
+            this.elements.settingsRecurrence.value = task.recurrence || 'none';
+            
+            // تحميل التذكيرات
+            this.loadReminders(taskId);
+            
+            // فتح التبويب الأول
+            this.switchTab('basic');
+            
+            this.elements.taskSettingsModal.classList.add('active');
+        }
+
+        loadReminders(taskId) {
+            const reminders = this.taskManager.getTaskReminders(taskId);
+            const listElement = this.elements.remindersList;
+            
+            if (reminders.length === 0) {
+                listElement.innerHTML = '<p style="color: var(--gray); text-align: center; padding: 20px;">لا توجد تذكيرات</p>';
+                return;
+            }
+            
+            let html = '';
+            reminders.forEach(reminder => {
+                const typeText = reminder.type === 'notification' ? 'إشعار' : 
+                               reminder.type === 'email' ? 'بريد إلكتروني' : 'الاثنين معاً';
+                
+                html += `
+                    <div class="reminder-item">
+                        <div class="reminder-icon" style="background: ${reminder.type === 'notification' ? '#4361ee' : reminder.type === 'email' ? '#f72585' : '#7209b7'}">
+                            <i class="${reminder.type === 'notification' ? 'fas fa-bell' : 'fas fa-envelope'}"></i>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: bold;">${typeText}</div>
+                            <div style="font-size: 0.85rem; color: #6c757d;">${reminder.time} دقيقة قبل الموعد</div>
+                        </div>
+                        <button class="btn btn-sm btn-danger delete-reminder" data-id="${reminder.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            listElement.innerHTML = html;
+            
+            // أحداث حذف التذكيرات
+            document.querySelectorAll('.delete-reminder').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const reminderId = e.target.closest('button').dataset.id;
+                    this.taskManager.deleteReminder(reminderId);
+                    this.loadReminders(this.editingTaskId);
+                });
+            });
+        }
+
+        addReminder() {
+            const type = this.elements.reminderType.value;
+            const time = this.elements.reminderTime.value;
+            
+            if (!this.editingTaskId) {
+                alert('يرجى حفظ المهمة أولاً قبل إضافة تذكيرات');
+                return;
+            }
+            
+            const reminder = {
+                type: type,
+                time: time
+            };
+            
+            this.taskManager.addReminder(this.editingTaskId, reminder);
+            this.loadReminders(this.editingTaskId);
+            
+            // إعادة تعيين الحقول
+            this.elements.reminderType.value = 'notification';
+            this.elements.reminderTime.value = '5';
+        }
+
+        saveTaskSettings() {
+            const taskId = this.elements.settingsTaskId.value;
+            const task = this.taskManager.getTaskById(taskId);
+            
+            if (!task) {
+                alert('المهمة غير موجودة');
+                return;
+            }
+            
+            const updatedTask = {
+                title: this.elements.settingsTitle.value.trim(),
+                description: this.elements.settingsDescription.value.trim(),
+                categoryId: this.elements.settingsCategory.value,
+                duration: parseInt(this.elements.settingsDuration.value) || 30,
+                priority: this.elements.settingsPriority.value,
+                startDate: this.elements.settingsStartDate.value,
+                endDate: this.elements.settingsEndDate.value,
+                startTime: this.elements.settingsStartTime.value || null,
+                endTime: this.elements.settingsEndTime.value || null,
+                recurrence: this.elements.settingsRecurrence.value
+            };
+            
+            // التحقق من الوقت المتاح (إذا تغيرت الفئة أو التاريخ أو المدة)
+            if (updatedTask.categoryId !== task.categoryId || 
+                updatedTask.startDate !== task.startDate || 
+                updatedTask.duration !== task.duration) {
+                
+                const timeCheck = this.taskManager.checkCategoryTimeAvailability(
+                    updatedTask.categoryId, 
+                    updatedTask.duration, 
+                    updatedTask.startDate,
+                    taskId
+                );
+                
+                if (!timeCheck.available) {
+                    alert(`لا يمكن تحديث المهمة. الحصة اليومية للفئة ممتلئة. الوقت المتاح: ${timeCheck.remaining} دقيقة فقط`);
+                    return;
+                }
+            }
+            
+            this.taskManager.updateTask(taskId, updatedTask);
+            this.closeModal('task-settings-modal');
+            
+            // تحديث جميع العروض
+            if (this.currentView === 'tasks') {
+                this.loadTasksView();
+            } else if (this.currentView === 'calendar') {
+                this.loadCalendarView();
+            } else if (this.currentView === 'stats') {
+                this.loadStatsView();
+            }
+        }
+
+        deleteTask() {
+            const taskId = this.elements.settingsTaskId.value;
+            
+            if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
+                this.taskManager.deleteTask(taskId);
+                this.closeModal('task-settings-modal');
+                
+                // تحديث العروض
+                if (this.currentView === 'tasks') {
+                    this.loadTasksView();
+                } else if (this.currentView === 'calendar') {
+                    this.loadCalendarView();
+                } else if (this.currentView === 'stats') {
+                    this.loadStatsView();
+                }
             }
         }
 
@@ -1033,6 +2229,10 @@
                     this.elements.categoryName.value = category.name;
                     this.elements.categoryColor.value = category.color || '#4361ee';
                     this.elements.categoryTimeLimit.value = category.timeLimit || 60;
+                    this.elements.categoryIcon.value = category.icon || 'fas fa-tag';
+                    this.elements.categoryReminderMessage.value = category.reminderMessage || '';
+                    this.elements.categoryWarningPercentage.value = category.warningPercentage || 80;
+                    this.elements.warningPercentageValue.textContent = `${category.warningPercentage || 80}%`;
                 }
             } else {
                 // وضع الإضافة
@@ -1041,6 +2241,10 @@
                 this.elements.categoryName.value = '';
                 this.elements.categoryColor.value = '#4361ee';
                 this.elements.categoryTimeLimit.value = 60;
+                this.elements.categoryIcon.value = 'fas fa-tag';
+                this.elements.categoryReminderMessage.value = '';
+                this.elements.categoryWarningPercentage.value = 80;
+                this.elements.warningPercentageValue.textContent = '80%';
             }
             
             console.log("فتح نافذة الفئة");
@@ -1068,7 +2272,10 @@
             const categoryData = {
                 name: name,
                 color: this.elements.categoryColor.value,
-                timeLimit: timeLimit
+                timeLimit: timeLimit,
+                icon: this.elements.categoryIcon.value,
+                reminderMessage: this.elements.categoryReminderMessage.value,
+                warningPercentage: parseInt(this.elements.categoryWarningPercentage.value) || 80
             };
             
             if (this.editingCategoryId) {
@@ -1087,6 +2294,8 @@
                 this.loadCategoriesView();
             } else if (this.currentView === 'stats') {
                 this.loadStatsView();
+            } else if (this.currentView === 'tasks') {
+                this.loadTasksView();
             }
             
             // إعادة تعيين حالة التعديل
@@ -1101,8 +2310,12 @@
                 // تحديث العرض
                 this.loadCategoriesView();
                 
-                // إعادة تحميل خيارات الفئات في نموذج المهام
-                this.loadCategoryOptions();
+                // إعادة تحميل خيارات الفئات في النماذج
+                this.loadCategoryOptions(this.elements.taskCategory);
+                this.loadCategoryOptions(this.elements.settingsCategory);
+                
+                // تحديث الفلاتر
+                this.updateFilterOptions();
             } else {
                 alert(result.message);
             }
@@ -1125,13 +2338,13 @@
             
             // فتح Console للمستخدم
             console.log("=========================================");
-            console.log("🎯 تطبيق إدارة المهام مع التحكم الزمني!");
+            console.log("🎯 تطبيق إدارة المهام المتقدم!");
             console.log("📱 الميزات المتاحة:");
-            console.log("   - إضافة وحذف المهام مع التحقق الزمني");
-            console.log("   - إضافة/تعديل/حذف الفئات مع تحديد الحصص");
-            console.log("   - عرض مستوى امتلاء الفئات في الرسم البياني");
-            console.log("   - منع إضافة مهام تتجاوز الحصة الزمنية");
-            console.log("   - تخزين محلي للبيانات");
+            console.log("   - إضافة مهام بتواريخ وأوقات محددة");
+            console.log("   - عرض الجدول اليومي والأسبوعي والشهري");
+            console.log("   - إعدادات متقدمة لكل مهمة");
+            console.log("   - تذكيرات مخصصة للفئات");
+            console.log("   - نظام تحكم زمني متكامل");
             console.log("=========================================");
             
         } catch (error) {
