@@ -36,6 +36,7 @@
     .btn-primary:hover { background: var(--secondary); transform: translateY(-2px); }
     .btn-secondary { background: var(--light); color: var(--dark); border: 1px solid #dee2e6; }
     .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: #f8961e; color: white; }
     .btn-sm { padding: 6px 12px; font-size: 0.9rem; }
     
     /* شريط الوقت */
@@ -62,6 +63,37 @@
     .task-meta { display: flex; gap: 15px; font-size: 0.85rem; color: var(--gray); }
     .task-actions { display: flex; gap: 10px; }
     
+    /* الفئات */
+    .category-card { 
+        display: flex; 
+        align-items: center; 
+        gap: 15px; 
+        padding: 15px; 
+        background: #f8f9fa; 
+        border-radius: 8px; 
+        margin-bottom: 15px;
+        border-right: 4px solid;
+    }
+    .category-info { flex: 1; }
+    .category-name { font-weight: bold; margin-bottom: 5px; }
+    .category-stats { font-size: 0.85rem; color: #6c757d; }
+    .category-actions { display: flex; gap: 5px; }
+    
+    /* شريط التقدم */
+    .progress-container { 
+        width: 100%; 
+        height: 8px; 
+        background: #e9ecef; 
+        border-radius: 4px; 
+        overflow: hidden; 
+        margin: 10px 0;
+    }
+    .progress-bar { 
+        height: 100%; 
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    
     /* النوافذ */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
@@ -79,10 +111,31 @@
     .form-row { display: flex; gap: 15px; }
     .form-row .form-group { flex: 1; }
     
+    /* الإحصائيات */
+    .stats-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); 
+        gap: 20px; 
+        margin-top: 20px;
+    }
+    .stat-card { 
+        background: #f8f9fa; 
+        padding: 20px; 
+        border-radius: 10px; 
+        text-align: center;
+        border-top: 4px solid;
+    }
+    
     /* الحالة الفارغة */
     .empty-state { text-align: center; padding: 40px 20px; color: var(--gray); }
     .empty-state i { margin-bottom: 20px; opacity: 0.5; }
     .empty-state h4 { margin-bottom: 10px; color: var(--dark); }
+    
+    /* رسائل التنبيه */
+    .alert { padding: 12px 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+    .alert-warning { background: #fff3cd; border: 1px solid #ffcd39; color: #856404; }
+    .alert-danger { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+    .alert-success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
     </style>
 </head>
 <body>
@@ -119,6 +172,7 @@
                 <div id="tasks-view" class="view active-view">
                     <div class="tasks-container">
                         <h3>مهام اليوم</h3>
+                        <div id="time-alert" style="display: none;"></div>
                         <div class="tasks-list" id="tasks-list">
                             <div class="empty-state">
                                 <i class="fas fa-tasks fa-3x"></i>
@@ -141,7 +195,7 @@
                 <div id="stats-view" class="view">
                     <div class="stats-container">
                         <h3>إحصائيات المهام</h3>
-                        <div id="stats-grid"></div>
+                        <div id="stats-grid" class="stats-grid"></div>
                     </div>
                 </div>
 
@@ -149,8 +203,8 @@
                 <div id="categories-view" class="view">
                     <div class="categories-container">
                         <h3>إدارة الفئات</h3>
-                        <button class="btn btn-secondary" id="add-category-btn"><i class="fas fa-plus"></i> إضافة فئة</button>
-                        <div class="categories-list" id="categories-list"></div>
+                        <button class="btn btn-primary" id="add-category-btn"><i class="fas fa-plus"></i> إضافة فئة</button>
+                        <div class="categories-list" id="categories-list" style="margin-top: 20px;"></div>
                     </div>
                 </div>
             </div>
@@ -180,10 +234,11 @@
                             <select id="task-category"></select>
                         </div>
                         <div class="form-group">
-                            <label for="task-duration">المدة (دقائق)</label>
-                            <input type="number" id="task-duration" min="1" value="30">
+                            <label for="task-duration">المدة (دقائق) *</label>
+                            <input type="number" id="task-duration" min="1" value="30" required>
                         </div>
                     </div>
+                    <div id="time-check-result"></div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -193,22 +248,30 @@
         </div>
     </div>
 
-    <!-- نافذة إضافة فئة -->
-    <div class="modal" id="add-category-modal">
+    <!-- نافذة إضافة/تعديل فئة -->
+    <div class="modal" id="category-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>إضافة فئة جديدة</h3>
+                <h3 id="category-modal-title">إضافة فئة جديدة</h3>
                 <button class="close-btn" id="close-category-modal">&times;</button>
             </div>
             <div class="modal-body">
                 <form id="category-form">
+                    <input type="hidden" id="category-id">
                     <div class="form-group">
                         <label for="category-name">اسم الفئة *</label>
                         <input type="text" id="category-name" placeholder="أدخل اسم الفئة" required>
                     </div>
-                    <div class="form-group">
-                        <label for="category-color">لون الفئة</label>
-                        <input type="color" id="category-color" value="#4361ee">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="category-color">لون الفئة</label>
+                            <input type="color" id="category-color" value="#4361ee">
+                        </div>
+                        <div class="form-group">
+                            <label for="category-time-limit">الحصة اليومية (دقائق) *</label>
+                            <input type="number" id="category-time-limit" min="1" value="60" required>
+                            <small style="color: #6c757d; font-size: 0.85rem;">الحد الأقصى من الدقائق يوميًا</small>
+                        </div>
                     </div>
                 </form>
             </div>
@@ -277,19 +340,29 @@
                     id: 'personal',
                     name: 'مهام شخصية',
                     color: '#4361ee',
+                    timeLimit: 120, // ساعتين بالدقائق
                     icon: 'fas fa-home'
                 },
                 {
                     id: 'work',
                     name: 'عمل',
                     color: '#f72585',
+                    timeLimit: 480, // 8 ساعات
                     icon: 'fas fa-briefcase'
                 },
                 {
                     id: 'study',
                     name: 'دراسة',
                     color: '#4cc9f0',
+                    timeLimit: 180, // 3 ساعات
                     icon: 'fas fa-graduation-cap'
+                },
+                {
+                    id: 'health',
+                    name: 'صحية',
+                    color: '#38b000',
+                    timeLimit: 60, // ساعة واحدة
+                    icon: 'fas fa-heartbeat'
                 }
             ];
         }
@@ -303,7 +376,7 @@
                     description: 'هذه مهمة للاختبار',
                     categoryId: 'personal',
                     duration: 30,
-                    date: new Date().toISOString().split('T')[0],
+                    date: this.getTodayDate(),
                     completed: false
                 }];
                 this.saveTasks();
@@ -313,12 +386,19 @@
             this.saveCategories();
         }
 
+        getTodayDate() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
         // وظائف المهام
         addTask(task) {
             if (!task.id) task.id = Date.now().toString();
+            task.date = this.getTodayDate();
             this.tasks.push(task);
             this.saveTasks();
             console.log("تمت إضافة مهمة:", task);
+            return task;
         }
 
         deleteTask(taskId) {
@@ -326,8 +406,9 @@
             this.saveTasks();
         }
 
-        getTasks() {
-            return [...this.tasks];
+        getTasks(date = null) {
+            if (!date) date = this.getTodayDate();
+            return this.tasks.filter(task => task.date === date);
         }
 
         getTaskById(taskId) {
@@ -346,17 +427,58 @@
             this.saveToStorage('tasks', this.tasks);
         }
 
+        // التحقق من الوقت المتاح في الفئة
+        checkCategoryTimeAvailability(categoryId, taskDuration, excludeTaskId = null) {
+            const category = this.getCategoryById(categoryId);
+            if (!category || !category.timeLimit) return { available: true, remaining: 0 };
+            
+            const todayTasks = this.getTasks().filter(task => 
+                task.categoryId === categoryId && 
+                (!excludeTaskId || task.id !== excludeTaskId)
+            );
+            
+            const totalUsedTime = todayTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
+            const remainingTime = category.timeLimit - totalUsedTime;
+            
+            return {
+                available: remainingTime >= taskDuration,
+                remaining: remainingTime,
+                used: totalUsedTime,
+                limit: category.timeLimit
+            };
+        }
+
         // وظائف الفئات
         addCategory(category) {
             if (!category.id) category.id = Date.now().toString();
+            if (!category.timeLimit) category.timeLimit = 60; // قيمة افتراضية: ساعة واحدة
             this.categories.push(category);
             this.saveCategories();
             console.log("تمت إضافة فئة:", category);
+            return category;
+        }
+
+        updateCategory(categoryId, updatedData) {
+            const index = this.categories.findIndex(cat => cat.id === categoryId);
+            if (index !== -1) {
+                this.categories[index] = { ...this.categories[index], ...updatedData };
+                this.saveCategories();
+                console.log("تم تحديث الفئة:", this.categories[index]);
+                return this.categories[index];
+            }
+            return null;
         }
 
         deleteCategory(categoryId) {
+            // لا يمكن حذف فئة تحتوي على مهام
+            const tasksInCategory = this.tasks.filter(task => task.categoryId === categoryId);
+            if (tasksInCategory.length > 0) {
+                return { success: false, message: 'لا يمكن حذف فئة تحتوي على مهام' };
+            }
+            
             this.categories = this.categories.filter(cat => cat.id !== categoryId);
             this.saveCategories();
+            return { success: true };
         }
 
         getCategories() {
@@ -381,14 +503,28 @@
             const tasks = this.getTasks();
             const categories = this.getCategories();
             
+            // حساب الإحصائيات لكل فئة
+            const categoryStats = categories.map(cat => {
+                const catTasks = tasks.filter(t => t.categoryId === cat.id);
+                const usedTime = catTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
+                const percentage = cat.timeLimit ? Math.min(100, Math.round((usedTime / cat.timeLimit) * 100)) : 0;
+                
+                return {
+                    ...cat,
+                    taskCount: catTasks.length,
+                    usedTime,
+                    percentage,
+                    remainingTime: cat.timeLimit - usedTime,
+                    isFull: cat.timeLimit ? usedTime >= cat.timeLimit : false
+                };
+            });
+            
             return {
                 totalTasks: tasks.length,
                 completedTasks: tasks.filter(t => t.completed).length,
                 pendingTasks: tasks.filter(t => !t.completed).length,
-                categories: categories.map(cat => ({
-                    ...cat,
-                    taskCount: tasks.filter(t => t.categoryId === cat.id).length
-                }))
+                totalTime: tasks.reduce((sum, task) => sum + (task.duration || 0), 0),
+                categories: categoryStats
             };
         }
     }
@@ -398,6 +534,7 @@
         constructor(taskManager) {
             this.taskManager = taskManager;
             this.currentView = 'tasks';
+            this.editingCategoryId = null;
             this.initializeElements();
             this.setupEventListeners();
             this.initializeApp();
@@ -416,14 +553,19 @@
                 taskCategory: document.getElementById('task-category'),
                 taskDuration: document.getElementById('task-duration'),
                 cancelTask: document.getElementById('cancel-task'),
+                timeCheckResult: document.getElementById('time-check-result'),
+                timeAlert: document.getElementById('time-alert'),
                 
-                addCategoryBtn: document.getElementById('add-category-btn'),
-                addCategoryModal: document.getElementById('add-category-modal'),
+                categoryModal: document.getElementById('category-modal'),
+                categoryModalTitle: document.getElementById('category-modal-title'),
                 closeCategoryModal: document.getElementById('close-category-modal'),
                 saveCategoryBtn: document.getElementById('save-category'),
+                categoryId: document.getElementById('category-id'),
                 categoryName: document.getElementById('category-name'),
                 categoryColor: document.getElementById('category-color'),
+                categoryTimeLimit: document.getElementById('category-time-limit'),
                 cancelCategory: document.getElementById('cancel-category'),
+                addCategoryBtn: document.getElementById('add-category-btn'),
                 
                 navItems: document.querySelectorAll('.nav-item'),
                 views: document.querySelectorAll('.view'),
@@ -449,12 +591,16 @@
             this.elements.closeTaskModal.addEventListener('click', () => this.closeModal('add-task-modal'));
             this.elements.saveTaskBtn.addEventListener('click', () => this.saveTask());
             this.elements.cancelTask.addEventListener('click', () => this.closeModal('add-task-modal'));
+            
+            // التحقق من الوقت عند تغيير الفئة أو المدة
+            this.elements.taskCategory.addEventListener('change', () => this.checkTimeAvailability());
+            this.elements.taskDuration.addEventListener('input', () => this.checkTimeAvailability());
 
-            // إضافة فئة
-            this.elements.addCategoryBtn.addEventListener('click', () => this.openAddCategoryModal());
-            this.elements.closeCategoryModal.addEventListener('click', () => this.closeModal('add-category-modal'));
+            // إدارة الفئات
+            this.elements.addCategoryBtn.addEventListener('click', () => this.openCategoryModal());
+            this.elements.closeCategoryModal.addEventListener('click', () => this.closeModal('category-modal'));
             this.elements.saveCategoryBtn.addEventListener('click', () => this.saveCategory());
-            this.elements.cancelCategory.addEventListener('click', () => this.closeModal('add-category-modal'));
+            this.elements.cancelCategory.addEventListener('click', () => this.closeModal('category-modal'));
 
             // الوقت
             this.elements.timeButtons.forEach(btn => {
@@ -534,6 +680,9 @@
             const tasks = this.taskManager.getTasks();
             console.log("المهام:", tasks);
             
+            // عرض التحذيرات الزمنية
+            this.showTimeWarnings();
+            
             if (!tasks || tasks.length === 0) {
                 this.elements.tasksList.innerHTML = `
                     <div class="empty-state">
@@ -559,6 +708,7 @@
                             <div class="task-meta">
                                 <span><i class="fas fa-tag" style="color: ${category?.color || '#000'}"></i> ${category?.name || 'عام'}</span>
                                 <span><i class="fas fa-clock"></i> ${task.duration || 30} دقيقة</span>
+                                <span><i class="fas ${task.completed ? 'fa-check-circle' : 'fa-hourglass-half'}"></i> ${task.completed ? 'مكتملة' : 'قيد التنفيذ'}</span>
                             </div>
                         </div>
                         <div class="task-actions">
@@ -587,9 +737,40 @@
                     if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
                         this.taskManager.deleteTask(taskId);
                         this.loadTasksView();
+                        this.showTimeWarnings();
                     }
                 });
             });
+        }
+
+        // عرض التحذيرات الزمنية
+        showTimeWarnings() {
+            const categories = this.taskManager.getCategories();
+            let warningsHtml = '';
+            
+            categories.forEach(category => {
+                const timeCheck = this.taskManager.checkCategoryTimeAvailability(category.id, 0);
+                const percentage = timeCheck.limit ? Math.round((timeCheck.used / timeCheck.limit) * 100) : 0;
+                
+                if (percentage >= 100) {
+                    warningsHtml += `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>${category.name}</strong> ممتلئة بالكامل! (${timeCheck.used}/${timeCheck.limit} دقيقة)
+                        </div>
+                    `;
+                } else if (percentage >= 80) {
+                    warningsHtml += `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>${category.name}</strong> قريبة من الامتلاء (${percentage}% - ${timeCheck.remaining} دقيقة متبقية)
+                        </div>
+                    `;
+                }
+            });
+            
+            this.elements.timeAlert.innerHTML = warningsHtml;
+            this.elements.timeAlert.style.display = warningsHtml ? 'block' : 'none';
         }
 
         // تحميل الإحصائيات
@@ -597,22 +778,53 @@
             console.log("تحميل الإحصائيات...");
             const stats = this.taskManager.getStatistics();
             
-            let html = `
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+            let html = '';
+            
+            // بطاقات إحصائية عامة
+            html += `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <div class="stat-card" style="border-color: #4361ee;">
                         <div style="font-size: 2rem; color: #4361ee; font-weight: bold;">${stats.totalTasks}</div>
                         <div style="color: #6c757d;">إجمالي المهام</div>
                     </div>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                    <div class="stat-card" style="border-color: #4cc9f0;">
                         <div style="font-size: 2rem; color: #4cc9f0; font-weight: bold;">${stats.completedTasks}</div>
                         <div style="color: #6c757d;">مهام مكتملة</div>
                     </div>
-                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                    <div class="stat-card" style="border-color: #f8961e;">
                         <div style="font-size: 2rem; color: #f8961e; font-weight: bold;">${stats.pendingTasks}</div>
                         <div style="color: #6c757d;">مهام قيد الانتظار</div>
                     </div>
                 </div>
             `;
+            
+            // إحصائيات الفئات
+            html += `<h4 style="margin-bottom: 15px;">الحصص الزمنية للفئات</h4>`;
+            
+            stats.categories.forEach(category => {
+                const percentage = category.percentage || 0;
+                const remainingText = category.remainingTime > 0 ? 
+                    `${category.remainingTime} دقيقة متبقية` : 
+                    'ممتلئة بالكامل';
+                
+                html += `
+                    <div class="stat-card" style="border-color: ${category.color}; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <div>
+                                <div style="font-weight: bold; color: ${category.color};">${category.name}</div>
+                                <div style="font-size: 0.9rem; color: #6c757d;">${category.taskCount} مهمة - ${category.usedTime}/${category.timeLimit} دقيقة</div>
+                            </div>
+                            <div style="font-weight: bold;">${percentage}%</div>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${percentage}%; background: ${category.color};"></div>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #6c757d; margin-top: 5px;">
+                            ${remainingText}
+                        </div>
+                    </div>
+                `;
+            });
             
             this.elements.statsGrid.innerHTML = html;
         }
@@ -636,29 +848,53 @@
             
             let html = '';
             categories.forEach(category => {
+                // حساب الوقت المستخدم
+                const tasks = this.taskManager.getTasks();
+                const categoryTasks = tasks.filter(task => task.categoryId === category.id);
+                const usedTime = categoryTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
+                const percentage = category.timeLimit ? Math.min(100, Math.round((usedTime / category.timeLimit) * 100)) : 0;
+                
                 html += `
-                    <div style="display: flex; align-items: center; gap: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; margin-bottom: 10px;">
-                        <div style="width: 20px; height: 20px; background: ${category.color}; border-radius: 50%;"></div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: bold;">${category.name}</div>
+                    <div class="category-card" style="border-right-color: ${category.color}">
+                        <div style="width: 40px; height: 40px; background: ${category.color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-tag"></i>
                         </div>
-                        <button class="btn btn-danger btn-sm delete-category" data-id="${category.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
+                        <div class="category-info">
+                            <div class="category-name">${category.name}</div>
+                            <div class="category-stats">
+                                <div>${categoryTasks.length} مهمة</div>
+                                <div>${usedTime}/${category.timeLimit} دقيقة (${percentage}%)</div>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar" style="width: ${percentage}%; background: ${category.color};"></div>
+                            </div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="btn btn-sm btn-secondary edit-category" data-id="${category.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-category" data-id="${category.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                 `;
             });
             
             this.elements.categoriesList.innerHTML = html;
             
-            // أحداث حذف الفئات
+            // أحداث الفئات
+            document.querySelectorAll('.edit-category').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const categoryId = e.target.closest('button').dataset.id;
+                    this.editCategory(categoryId);
+                });
+            });
+            
             document.querySelectorAll('.delete-category').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const categoryId = e.target.closest('button').dataset.id;
-                    if (confirm('هل أنت متأكد من حذف هذه الفئة؟')) {
-                        this.taskManager.deleteCategory(categoryId);
-                        this.loadCategoriesView();
-                    }
+                    this.deleteCategory(categoryId);
                 });
             });
         }
@@ -667,7 +903,48 @@
         openAddTaskModal() {
             console.log("فتح نافذة إضافة مهمة");
             this.loadCategoryOptions();
+            this.elements.taskTitle.value = '';
+            this.elements.taskDescription.value = '';
+            this.elements.taskDuration.value = '30';
+            this.elements.timeCheckResult.innerHTML = '';
             this.elements.addTaskModal.classList.add('active');
+        }
+
+        // التحقق من الوقت المتاح
+        checkTimeAvailability() {
+            const categoryId = this.elements.taskCategory.value;
+            const duration = parseInt(this.elements.taskDuration.value) || 0;
+            
+            if (!categoryId || duration <= 0) {
+                this.elements.timeCheckResult.innerHTML = '';
+                return;
+            }
+            
+            const timeCheck = this.taskManager.checkCategoryTimeAvailability(categoryId, duration);
+            const category = this.taskManager.getCategoryById(categoryId);
+            
+            let message = '';
+            let alertClass = '';
+            
+            if (timeCheck.available) {
+                alertClass = 'alert-success';
+                message = `
+                    <i class="fas fa-check-circle"></i>
+                    الوقت متاح! ${timeCheck.remaining} دقيقة متبقية في فئة "${category.name}"
+                `;
+            } else {
+                alertClass = 'alert-danger';
+                message = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>تجاوز الحصة!</strong> تحتاج ${duration} دقيقة لكن المتاح فقط ${timeCheck.remaining} دقيقة في فئة "${category.name}"
+                `;
+            }
+            
+            this.elements.timeCheckResult.innerHTML = `
+                <div class="alert ${alertClass}">
+                    ${message}
+                </div>
+            `;
         }
 
         loadCategoryOptions() {
@@ -691,6 +968,9 @@
                 option.textContent = 'عام';
                 select.appendChild(option);
             }
+            
+            // تحقق من الوقت بعد تحميل الخيارات
+            setTimeout(() => this.checkTimeAvailability(), 100);
         }
 
         saveTask() {
@@ -700,13 +980,31 @@
                 return;
             }
             
+            const duration = parseInt(this.elements.taskDuration.value) || 0;
+            if (duration <= 0) {
+                alert('يرجى إدخال مدة صحيحة للمهمة');
+                return;
+            }
+            
+            const categoryId = this.elements.taskCategory.value;
+            if (!categoryId) {
+                alert('يرجى اختيار فئة للمهمة');
+                return;
+            }
+            
+            // التحقق من الوقت المتاح
+            const timeCheck = this.taskManager.checkCategoryTimeAvailability(categoryId, duration);
+            if (!timeCheck.available) {
+                alert(`لا يمكن إضافة المهمة. الحصة اليومية للفئة ممتلئة. الوقت المتاح: ${timeCheck.remaining} دقيقة فقط`);
+                return;
+            }
+            
             const task = {
                 id: Date.now().toString(),
                 title: title,
                 description: this.elements.taskDescription.value.trim(),
-                categoryId: this.elements.taskCategory.value,
-                duration: parseInt(this.elements.taskDuration.value) || 30,
-                date: new Date().toISOString().split('T')[0],
+                categoryId: categoryId,
+                duration: duration,
                 completed: false
             };
             
@@ -714,21 +1012,44 @@
             this.taskManager.addTask(task);
             this.closeModal('add-task-modal');
             
-            // إعادة تعيين النموذج
-            this.elements.taskTitle.value = '';
-            this.elements.taskDescription.value = '';
-            this.elements.taskDuration.value = '30';
-            
             // تحديث العرض
             if (this.currentView === 'tasks') {
                 this.loadTasksView();
+            } else if (this.currentView === 'stats') {
+                this.loadStatsView();
             }
         }
 
-        // فتح نافذة إضافة فئة
-        openAddCategoryModal() {
-            console.log("فتح نافذة إضافة فئة");
-            this.elements.addCategoryModal.classList.add('active');
+        // فتح نافذة إضافة/تعديل فئة
+        openCategoryModal(categoryId = null) {
+            this.editingCategoryId = categoryId;
+            
+            if (categoryId) {
+                // وضع التعديل
+                this.elements.categoryModalTitle.textContent = 'تعديل الفئة';
+                const category = this.taskManager.getCategoryById(categoryId);
+                if (category) {
+                    this.elements.categoryId.value = category.id;
+                    this.elements.categoryName.value = category.name;
+                    this.elements.categoryColor.value = category.color || '#4361ee';
+                    this.elements.categoryTimeLimit.value = category.timeLimit || 60;
+                }
+            } else {
+                // وضع الإضافة
+                this.elements.categoryModalTitle.textContent = 'إضافة فئة جديدة';
+                this.elements.categoryId.value = '';
+                this.elements.categoryName.value = '';
+                this.elements.categoryColor.value = '#4361ee';
+                this.elements.categoryTimeLimit.value = 60;
+            }
+            
+            console.log("فتح نافذة الفئة");
+            this.elements.categoryModal.classList.add('active');
+        }
+
+        // تعديل فئة
+        editCategory(categoryId) {
+            this.openCategoryModal(categoryId);
         }
 
         saveCategory() {
@@ -738,23 +1059,52 @@
                 return;
             }
             
-            const category = {
-                id: Date.now().toString(),
+            const timeLimit = parseInt(this.elements.categoryTimeLimit.value) || 0;
+            if (timeLimit <= 0) {
+                alert('يرجى إدخال حصة زمنية صحيحة');
+                return;
+            }
+            
+            const categoryData = {
                 name: name,
-                color: this.elements.categoryColor.value
+                color: this.elements.categoryColor.value,
+                timeLimit: timeLimit
             };
             
-            console.log("حفظ الفئة:", category);
-            this.taskManager.addCategory(category);
-            this.closeModal('add-category-modal');
+            if (this.editingCategoryId) {
+                // تحديث فئة موجودة
+                this.taskManager.updateCategory(this.editingCategoryId, categoryData);
+            } else {
+                // إضافة فئة جديدة
+                categoryData.id = Date.now().toString();
+                this.taskManager.addCategory(categoryData);
+            }
             
-            // إعادة تعيين النموذج
-            this.elements.categoryName.value = '';
-            this.elements.categoryColor.value = '#4361ee';
+            this.closeModal('category-modal');
             
-            // تحديث العرض
+            // تحديث العروض
             if (this.currentView === 'categories') {
                 this.loadCategoriesView();
+            } else if (this.currentView === 'stats') {
+                this.loadStatsView();
+            }
+            
+            // إعادة تعيين حالة التعديل
+            this.editingCategoryId = null;
+        }
+
+        // حذف فئة
+        deleteCategory(categoryId) {
+            const result = this.taskManager.deleteCategory(categoryId);
+            
+            if (result.success) {
+                // تحديث العرض
+                this.loadCategoriesView();
+                
+                // إعادة تحميل خيارات الفئات في نموذج المهام
+                this.loadCategoryOptions();
+            } else {
+                alert(result.message);
             }
         }
 
@@ -775,11 +1125,12 @@
             
             // فتح Console للمستخدم
             console.log("=========================================");
-            console.log("🎯 تطبيق إدارة المهام جاهز للاستخدام!");
+            console.log("🎯 تطبيق إدارة المهام مع التحكم الزمني!");
             console.log("📱 الميزات المتاحة:");
-            console.log("   - إضافة وحذف المهام");
-            console.log("   - إضافة وحذف الفئات");
-            console.log("   - عرض الإحصائيات");
+            console.log("   - إضافة وحذف المهام مع التحقق الزمني");
+            console.log("   - إضافة/تعديل/حذف الفئات مع تحديد الحصص");
+            console.log("   - عرض مستوى امتلاء الفئات في الرسم البياني");
+            console.log("   - منع إضافة مهام تتجاوز الحصة الزمنية");
             console.log("   - تخزين محلي للبيانات");
             console.log("=========================================");
             
