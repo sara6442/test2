@@ -1035,10 +1035,20 @@
     // ========== نظام التخزين والبيانات ==========
     class TaskManager {
         constructor() {
-            this.tasks = this.loadFromStorage('tasks') || [];
-            this.categories = this.loadFromStorage('categories') || this.getDefaultCategories();
-            this.initSampleData();
-        }
+    // تحميل المهام
+    const tasksData = this.loadFromStorage('tasks');
+    this.tasks = Array.isArray(tasksData) ? tasksData : [];
+    
+    // تحميل الفئات - التأكد أنها مصفوفة
+    const categoriesData = this.loadFromStorage('categories');
+    if (Array.isArray(categoriesData) && categoriesData.length > 0) {
+        this.categories = categoriesData;
+    } else {
+        this.categories = this.getDefaultCategories();
+    }
+    
+    this.initSampleData();
+}
 
         loadFromStorage(key) {
             try {
