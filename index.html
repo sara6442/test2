@@ -11,15 +11,16 @@
         /* الثيم الفاتح (الإفتراضي) */
         --primary: #4361ee; --secondary: #3a0ca3; --accent: #7209b7;
         --success: #4cc9f0; --danger: #f72585; --warning: #f8961e;
-        --light: #f8f9fa; --dark: #212529; --gray: #6c757d;
-        --bg-color: #f5f7fb; --card-bg: #ffffff; --text-color: #212529;
+        --light: #f8f9fa; --dark: #424242; --gray: #6c757d; /* تغيير الأسود إلى رمادي فاتح */
+        --bg-color: #f5f7fb; --card-bg: #ffffff; --text-color: #424242; /* تفتيح النص */
         --border-color: #dee2e6; --hover-bg: #f8f9fa;
+        --sidebar-gradient: linear-gradient(180deg, #4361ee, #3a0ca3); /* ثابت للشريط الجانبي */
     }
-    body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); min-height: 100vh; transition: all 0.3s; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg-color); min-height: 100vh; transition: all 0.3s ease; color: var(--text-color); }
     .container { display: flex; min-height: 100vh; direction: rtl; }
     
-    /* الشريط الجانبي */
-    .sidebar { width: 250px; background: linear-gradient(180deg, var(--primary), var(--secondary)); color: white; padding: 20px 0; transition: all 0.3s; }
+    /* الشريط الجانبي - متغير حسب الثيم */
+    .sidebar { width: 250px; background: var(--sidebar-gradient); color: white; padding: 20px 0; transition: all 0.3s; }
     .logo { padding: 0 20px 30px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 20px; }
     .logo h1 { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; }
     .nav-item { display: flex; align-items: center; gap: 15px; padding: 15px; color: rgba(255,255,255,0.9); text-decoration: none; border-radius: 8px; margin: 0 15px 5px; transition: 0.3s; }
@@ -28,64 +29,81 @@
     .nav-item i { width: 24px; text-align: center; }
     
     /* رأس الصفحة مع اختيار الثيم */
-    .theme-selector { display: flex; gap: 10px; align-items: center; }
-    .theme-btn { width: 24px; height: 24px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; }
+    .theme-selector { display: flex; gap: 10px; align-items: center; margin-top: 15px; }
+    .theme-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); cursor: pointer; transition: 0.3s; position: relative; }
     .theme-btn:hover { transform: scale(1.1); border-color: white; }
     .theme-btn.active { border-color: white; box-shadow: 0 0 0 2px rgba(255,255,255,0.5); }
+    .theme-btn.active::after { content: '✓'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-size: 14px; font-weight: bold; }
     .theme-light { background: linear-gradient(135deg, #f8f9fa, #e9ecef); }
-    .theme-dark { background: linear-gradient(135deg, #212529, #343a40); }
+    .theme-dark { background: linear-gradient(135deg, #424242, #343a40); } /* تفتيح الأسود */
     .theme-blue { background: linear-gradient(135deg, #4361ee, #3a0ca3); }
-    .theme-green { background: linear-gradient(135deg, #38b000, #2d9100); }
+    .theme-light-blue { background: linear-gradient(135deg, #4cc9f0, #38b6ff); } /* تغيير الأخضر إلى أزرق فاتح */
     
     /* المحتوى الرئيسي */
     .main-content { flex: 1; margin-right: 250px; padding: 20px; transition: all 0.3s; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 20px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-    .header-left h2 { color: var(--primary); margin-bottom: 5px; }
+    .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 20px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+    .header-left h2 { color: var(--primary); margin-bottom: 5px; font-weight: 600; }
     .date-display { color: var(--gray); font-size: 0.9rem; }
     
     /* أزرار */
-    .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; transition: 0.3s; background: var(--primary); color: white; }
-    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-weight: 500; transition: 0.3s; background: var(--primary); color: white; font-size: 0.95rem; }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .btn-primary { background: var(--primary); }
     .btn-secondary { background: var(--gray); }
     .btn-success { background: var(--success); }
     .btn-danger { background: var(--danger); }
     .btn-warning { background: var(--warning); }
     .btn-info { background: #3a86ff; }
-    .btn-light { background: var(--light); color: var(--dark); border: 1px solid var(--border-color); }
-    .btn-sm { padding: 6px 12px; font-size: 0.9rem; }
+    .btn-light { background: var(--light); color: var(--text-color); border: 1px solid var(--border-color); }
+    .btn-sm { padding: 6px 12px; font-size: 0.85rem; }
+    
+    /* زر حالة الفئات */
+    .category-status-btn { 
+        padding: 8px 16px; 
+        background: rgba(67, 97, 238, 0.1); 
+        color: var(--primary); 
+        border: 1px solid rgba(67, 97, 238, 0.2);
+        border-radius: 6px;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .category-status-btn:hover { 
+        background: rgba(67, 97, 238, 0.2); 
+        transform: translateY(-1px);
+    }
     
     /* شريط الوقت */
-    .time-navigation { display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .time-navigation { display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: var(--card-bg); border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     .time-btn { flex: 1; padding: 10px; border: 2px solid var(--border-color); background: var(--card-bg); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--text-color); transition: 0.3s; }
     .time-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
     .time-btn:hover { border-color: var(--primary); }
     
     /* المحتوى */
-    .content-area { background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    .content-area { background: var(--card-bg); padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
     .view { display: none; }
     .active-view { display: block; }
     
     /* المهام */
-    .tasks-list { display: flex; flex-direction: column; gap: 10px; }
+    .tasks-list { display: flex; flex-direction: column; gap: 12px; }
     .task-item { 
         display: flex; 
         align-items: center; 
         gap: 15px; 
-        padding: 15px; 
+        padding: 16px; 
         background: var(--hover-bg); 
         border-radius: 8px; 
         border-right: 4px solid var(--primary); 
         transition: 0.3s;
         cursor: pointer;
     }
-    .task-item:hover { transform: translateX(-5px); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-    .task-item.completed { opacity: 0.7; border-color: var(--success); }
-    .task-item.completed .task-title { text-decoration: line-through; }
-    .task-checkbox { width: 20px; height: 20px; cursor: pointer; }
+    .task-item:hover { transform: translateX(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .task-item.completed { opacity: 0.9; border-color: #38b000; }
+    .task-item.completed .task-title { text-decoration: line-through; color: #38b000; }
+    .task-checkbox { width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary); }
     .task-content { flex: 1; }
-    .task-title { font-weight: bold; margin-bottom: 5px; color: var(--text-color); }
-    .task-description { color: var(--gray); font-size: 0.9rem; margin-bottom: 10px; }
+    .task-title { font-weight: 600; margin-bottom: 6px; color: var(--text-color); font-size: 1.05rem; }
+    .task-description { color: var(--gray); font-size: 0.9rem; margin-bottom: 10px; line-height: 1.5; }
     .task-meta { display: flex; gap: 15px; font-size: 0.85rem; color: var(--gray); flex-wrap: wrap; }
     .task-actions { display: flex; gap: 5px; }
     
@@ -94,30 +112,46 @@
         display: flex; 
         align-items: center; 
         gap: 15px; 
-        padding: 15px; 
+        padding: 16px; 
         background: var(--hover-bg); 
         border-radius: 8px; 
         margin-bottom: 15px;
         border-right: 4px solid;
+        transition: all 0.3s;
     }
     .category-info { flex: 1; }
-    .category-name { font-weight: bold; margin-bottom: 5px; color: var(--text-color); }
-    .category-stats { font-size: 0.85rem; color: var(--gray); }
+    .category-name { font-weight: 600; margin-bottom: 6px; color: var(--text-color); font-size: 1.1rem; }
+    .category-stats { font-size: 0.85rem; color: var(--gray); margin-bottom: 8px; }
     .category-actions { display: flex; gap: 5px; }
     
-    /* شريط التقدم */
-    .progress-container { 
+    /* شريط التقدم في الفئات */
+    .category-progress-container { 
         width: 100%; 
-        height: 8px; 
+        height: 10px; 
         background: var(--border-color); 
-        border-radius: 4px; 
+        border-radius: 5px; 
         overflow: hidden; 
         margin: 10px 0;
+        position: relative;
     }
-    .progress-bar { 
+    .category-progress-bar { 
         height: 100%; 
-        border-radius: 4px;
+        border-radius: 5px;
         transition: width 0.5s ease;
+        background: var(--card-bg); /* الخلفية للفراغ */
+    }
+    .category-task-bar {
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 5px;
+        opacity: 0.7; /* باهتة */
+        transition: all 0.3s ease;
+    }
+    .category-task-bar.completed {
+        opacity: 1; /* مكتملة أكثر وضوحاً */
+        background: #38b000 !important; /* أخضر للمهام المكتملة */
     }
     
     /* الجدول الزمني */
@@ -143,14 +177,15 @@
     }
     .time-label { 
         width: 80px; 
-        font-weight: bold; 
-        color: var(--dark);
+        font-weight: 600; 
+        color: var(--text-color);
         display: flex;
         align-items: center;
         justify-content: center;
         padding: 10px;
         border-right: 1px solid var(--border-color);
         background: var(--hover-bg);
+        font-size: 0.9rem;
     }
     .time-tasks { 
         flex: 1; 
@@ -174,26 +209,29 @@
         position: relative;
         transition: all 0.3s;
         border: 1px solid rgba(255,255,255,0.2);
+        opacity: 0.8; /* باهتة */
     }
-    .calendar-task:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 10; }
+    .calendar-task:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 10; opacity: 1; }
+    .calendar-task.completed { opacity: 1; background: #38b000 !important; } /* أخضر للمهام المكتملة */
     
     /* معلومات عند التحويم */
     .task-tooltip {
         position: absolute;
         background: var(--card-bg);
         color: var(--text-color);
-        padding: 10px;
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        padding: 12px;
+        border-radius: 8px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         z-index: 1000;
         max-width: 300px;
         display: none;
         border: 1px solid var(--border-color);
         font-size: 0.85rem;
+        line-height: 1.5;
     }
-    .task-tooltip h4 { margin-bottom: 5px; color: var(--primary); }
-    .task-tooltip p { margin-bottom: 5px; color: var(--gray); }
-    .task-tooltip .tooltip-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem; }
+    .task-tooltip h4 { margin-bottom: 6px; color: var(--primary); font-weight: 600; }
+    .task-tooltip p { margin-bottom: 6px; color: var(--gray); }
+    .task-tooltip .tooltip-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.8rem; margin-top: 8px; }
     
     /* عرض أسبوعي */
     .weekly-view { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
@@ -203,10 +241,10 @@
         padding-bottom: 10px; 
         margin-bottom: 10px;
         border-bottom: 1px solid var(--border-color);
-        font-weight: bold;
+        font-weight: 600;
         color: var(--text-color);
     }
-    .day-today { background: rgba(67, 97, 238, 0.1); border-color: var(--primary); }
+    .day-today { background: rgba(67, 97, 238, 0.08); border-color: var(--primary); }
     .day-tasks { min-height: 200px; }
     
     /* عرض شهري */
@@ -224,7 +262,7 @@
         margin-bottom: 5px;
         font-size: 0.9rem;
     }
-    .day-number { font-weight: bold; color: var(--text-color); }
+    .day-number { font-weight: 600; color: var(--text-color); }
     .today-indicator { 
         background: var(--primary); 
         color: white; 
@@ -234,14 +272,14 @@
         display: flex; 
         align-items: center; 
         justify-content: center;
-        font-weight: bold;
+        font-weight: 600;
     }
     .other-month { background: var(--hover-bg); color: #adb5bd; }
     
     /* النوافذ */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    .modal-content { background: var(--card-bg); border-radius: 10px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; color: var(--text-color); }
+    .modal-content { background: var(--card-bg); border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; color: var(--text-color); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--border-color); }
     .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray); }
     .modal-body { padding: 20px; }
@@ -254,7 +292,7 @@
         margin-bottom: 20px;
     }
     .tab-btn { 
-        padding: 10px 20px; 
+        padding: 12px 20px; 
         background: none; 
         border: none; 
         cursor: pointer; 
@@ -273,7 +311,7 @@
     /* محرر الملاحظات */
     .notes-editor { border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden; margin-bottom: 20px; }
     .editor-toolbar { display: flex; gap: 5px; padding: 10px; background: var(--hover-bg); border-bottom: 1px solid var(--border-color); flex-wrap: wrap; }
-    .editor-btn { padding: 5px 10px; border: 1px solid var(--border-color); background: var(--card-bg); border-radius: 4px; cursor: pointer; color: var(--text-color); }
+    .editor-btn { padding: 6px 10px; border: 1px solid var(--border-color); background: var(--card-bg); border-radius: 4px; cursor: pointer; color: var(--text-color); }
     .editor-btn:hover { background: var(--hover-bg); }
     .editor-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
     .notes-content { 
@@ -291,7 +329,7 @@
     }
     .notes-content:focus { outline: none; }
     .note-item { 
-        padding: 15px; 
+        padding: 16px; 
         margin-bottom: 15px; 
         background: var(--hover-bg); 
         border-radius: 8px;
@@ -303,18 +341,19 @@
     .note-content { line-height: 1.6; }
     
     /* النماذج */
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; margin-bottom: 5px; font-weight: 500; color: var(--text-color); }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: var(--text-color); }
     .form-group input, .form-group select, .form-group textarea { 
         width: 100%; 
-        padding: 10px; 
+        padding: 10px 12px; 
         border: 1px solid var(--border-color); 
-        border-radius: 5px; 
+        border-radius: 6px; 
         font-size: 1rem; 
         background: var(--card-bg);
         color: var(--text-color);
+        transition: border-color 0.3s;
     }
-    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--primary); }
     .form-row { display: flex; gap: 15px; }
     .form-row .form-group { flex: 1; }
     
@@ -333,24 +372,42 @@
         border-top: 4px solid;
     }
     
-    /* رسائل التحفيز */
-    .motivation-message { 
-        padding: 15px; 
+    /* رسائل حالة الفئات */
+    .category-status-container { margin-bottom: 20px; }
+    .status-message { 
+        padding: 16px; 
         border-radius: 8px; 
-        margin-bottom: 20px;
+        margin-bottom: 12px;
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 12px;
         animation: fadeIn 0.5s ease;
+        border-right: 4px solid;
     }
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
+        from { opacity: 0; transform: translateY(-8px); }
         to { opacity: 1; transform: translateY(0); }
     }
-    .motivation-empty { background: #e7f5ff; border: 1px solid #a5d8ff; color: #1864ab; }
-    .motivation-progress { background: #fff3bf; border: 1px solid #ffd43b; color: #e67700; }
-    .motivation-completed { background: #d3f9d8; border: 1px solid #69db7c; color: #2b8a3e; }
-    .motivation-full { background: #ffe3e3; border: 1px solid #ff8787; color: #c92a2a; }
+    .status-empty { 
+        background: rgba(67, 97, 238, 0.08); 
+        border-right-color: #4361ee; 
+        color: #4361ee; 
+    }
+    .status-progress { 
+        background: rgba(248, 150, 30, 0.08); 
+        border-right-color: #f8961e; 
+        color: #e67700; 
+    }
+    .status-completed { 
+        background: rgba(56, 176, 0, 0.08); 
+        border-right-color: #38b000; 
+        color: #2b8a3e; 
+    }
+    .status-full { 
+        background: rgba(247, 37, 133, 0.08); 
+        border-right-color: #f72585; 
+        color: #c2255c; 
+    }
     
     /* الحالة الفارغة */
     .empty-state { text-align: center; padding: 40px 20px; color: var(--gray); }
@@ -388,10 +445,10 @@
     /* مؤشرات الوقت */
     .time-indicator { 
         display: inline-block; 
-        padding: 2px 8px; 
+        padding: 3px 8px; 
         border-radius: 4px; 
         font-size: 0.8rem; 
-        font-weight: bold;
+        font-weight: 500;
         margin-left: 5px;
     }
     .time-soon { background: #fff3cd; color: #856404; }
@@ -422,6 +479,19 @@
     ::-webkit-scrollbar-track { background: var(--hover-bg); }
     ::-webkit-scrollbar-thumb { background: var(--gray); border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+    
+    /* مؤشرات الحالة */
+    .status-indicator { 
+        display: inline-flex; 
+        align-items: center; 
+        gap: 5px; 
+        padding: 4px 8px; 
+        border-radius: 4px; 
+        font-size: 0.8rem; 
+        font-weight: 500;
+        background: rgba(67, 97, 238, 0.1);
+        color: var(--primary);
+    }
     </style>
 </head>
 <body>
@@ -429,11 +499,11 @@
         <aside class="sidebar">
             <div class="logo">
                 <h1><i class="fas fa-tasks"></i> مهامي</h1>
-                <div class="theme-selector" style="margin-top: 15px;">
+                <div class="theme-selector">
                     <div class="theme-btn theme-light active" data-theme="light" title="فاتح"></div>
                     <div class="theme-btn theme-dark" data-theme="dark" title="داكن"></div>
                     <div class="theme-btn theme-blue" data-theme="blue" title="أزرق"></div>
-                    <div class="theme-btn theme-green" data-theme="green" title="أخضر"></div>
+                    <div class="theme-btn theme-light-blue" data-theme="light-blue" title="أزرق فاتح"></div>
                 </div>
             </div>
             <nav class="main-nav">
@@ -495,7 +565,13 @@
                         <button class="btn btn-secondary" id="clear-filters"><i class="fas fa-times"></i> مسح الفلاتر</button>
                     </div>
                     
-                    <div id="motivation-messages"></div>
+                    <div class="category-status-container">
+                        <button class="category-status-btn" id="toggle-category-status">
+                            <i class="fas fa-chart-bar"></i> عرض حالة الفئات
+                        </button>
+                        <div id="category-status-messages" style="display: none; margin-top: 15px;"></div>
+                    </div>
+                    
                     <div class="tasks-list" id="tasks-list">
                         <div class="empty-state">
                             <i class="fas fa-tasks fa-3x"></i>
@@ -793,36 +869,21 @@
                             <option value="fas fa-users">اجتماعي</option>
                         </select>
                     </div>
-                    <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--text-color);">رسائل التحفيز للفئة</h4>
+                    <h4 style="margin-top: 20px; margin-bottom: 10px; color: var(--text-color);">رسائل حالة الفئة</h4>
                     <div class="form-group">
                         <label for="category-empty-message">رسالة عندما تكون الفئة فارغة</label>
-                        <input type="text" id="category-empty-message" placeholder="أكتب رسالة تشجيعية للبدء">
+                        <input type="text" id="category-empty-message" placeholder="أكتب رسالة تشجيعية للبدء" value="فارغة، أضف مهام للبدء!">
                         <small style="color: var(--gray); font-size: 0.85rem;">ستظهر عندما لا توجد مهام في الفئة</small>
                     </div>
                     <div class="form-group">
-                        <label for="category-progress-message">رسالة عند إضافة مهام غير مكتملة</label>
-                        <input type="text" id="category-progress-message" placeholder="أكتب رسالة تحفيزية للإنجاز">
-                        <small style="color: var(--gray); font-size: 0.85rem;">ستظهر عند إضافة مهام لم تنته بعد</small>
-                    </div>
-                    <div class="form-group">
-                        <label for="category-completed-message">رسالة عند إكمال جميع المهام</label>
-                        <input type="text" id="category-completed-message" placeholder="أكتب رسالة تهنئة للإنجاز">
-                        <small style="color: var(--gray); font-size: 0.85rem;">ستظهر عند إنهاء جميع مهام الفئة</small>
-                    </div>
-                    <div class="form-group">
                         <label for="category-full-message">رسالة عند امتلاء الحصة الزمنية</label>
-                        <input type="text" id="category-full-message" placeholder="أكتب رسالة عندما تمتلئ الفئة">
+                        <input type="text" id="category-full-message" placeholder="أكتب رسالة عندما تمتلئ الفئة" value="الحصة اليومية ممتلئة!">
                         <small style="color: var(--gray); font-size: 0.85rem;">ستظهر عند استخدام كامل الحصة اليومية</small>
                     </div>
                     <div class="form-group">
-                        <label for="category-warning-percentage">نسبة التحذير</label>
-                        <input type="range" id="category-warning-percentage" min="0" max="100" value="80">
-                        <div style="display: flex; justify-content: space-between;">
-                            <small style="color: var(--gray);">0%</small>
-                            <small id="warning-percentage-value" style="color: var(--primary); font-weight: bold;">80%</small>
-                            <small style="color: var(--gray);">100%</small>
-                        </div>
-                        <small style="color: var(--gray); font-size: 0.85rem;">سيتم عرض رسائل خاصة عند وصول الفئة إلى هذه النسبة</small>
+                        <label for="category-completed-message">رسالة عند إكمال جميع المهام</label>
+                        <input type="text" id="category-completed-message" placeholder="أكتب رسالة تهنئة للإنجاز" value="أحسنت! جميع المهام مكتملة!">
+                        <small style="color: var(--gray); font-size: 0.85rem;">ستظهر عند إنهاء جميع مهام الفئة</small>
                     </div>
                 </form>
             </div>
@@ -944,11 +1005,9 @@
                     color: '#4361ee',
                     timeLimit: 120,
                     icon: 'fas fa-home',
-                    emptyMessage: 'لا توجد مهام شخصية اليوم، أضف مهمة للبدء! ✨',
-                    progressMessage: 'لديك مهام شخصية تنتظر الإنجاز، استمر في التقدم! 💪',
-                    completedMessage: 'أحسنت! لقد أنجزت جميع مهامك الشخصية اليوم! 🎉',
-                    fullMessage: 'لقد استخدمت وقتك الشخصي اليوم، حافظ على التوازن! ⚖️',
-                    warningPercentage: 80
+                    emptyMessage: 'فارغة، أضف مهام شخصية للبدء!',
+                    fullMessage: 'الحصة الشخصية اليومية ممتلئة!',
+                    completedMessage: 'أحسنت! جميع المهام الشخصية مكتملة!'
                 },
                 {
                     id: 'work',
@@ -956,11 +1015,9 @@
                     color: '#f72585',
                     timeLimit: 480,
                     icon: 'fas fa-briefcase',
-                    emptyMessage: 'يوم عمل هادئ، ربما حان الوقت للتخطيط للمستقبل? 📈',
-                    progressMessage: 'مهام العمل تنتظرك، اجعلها أولوية! 🚀',
-                    completedMessage: 'مهام العمل مكتملة، عمل رائع اليوم! 👏',
-                    fullMessage: 'يوم عمل مكثف، لا تنسى أخذ قسط من الراحة! ☕',
-                    warningPercentage: 90
+                    emptyMessage: 'لا توجد مهام عمل اليوم، أضف مهام للبدء!',
+                    fullMessage: 'وقت العمل اليومي انتهى!',
+                    completedMessage: 'مهام العمل مكتملة، عمل رائع!'
                 },
                 {
                     id: 'study',
@@ -968,23 +1025,9 @@
                     color: '#4cc9f0',
                     timeLimit: 180,
                     icon: 'fas fa-graduation-cap',
-                    emptyMessage: 'لا توجد مهام دراسة، ربما حان الوقت للتعلم شيء جديد? 📚',
-                    progressMessage: 'استمر في الدراسة، المعرفة هي القوة! 💡',
-                    completedMessage: 'لقد أتممت جلسة الدراسة بنجاح، فخور بك! 🌟',
-                    fullMessage: 'لقد استخدمت وقت الدراسة اليوم، استراحة ثم العودة! 🧠',
-                    warningPercentage: 75
-                },
-                {
-                    id: 'health',
-                    name: 'صحية',
-                    color: '#38b000',
-                    timeLimit: 60,
-                    icon: 'fas fa-heartbeat',
-                    emptyMessage: 'لا توجد أنشطة صحية، كيف ستعتني بصحتك اليوم? 💚',
-                    progressMessage: 'استمر في العناية بصحتك، الجسد السليم في العقل السليم! 🏃‍♂️',
-                    completedMessage: 'رائع! لقد اعتنيت بصحتك اليوم بشكل ممتاز! 💪',
-                    fullMessage: 'لقد استخدمت وقتك الصحي، حافظ على الروتين! 🍎',
-                    warningPercentage: 100
+                    emptyMessage: 'لا توجد مهام دراسة، أضف مهام للبدء!',
+                    fullMessage: 'وقت الدراسة اليومي انتهى!',
+                    completedMessage: 'لقد أتممت جلسة الدراسة بنجاح!'
                 }
             ];
         }
@@ -995,8 +1038,6 @@
                 const today = new Date();
                 const tomorrow = new Date(today);
                 tomorrow.setDate(tomorrow.getDate() + 1);
-                const nextWeek = new Date(today);
-                nextWeek.setDate(nextWeek.getDate() + 7);
                 
                 this.tasks = [
                     {
@@ -1012,21 +1053,6 @@
                         completed: false,
                         priority: 'medium',
                         recurrence: 'none',
-                        createdAt: new Date().toISOString()
-                    },
-                    {
-                        id: '2',
-                        title: 'اجتماع عمل',
-                        description: 'اجتماع فريق العمل الأسبوعي',
-                        categoryId: 'work',
-                        duration: 60,
-                        startDate: today.toISOString().split('T')[0],
-                        endDate: today.toISOString().split('T')[0],
-                        startTime: '14:00',
-                        endTime: '15:00',
-                        completed: false,
-                        priority: 'high',
-                        recurrence: 'weekly',
                         createdAt: new Date().toISOString()
                     }
                 ];
@@ -1186,15 +1212,14 @@
             if (!category.timeLimit) category.timeLimit = 60;
             if (!category.icon) category.icon = 'fas fa-tag';
             
-            // رسائل تحفيزية افتراضية
-            if (!category.emptyMessage) category.emptyMessage = `فئة ${category.name} فارغة، أضف مهام للبدء!`;
-            if (!category.progressMessage) category.progressMessage = `لديك مهام في ${category.name} تنتظر الإنجاز!`;
-            if (!category.completedMessage) category.completedMessage = `أحسنت! لقد أنجزت جميع مهام ${category.name}!`;
-            if (!category.fullMessage) category.fullMessage = `فئة ${category.name} ممتلئة اليوم!`;
-            if (!category.warningPercentage) category.warningPercentage = 80;
+            // رسائل افتراضية
+            if (!category.emptyMessage) category.emptyMessage = 'فارغة، أضف مهام للبدء!';
+            if (!category.fullMessage) category.fullMessage = 'الحصة اليومية ممتلئة!';
+            if (!category.completedMessage) category.completedMessage = 'أحسنت! جميع المهام مكتملة!';
             
             this.categories.push(category);
             this.saveCategories();
+            console.log("تمت إضافة فئة:", category);
             return category;
         }
 
@@ -1203,6 +1228,7 @@
             if (index !== -1) {
                 this.categories[index] = { ...this.categories[index], ...updatedData };
                 this.saveCategories();
+                console.log("تم تحديث الفئة:", this.categories[index]);
                 return this.categories[index];
             }
             return null;
@@ -1303,8 +1329,8 @@
             return this.currentTheme;
         }
 
-        // ========== الإحصائيات والتحفيز ==========
-        getCategoryMotivation(categoryId) {
+        // ========== حالة الفئات ==========
+        getCategoryStatus(categoryId) {
             const category = this.getCategoryById(categoryId);
             if (!category) return null;
             
@@ -1319,50 +1345,48 @@
             const usedTime = categoryTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
             const percentage = category.timeLimit ? Math.min(100, Math.round((usedTime / category.timeLimit) * 100)) : 0;
             
+            let status = '';
             let message = '';
-            let type = '';
             
             if (totalTasks === 0) {
+                status = 'empty';
                 message = category.emptyMessage;
-                type = 'empty';
-            } else if (completedTasks === totalTasks) {
+            } else if (completedTasks === totalTasks && totalTasks > 0) {
+                status = 'completed';
                 message = category.completedMessage;
-                type = 'completed';
             } else if (percentage >= 100) {
+                status = 'full';
                 message = category.fullMessage;
-                type = 'full';
             } else {
-                message = category.progressMessage;
-                type = 'progress';
+                status = 'progress';
+                message = 'في تقدم...';
             }
             
             return {
+                status,
                 message,
-                type,
+                categoryName: category.name,
                 totalTasks,
                 completedTasks,
                 usedTime,
                 percentage,
-                limit: category.timeLimit
+                limit: category.timeLimit,
+                color: category.color
             };
         }
 
-        getAllMotivations() {
+        getAllCategoryStatuses() {
             const categories = this.getCategories();
-            const motivations = [];
+            const statuses = [];
             
             categories.forEach(category => {
-                const motivation = this.getCategoryMotivation(category.id);
-                if (motivation) {
-                    motivations.push({
-                        categoryId: category.id,
-                        categoryName: category.name,
-                        ...motivation
-                    });
+                const status = this.getCategoryStatus(category.id);
+                if (status && status.totalTasks > 0) {
+                    statuses.push(status);
                 }
             });
             
-            return motivations.filter(m => m.totalTasks > 0 || m.type === 'empty');
+            return statuses;
         }
     }
 
@@ -1381,6 +1405,7 @@
                 statusFilter: 'all',
                 categoryFilter: 'all'
             };
+            this.showCategoryStatus = false;
             
             this.initializeElements();
             this.setupEventListeners();
@@ -1411,7 +1436,10 @@
                 taskEndTime: document.getElementById('task-end-time'),
                 cancelTask: document.getElementById('cancel-task'),
                 timeCheckResult: document.getElementById('time-check-result'),
-                motivationMessages: document.getElementById('motivation-messages'),
+                
+                // حالة الفئات
+                toggleCategoryStatus: document.getElementById('toggle-category-status'),
+                categoryStatusMessages: document.getElementById('category-status-messages'),
                 
                 // إعدادات المهمة
                 taskSettingsModal: document.getElementById('task-settings-modal'),
@@ -1453,11 +1481,8 @@
                 categoryTimeLimit: document.getElementById('category-time-limit'),
                 categoryIcon: document.getElementById('category-icon'),
                 categoryEmptyMessage: document.getElementById('category-empty-message'),
-                categoryProgressMessage: document.getElementById('category-progress-message'),
-                categoryCompletedMessage: document.getElementById('category-completed-message'),
                 categoryFullMessage: document.getElementById('category-full-message'),
-                categoryWarningPercentage: document.getElementById('category-warning-percentage'),
-                warningPercentageValue: document.getElementById('warning-percentage-value'),
+                categoryCompletedMessage: document.getElementById('category-completed-message'),
                 cancelCategory: document.getElementById('cancel-category'),
                 addCategoryBtn: document.getElementById('add-category-btn'),
                 
@@ -1538,6 +1563,9 @@
             this.elements.saveNote.addEventListener('click', () => this.saveNote());
             this.elements.cancelNote.addEventListener('click', () => this.closeModal('note-modal'));
             
+            // حالة الفئات
+            this.elements.toggleCategoryStatus.addEventListener('click', () => this.toggleCategoryStatus());
+            
             // التحقق من الوقت
             this.elements.taskCategory.addEventListener('change', () => this.checkTimeAvailability());
             this.elements.taskDuration.addEventListener('input', () => this.checkTimeAvailability());
@@ -1574,11 +1602,6 @@
             this.elements.saveCategoryBtn.addEventListener('click', () => this.saveCategory());
             this.elements.cancelCategory.addEventListener('click', () => this.closeModal('category-modal'));
             
-            // شريط التحذير
-            this.elements.categoryWarningPercentage.addEventListener('input', (e) => {
-                this.elements.warningPercentageValue.textContent = `${e.target.value}%`;
-            });
-            
             // الفلاتر
             this.elements.dateFilter.addEventListener('change', () => this.applyFilters());
             this.elements.statusFilter.addEventListener('change', () => this.applyFilters());
@@ -1606,16 +1629,6 @@
         setupEditorListeners() {
             // أزرار التنسيق
             this.elements.editorButtons.forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const command = e.currentTarget.dataset.command;
-                    document.execCommand(command, false, null);
-                    this.updateEditorButtons();
-                });
-            });
-            
-            // أزرار التنسيق في النافذة
-            document.querySelectorAll('#editor-toolbar .editor-btn[data-command]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.preventDefault();
                     const command = e.currentTarget.dataset.command;
@@ -1667,14 +1680,6 @@
             });
         }
 
-        updateEditorButtons() {
-            // تحديث حالة أزرار التنسيق
-            this.elements.editorButtons.forEach(btn => {
-                const command = btn.dataset.command;
-                btn.classList.toggle('active', document.queryCommandState(command));
-            });
-        }
-
         initializeApp() {
             console.log("تهيئة التطبيق...");
             this.updateDate();
@@ -1711,21 +1716,28 @@
             
             // تطبيق الثيم
             const root = document.documentElement;
+            const sidebar = document.querySelector('.sidebar');
             
             switch(themeName) {
                 case 'light':
                     root.style.setProperty('--bg-color', '#f5f7fb');
                     root.style.setProperty('--card-bg', '#ffffff');
-                    root.style.setProperty('--text-color', '#212529');
+                    root.style.setProperty('--text-color', '#424242');
                     root.style.setProperty('--border-color', '#dee2e6');
                     root.style.setProperty('--hover-bg', '#f8f9fa');
+                    root.style.setProperty('--dark', '#424242');
+                    root.style.setProperty('--sidebar-gradient', 'linear-gradient(180deg, #4361ee, #3a0ca3)');
+                    sidebar.style.background = 'linear-gradient(180deg, #4361ee, #3a0ca3)';
                     break;
                 case 'dark':
                     root.style.setProperty('--bg-color', '#121212');
                     root.style.setProperty('--card-bg', '#1e1e1e');
-                    root.style.setProperty('--text-color', '#f8f9fa');
-                    root.style.setProperty('--border-color', '#495057');
+                    root.style.setProperty('--text-color', '#e0e0e0');
+                    root.style.setProperty('--border-color', '#424242');
                     root.style.setProperty('--hover-bg', '#2d2d2d');
+                    root.style.setProperty('--dark', '#e0e0e0');
+                    root.style.setProperty('--sidebar-gradient', 'linear-gradient(180deg, #2d2d2d, #1a1a1a)');
+                    sidebar.style.background = 'linear-gradient(180deg, #2d2d2d, #1a1a1a)';
                     break;
                 case 'blue':
                     root.style.setProperty('--bg-color', '#e7f5ff');
@@ -1733,21 +1745,74 @@
                     root.style.setProperty('--text-color', '#1c7ed6');
                     root.style.setProperty('--border-color', '#a5d8ff');
                     root.style.setProperty('--hover-bg', '#d0ebff');
+                    root.style.setProperty('--dark', '#1c7ed6');
+                    root.style.setProperty('--sidebar-gradient', 'linear-gradient(180deg, #1c7ed6, #1864ab)');
+                    sidebar.style.background = 'linear-gradient(180deg, #1c7ed6, #1864ab)';
                     break;
-                case 'green':
-                    root.style.setProperty('--bg-color', '#ebfbee');
+                case 'light-blue':
+                    root.style.setProperty('--bg-color', '#f0f9ff');
                     root.style.setProperty('--card-bg', '#ffffff');
-                    root.style.setProperty('--text-color', '#2b8a3e');
-                    root.style.setProperty('--border-color', '#b2f2bb');
-                    root.style.setProperty('--hover-bg', '#d3f9d8');
+                    root.style.setProperty('--text-color', '#0ea5e9');
+                    root.style.setProperty('--border-color', '#7dd3fc');
+                    root.style.setProperty('--hover-bg', '#e0f2fe');
+                    root.style.setProperty('--dark', '#0ea5e9');
+                    root.style.setProperty('--sidebar-gradient', 'linear-gradient(180deg, #38b6ff, #0ea5e9)');
+                    sidebar.style.background = 'linear-gradient(180deg, #38b6ff, #0ea5e9)';
                     break;
             }
             
             this.taskManager.setTheme(themeName);
         }
 
+        toggleCategoryStatus() {
+            this.showCategoryStatus = !this.showCategoryStatus;
+            
+            if (this.showCategoryStatus) {
+                this.elements.toggleCategoryStatus.innerHTML = '<i class="fas fa-times"></i> إخفاء حالة الفئات';
+                this.loadCategoryStatus();
+            } else {
+                this.elements.toggleCategoryStatus.innerHTML = '<i class="fas fa-chart-bar"></i> عرض حالة الفئات';
+                this.elements.categoryStatusMessages.style.display = 'none';
+            }
+        }
+
+        loadCategoryStatus() {
+            const statuses = this.taskManager.getAllCategoryStatuses();
+            const container = this.elements.categoryStatusMessages;
+            
+            if (statuses.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray); text-align: center; padding: 15px;">لا توجد فئات تحتوي على مهام اليوم</p>';
+                container.style.display = 'block';
+                return;
+            }
+            
+            let html = '';
+            
+            statuses.forEach(status => {
+                const statusClass = `status-${status.status}`;
+                const icon = status.status === 'empty' ? 'fas fa-inbox' :
+                           status.status === 'progress' ? 'fas fa-hourglass-half' :
+                           status.status === 'completed' ? 'fas fa-check-circle' :
+                           'fas fa-exclamation-triangle';
+                
+                html += `
+                    <div class="status-message ${statusClass}">
+                        <i class="${icon} fa-lg"></i>
+                        <div>
+                            <strong>${status.categoryName}:</strong> ${status.message}
+                            <div style="font-size: 0.85rem; margin-top: 5px; color: inherit; opacity: 0.9;">
+                                ${status.totalTasks} مهمة • ${status.completedTasks} مكتملة • ${status.usedTime}/${status.limit} دقيقة
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            container.style.display = 'block';
+        }
+
         switchView(viewName) {
-            console.log("تبديل العرض إلى:", viewName);
             this.currentView = viewName;
             
             // تحديث التنقل
@@ -1775,8 +1840,10 @@
             // التحكم بشريط الوقت
             this.elements.timeNavigation.style.display = (viewName === 'calendar') ? 'flex' : 'none';
             
-            // التحكم بمحرر الملاحظات المدمج
-            this.elements.notesEditor.style.display = (viewName === 'notes') ? 'block' : 'none';
+            // إعادة تعيين حالة الفئات
+            this.showCategoryStatus = false;
+            this.elements.toggleCategoryStatus.innerHTML = '<i class="fas fa-chart-bar"></i> عرض حالة الفئات';
+            this.elements.categoryStatusMessages.style.display = 'none';
             
             // إظهار/إخفاء العروض
             this.elements.views.forEach(view => {
@@ -1824,15 +1891,9 @@
 
         // تحميل المهام
         loadTasksView() {
-            console.log("تحميل عرض المهام...");
-            
-            // تحديث خيارات الفلاتر
             this.updateFilterOptions();
             
             const tasks = this.taskManager.getTasks(this.currentFilters);
-            
-            // عرض رسائل التحفيز
-            this.showMotivationMessages();
             
             if (!tasks || tasks.length === 0) {
                 this.elements.tasksList.innerHTML = `
@@ -1853,7 +1914,7 @@
                 
                 let timeStatus = '';
                 if (task.completed) {
-                    timeStatus = `<span class="time-indicator" style="background: #d4edda; color: #155724;">مكتملة</span>`;
+                    timeStatus = `<span class="time-indicator" style="background: #38b000; color: white;">مكتملة</span>`;
                 } else if (task.endDate < today) {
                     timeStatus = `<span class="time-indicator time-overdue">متأخرة</span>`;
                 } else if (task.startDate === today) {
@@ -1874,8 +1935,6 @@
                                 <span><i class="fas fa-clock"></i> ${task.duration || 30} دقيقة</span>
                                 <span><i class="fas fa-calendar"></i> ${this.formatArabicDate(task.startDate)}</span>
                                 ${task.startTime ? `<span><i class="fas fa-clock"></i> ${task.startTime}</span>` : ''}
-                                ${task.priority === 'high' ? '<span style="color: #f72585;"><i class="fas fa-exclamation-circle"></i> عالية</span>' : ''}
-                                ${task.priority === 'medium' ? '<span style="color: #f8961e;"><i class="fas fa-exclamation-circle"></i> متوسطة</span>' : ''}
                             </div>
                         </div>
                         <div class="task-actions">
@@ -1898,6 +1957,9 @@
                     const taskId = e.target.closest('.task-item').dataset.id;
                     this.taskManager.toggleTaskCompletion(taskId);
                     this.loadTasksView();
+                    if (this.showCategoryStatus) {
+                        this.loadCategoryStatus();
+                    }
                 });
             });
             
@@ -1907,6 +1969,9 @@
                     if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
                         this.taskManager.deleteTask(taskId);
                         this.loadTasksView();
+                        if (this.showCategoryStatus) {
+                            this.loadCategoryStatus();
+                        }
                     }
                 });
             });
@@ -1918,7 +1983,6 @@
                 });
             });
             
-            // فتح إعدادات المهمة عند النقر عليها
             document.querySelectorAll('.task-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     if (!e.target.closest('.task-actions') && !e.target.classList.contains('task-checkbox')) {
@@ -1927,38 +1991,6 @@
                     }
                 });
             });
-        }
-
-        showMotivationMessages() {
-            const motivations = this.taskManager.getAllMotivations();
-            const container = this.elements.motivationMessages;
-            
-            if (motivations.length === 0) {
-                container.innerHTML = '';
-                return;
-            }
-            
-            let html = '';
-            
-            motivations.forEach(motivation => {
-                const typeClass = `motivation-${motivation.type}`;
-                const icon = motivation.type === 'empty' ? 'fas fa-bell' :
-                           motivation.type === 'progress' ? 'fas fa-hourglass-half' :
-                           motivation.type === 'completed' ? 'fas fa-check-circle' :
-                           'fas fa-exclamation-triangle';
-                
-                html += `
-                    <div class="motivation-message ${typeClass}">
-                        <i class="${icon} fa-2x"></i>
-                        <div>
-                            <strong>${motivation.categoryName}:</strong> ${motivation.message}
-                            ${motivation.percentage > 0 ? `<br><small>${motivation.usedTime}/${motivation.limit} دقيقة (${motivation.percentage}%)</small>` : ''}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
         }
 
         updateFilterOptions() {
@@ -2000,8 +2032,6 @@
 
         // تحميل الجدول الزمني
         loadCalendarView() {
-            console.log("تحميل الجدول الزمني:", this.currentCalendarRange);
-            
             let title = '';
             let content = '';
             
@@ -2027,7 +2057,6 @@
                                                    this.currentCalendarRange === 'weekly' ? 'هذا الأسبوع' : 'هذا الشهر';
             this.elements.calendarBody.innerHTML = content;
             
-            // إضافة أحداث للمهام في الجدول
             this.addCalendarTaskEvents();
         }
 
@@ -2039,7 +2068,6 @@
             
             let html = '<div class="daily-view">';
             
-            // إنشاء فترات زمنية لـ 24 ساعة
             for (let hour = 0; hour < 24; hour++) {
                 const timeLabel = `${hour.toString().padStart(2, '0')}:00`;
                 const hourTasks = tasks.filter(task => {
@@ -2054,8 +2082,9 @@
                         <div class="time-tasks">
                             ${hourTasks.map(task => {
                                 const category = this.taskManager.getCategoryById(task.categoryId);
+                                const completedClass = task.completed ? 'completed' : '';
                                 return `
-                                    <div class="calendar-task" 
+                                    <div class="calendar-task ${completedClass}" 
                                          data-id="${task.id}"
                                          style="background: ${category?.color || '#4361ee'}"
                                          onmouseover="ui.showTaskTooltip(event, '${task.id}')"
@@ -2100,8 +2129,9 @@
                         <div class="day-tasks">
                             ${dayTasks.map(task => {
                                 const category = this.taskManager.getCategoryById(task.categoryId);
+                                const completedClass = task.completed ? 'completed' : '';
                                 return `
-                                    <div class="calendar-task" 
+                                    <div class="calendar-task ${completedClass}" 
                                          data-id="${task.id}"
                                          style="background: ${category?.color || '#4361ee'}; margin-bottom: 5px;"
                                          onmouseover="ui.showTaskTooltip(event, '${task.id}')"
@@ -2132,7 +2162,7 @@
             
             const dayHeaders = ['أحد', 'إثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
             dayHeaders.forEach(day => {
-                html += `<div class="month-day-header" style="text-align: center; font-weight: bold;">${day}</div>`;
+                html += `<div class="month-day-header" style="text-align: center; font-weight: 600;">${day}</div>`;
             });
             
             const prevMonthLastDay = new Date(year, month, 0).getDate();
@@ -2155,8 +2185,9 @@
                         </div>
                         ${dayTasks.slice(0, 3).map(task => {
                             const category = this.taskManager.getCategoryById(task.categoryId);
+                            const completedClass = task.completed ? 'completed' : '';
                             return `
-                                <div class="calendar-task" 
+                                <div class="calendar-task ${completedClass}" 
                                      data-id="${task.id}"
                                      style="background: ${category?.color || '#4361ee'}; 
                                             font-size: 0.7rem; 
@@ -2200,12 +2231,10 @@
             tooltip.innerHTML = content;
             tooltip.style.display = 'block';
             
-            // تحديد موقع العنصر
             const rect = event.target.getBoundingClientRect();
             tooltip.style.top = `${rect.top + window.scrollY - tooltip.offsetHeight - 10}px`;
             tooltip.style.left = `${rect.left + window.scrollX + rect.width / 2 - tooltip.offsetWidth / 2}px`;
             
-            // التأكد من بقاء الأداة داخل النافذة
             if (parseInt(tooltip.style.left) < 10) {
                 tooltip.style.left = '10px';
             }
@@ -2214,7 +2243,6 @@
                 tooltip.style.left = `${window.innerWidth - tooltip.offsetWidth - 10}px`;
             }
             
-            // إضافة حدث النقر
             event.target.addEventListener('click', () => {
                 this.openTaskSettings(taskId);
             }, { once: true });
@@ -2307,7 +2335,6 @@
                     minute: '2-digit'
                 });
                 
-                // استخراج العنوان من المحتوى
                 let title = note.title || 'ملاحظة بدون عنوان';
                 if (!note.title && note.content) {
                     const tempDiv = document.createElement('div');
@@ -2337,7 +2364,6 @@
             
             this.elements.notesList.innerHTML = html;
             
-            // أحداث الملاحظات
             document.querySelectorAll('.edit-note').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     const noteId = e.target.closest('button').dataset.id;
@@ -2355,7 +2381,6 @@
                 });
             });
             
-            // فتح الملاحظة عند النقر عليها
             document.querySelectorAll('.note-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     if (!e.target.closest('.note-actions')) {
@@ -2366,54 +2391,104 @@
             });
         }
 
-        openNoteModal(noteId = null) {
-            this.editingNoteId = noteId;
+        // تحميل الفئات
+        loadCategoriesView() {
+            console.log("تحميل الفئات...");
+            const categories = this.taskManager.getCategories();
             
-            if (noteId) {
-                const note = this.taskManager.getNoteById(noteId);
-                if (note) {
-                    this.elements.noteModalTitle.textContent = 'تعديل الملاحظة';
-                    this.elements.modalNotesContent.innerHTML = note.content;
-                }
-            } else {
-                this.elements.noteModalTitle.textContent = 'ملاحظة جديدة';
-                this.elements.modalNotesContent.innerHTML = '';
-            }
-            
-            this.elements.noteModal.classList.add('active');
-        }
-
-        saveNote() {
-            const content = this.elements.modalNotesContent.innerHTML.trim();
-            
-            if (!content) {
-                alert('يرجى إدخال محتوى للملاحظة');
+            if (!categories || categories.length === 0) {
+                this.elements.categoriesList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-tags fa-3x"></i>
+                        <h4>لا توجد فئات</h4>
+                        <p>اضغط على "إضافة فئة" لإنشاء فئتك الأولى</p>
+                    </div>
+                `;
                 return;
             }
             
-            // استخراج العنوان من المحتوى
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = content;
-            const text = tempDiv.textContent || tempDiv.innerText || '';
-            const title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
+            let html = '';
+            categories.forEach(category => {
+                // حساب الوقت المستخدم اليوم
+                const today = this.taskManager.getTodayDate();
+                const tasks = this.taskManager.getTasks({ dateFilter: 'today' });
+                const categoryTasks = tasks.filter(task => task.categoryId === category.id);
+                const usedTime = categoryTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
+                const percentage = category.timeLimit ? Math.min(100, Math.round((usedTime / category.timeLimit) * 100)) : 0;
+                
+                // حساب المهام المكتملة
+                const completedTasks = categoryTasks.filter(task => task.completed).length;
+                const totalTasks = categoryTasks.length;
+                
+                // إنشاء أشرطة المهام داخل شريط التقدم
+                let taskBarsHtml = '';
+                let cumulativePosition = 0;
+                
+                categoryTasks.forEach((task, index) => {
+                    const taskWidth = (task.duration / category.timeLimit) * 100;
+                    const isCompleted = task.completed;
+                    const taskColor = category.color;
+                    
+                    taskBarsHtml += `
+                        <div class="category-task-bar ${isCompleted ? 'completed' : ''}" 
+                             style="width: ${taskWidth}%; left: ${cumulativePosition}%; background: ${taskColor};"
+                             title="${task.title} (${task.duration} دقيقة) ${isCompleted ? ' - مكتملة' : ''}">
+                        </div>
+                    `;
+                    
+                    cumulativePosition += taskWidth;
+                });
+                
+                html += `
+                    <div class="category-card" style="border-right-color: ${category.color}">
+                        <div style="width: 50px; height: 50px; background: ${category.color}; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
+                            <i class="${category.icon || 'fas fa-tag'}"></i>
+                        </div>
+                        <div class="category-info">
+                            <div class="category-name">${category.name}</div>
+                            <div class="category-stats">
+                                <div><i class="fas fa-tasks"></i> ${totalTasks} مهمة • ${completedTasks} مكتملة</div>
+                                <div><i class="fas fa-clock"></i> ${usedTime}/${category.timeLimit} دقيقة (${percentage}%)</div>
+                            </div>
+                            <div class="category-progress-container">
+                                <div class="category-progress-bar" style="width: 100%;"></div>
+                                ${taskBarsHtml}
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--gray); margin-top: 5px;">
+                                <i class="fas fa-info-circle"></i> الفراغ: لون الخلفية | المهام: ألوان باهتة | المكتملة: أخضر
+                            </div>
+                        </div>
+                        <div class="category-actions">
+                            <button class="btn btn-sm btn-secondary edit-category" data-id="${category.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-danger delete-category" data-id="${category.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
             
-            const noteData = {
-                title: title,
-                content: content
-            };
+            this.elements.categoriesList.innerHTML = html;
             
-            if (this.editingNoteId) {
-                this.taskManager.updateNote(this.editingNoteId, noteData);
-            } else {
-                this.taskManager.addNote(noteData);
-            }
+            // أحداث الفئات
+            document.querySelectorAll('.edit-category').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const categoryId = e.target.closest('button').dataset.id;
+                    this.editCategory(categoryId);
+                });
+            });
             
-            this.closeModal('note-modal');
-            this.loadNotesView();
-            this.editingNoteId = null;
+            document.querySelectorAll('.delete-category').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const categoryId = e.target.closest('button').dataset.id;
+                    this.deleteCategory(categoryId);
+                });
+            });
         }
 
-        // باقي الوظائف تبقى كما هي مع بعض التعديلات البسيطة
+        // باقي الوظائف...
         openAddTaskModal() {
             this.loadCategoryOptions(this.elements.taskCategory);
             
@@ -2548,6 +2623,10 @@
                 this.loadCalendarView();
             } else if (this.currentView === 'stats') {
                 this.loadStatsView();
+            }
+            
+            if (this.showCategoryStatus) {
+                this.loadCategoryStatus();
             }
         }
 
@@ -2692,6 +2771,10 @@
             } else if (this.currentView === 'stats') {
                 this.loadStatsView();
             }
+            
+            if (this.showCategoryStatus) {
+                this.loadCategoryStatus();
+            }
         }
 
         deleteTask() {
@@ -2707,6 +2790,10 @@
                     this.loadCalendarView();
                 } else if (this.currentView === 'stats') {
                     this.loadStatsView();
+                }
+                
+                if (this.showCategoryStatus) {
+                    this.loadCategoryStatus();
                 }
             }
         }
@@ -2724,11 +2811,8 @@
                     this.elements.categoryTimeLimit.value = category.timeLimit || 60;
                     this.elements.categoryIcon.value = category.icon || 'fas fa-tag';
                     this.elements.categoryEmptyMessage.value = category.emptyMessage || '';
-                    this.elements.categoryProgressMessage.value = category.progressMessage || '';
-                    this.elements.categoryCompletedMessage.value = category.completedMessage || '';
                     this.elements.categoryFullMessage.value = category.fullMessage || '';
-                    this.elements.categoryWarningPercentage.value = category.warningPercentage || 80;
-                    this.elements.warningPercentageValue.textContent = `${category.warningPercentage || 80}%`;
+                    this.elements.categoryCompletedMessage.value = category.completedMessage || '';
                 }
             } else {
                 this.elements.categoryModalTitle.textContent = 'إضافة فئة جديدة';
@@ -2737,12 +2821,9 @@
                 this.elements.categoryColor.value = '#4361ee';
                 this.elements.categoryTimeLimit.value = 60;
                 this.elements.categoryIcon.value = 'fas fa-tag';
-                this.elements.categoryEmptyMessage.value = '';
-                this.elements.categoryProgressMessage.value = '';
-                this.elements.categoryCompletedMessage.value = '';
-                this.elements.categoryFullMessage.value = '';
-                this.elements.categoryWarningPercentage.value = 80;
-                this.elements.warningPercentageValue.textContent = '80%';
+                this.elements.categoryEmptyMessage.value = 'فارغة، أضف مهام للبدء!';
+                this.elements.categoryFullMessage.value = 'الحصة اليومية ممتلئة!';
+                this.elements.categoryCompletedMessage.value = 'أحسنت! جميع المهام مكتملة!';
             }
             
             this.elements.categoryModal.classList.add('active');
@@ -2771,10 +2852,8 @@
                 timeLimit: timeLimit,
                 icon: this.elements.categoryIcon.value,
                 emptyMessage: this.elements.categoryEmptyMessage.value,
-                progressMessage: this.elements.categoryProgressMessage.value,
-                completedMessage: this.elements.categoryCompletedMessage.value,
                 fullMessage: this.elements.categoryFullMessage.value,
-                warningPercentage: parseInt(this.elements.categoryWarningPercentage.value) || 80
+                completedMessage: this.elements.categoryCompletedMessage.value
             };
             
             if (this.editingCategoryId) {
@@ -2810,6 +2889,52 @@
             }
         }
 
+        openNoteModal(noteId = null) {
+            this.editingNoteId = noteId;
+            
+            if (noteId) {
+                const note = this.taskManager.getNoteById(noteId);
+                if (note) {
+                    this.elements.noteModalTitle.textContent = 'تعديل الملاحظة';
+                    this.elements.modalNotesContent.innerHTML = note.content;
+                }
+            } else {
+                this.elements.noteModalTitle.textContent = 'ملاحظة جديدة';
+                this.elements.modalNotesContent.innerHTML = '';
+            }
+            
+            this.elements.noteModal.classList.add('active');
+        }
+
+        saveNote() {
+            const content = this.elements.modalNotesContent.innerHTML.trim();
+            
+            if (!content) {
+                alert('يرجى إدخال محتوى للملاحظة');
+                return;
+            }
+            
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = content;
+            const text = tempDiv.textContent || tempDiv.innerText || '';
+            const title = text.substring(0, 30) + (text.length > 30 ? '...' : '');
+            
+            const noteData = {
+                title: title,
+                content: content
+            };
+            
+            if (this.editingNoteId) {
+                this.taskManager.updateNote(this.editingNoteId, noteData);
+            } else {
+                this.taskManager.addNote(noteData);
+            }
+            
+            this.closeModal('note-modal');
+            this.loadNotesView();
+            this.editingNoteId = null;
+        }
+
         closeModal(modalId) {
             document.getElementById(modalId).classList.remove('active');
         }
@@ -2831,14 +2956,13 @@
             window.ui = ui;
             
             console.log("=========================================");
-            console.log("🎯 تطبيق إدارة المهام المتقدم!");
-            console.log("📱 الميزات المتاحة:");
-            console.log("   - جدول زمني يومي كامل (24 ساعة)");
-            console.log("   - معلومات عند التحويم على المهام");
-            console.log("   - رسائل تحفيزية مخصصة للفئات");
-            console.log("   - 4 ثيمات مختلفة للواجهة");
-            console.log("   - نظام ملاحظات مع محرر نص متقدم");
-            console.log("   - نظام تحكم زمني متكامل");
+            console.log("🎯 تطبيق إدارة المهام المحسن!");
+            console.log("📱 الميزات الجديدة:");
+            console.log("   - الشريط الجانبي يتبع لون الثيم");
+            console.log("   - ألوان أفتح وأكثر راحة للنظر");
+            console.log("   - نظام إشعارات مبسط (3 رسائل فقط)");
+            console.log("   - عرض الفئات مع ألوان باهتة للمهام");
+            console.log("   - المهام المكتملة تظهر باللون الأخضر");
             console.log("=========================================");
             
         } catch (error) {
