@@ -21,10 +21,6 @@
         --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         --transition: all 0.3s ease;
         
-        /* خلفية مخصصة */
-        --custom-bg: none;
-        --custom-bg-color: transparent;
-        
         /* ثيم افتراضي (رمادي) */
         --theme-bg: #ffffff;
         --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
@@ -45,24 +41,6 @@
         min-height: 100vh;
         transition: var(--transition);
         position: relative;
-    }
-    
-    /* خلفية مخصصة */
-    body::before {
-        content: '';
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: var(--custom-bg);
-        background-color: var(--custom-bg-color);
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        opacity: 0.1;
-        z-index: -1;
-        pointer-events: none;
     }
    
     /* ========== تنسيقات الثيمات ========== */
@@ -202,7 +180,7 @@
         background: rgba(255, 255, 255, 0.2);
     }
     
-    /* نافذة اختيار الثيم والخلفية */
+    /* نافذة اختيار الثيم */
     .settings-popup {
         position: absolute;
         bottom: 70px;
@@ -214,7 +192,7 @@
         border: 1px solid var(--theme-border);
         display: none;
         z-index: 1000;
-        min-width: 300px;
+        min-width: 200px;
     }
     
     .settings-popup.active {
@@ -227,41 +205,13 @@
         text-align: center;
     }
     
-    .settings-tabs {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 20px;
-        border-bottom: 1px solid var(--theme-border);
-        padding-bottom: 10px;
-    }
-    
-    .settings-tab {
-        flex: 1;
-        text-align: center;
-        padding: 8px;
-        cursor: pointer;
-        border-radius: 6px;
-        transition: var(--transition);
-        color: var(--theme-text);
-        font-weight: 500;
-    }
-    
-    .settings-tab:hover {
-        background: var(--theme-border);
-    }
-    
-    .settings-tab.active {
-        background: var(--theme-primary);
-        color: white;
-    }
-    
-    .theme-options, .background-options {
+    .theme-options {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 10px;
     }
     
-    .theme-option, .background-option {
+    .theme-option {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -273,23 +223,23 @@
         border: 2px solid transparent;
     }
     
-    .theme-option:hover, .background-option:hover {
+    .theme-option:hover {
         background: var(--theme-border);
     }
     
-    .theme-option.active, .background-option.active {
+    .theme-option.active {
         border-color: var(--theme-primary);
         background: rgba(67, 97, 238, 0.1);
     }
     
-    .theme-preview, .background-preview {
+    .theme-preview {
         width: 40px;
         height: 40px;
         border-radius: 50%;
         border: 2px solid var(--theme-border);
     }
     
-    .theme-name, .background-name {
+    .theme-name {
         font-size: 0.85rem;
         color: var(--theme-text);
     }
@@ -298,40 +248,6 @@
     .theme-black-preview { background: linear-gradient(45deg, #1e1e1e, #2d2d2d); }
     .theme-blue-preview { background: linear-gradient(45deg, #4361ee, #3a56d4); }
     .theme-beige-preview { background: linear-gradient(45deg, #d7ccc8, #bcaaa4); }
-    
-    /* معاينات الخلفيات */
-    .bg-color-preview { background: linear-gradient(45deg, #f0f0f0, #e0e0e0); }
-    .bg-nature-preview { background: linear-gradient(45deg, #4CAF50, #2E7D32); }
-    .bg-sky-preview { background: linear-gradient(45deg, #29B6F6, #0288D1); }
-    .bg-clouds-preview { background: linear-gradient(45deg, #E3F2FD, #BBDEFB); }
-    .bg-mountain-preview { background: linear-gradient(45deg, #795548, #5D4037); }
-    .bg-sea-preview { background: linear-gradient(45deg, #00BCD4, #0097A7); }
-    
-    /* اختيارات الألوان */
-    .color-options {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 8px;
-        margin-top: 10px;
-    }
-    
-    .color-option {
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 2px solid transparent;
-        transition: var(--transition);
-    }
-    
-    .color-option:hover {
-        transform: scale(1.1);
-    }
-    
-    .color-option.active {
-        border-color: var(--theme-primary);
-        box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.3);
-    }
     
     /* المحتوى الرئيسي */
     .main-content {
@@ -424,10 +340,27 @@
         transform: translateY(-2px);
     }
     
+    .btn-warning {
+        background: #fff3cd;
+        color: #856404;
+        border: 1px solid #ffeaa7;
+    }
+    
+    .btn-warning:hover {
+        background: #ffeaa7;
+        transform: translateY(-2px);
+    }
+    
     .btn-sm {
         padding: 8px 16px;
         font-size: 0.9rem;
         border-radius: 8px;
+    }
+    
+    .btn-xs {
+        padding: 4px 10px;
+        font-size: 0.8rem;
+        border-radius: 6px;
     }
     
     /* ========== منطقة المحتوى ========== */
@@ -575,6 +508,13 @@
     }
     
     /* ========== عرض الفئات ========== */
+    .categories-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+    
     .categories-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -610,6 +550,7 @@
         border-radius: 50%;
         border: 3px solid white;
         box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+        cursor: pointer;
     }
     
     .category-name {
@@ -622,6 +563,17 @@
     .category-stats {
         font-size: 0.9rem;
         color: var(--gray-color);
+    }
+    
+    .category-actions {
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: var(--transition);
+    }
+    
+    .category-card:hover .category-actions {
+        opacity: 1;
     }
     
     /* شريط التقدم داخل الفئة */
@@ -686,7 +638,7 @@
         position: relative;
         background: var(--theme-card);
         border: 1px solid var(--theme-border);
-        border-bottom: 1px solid var(--theme-border); /* خط فاصل بين المهام */
+        border-bottom: 1px solid var(--theme-border);
     }
     
     .category-task-item:last-child {
@@ -697,6 +649,7 @@
     .category-task-item:hover {
         transform: translateX(-5px);
         box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        background: var(--theme-border);
     }
     
     .category-task-item.completed {
@@ -708,6 +661,9 @@
         font-weight: 500;
         margin-bottom: 5px;
         font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
     }
     
     .category-task-meta {
@@ -784,11 +740,48 @@
         min-height: 100px;
         border: 1px solid var(--theme-border);
         transition: var(--transition);
+        line-height: 1.6;
     }
     
     .note-content:focus {
         outline: none;
         border-color: var(--theme-primary);
+    }
+    
+    /* خانة الاختيار في الملاحظات */
+    .note-checkbox-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 8px;
+        padding: 8px;
+        border-radius: 6px;
+        transition: var(--transition);
+    }
+    
+    .note-checkbox-item:hover {
+        background: rgba(0,0,0,0.05);
+    }
+    
+    .note-checkbox-item.completed {
+        opacity: 0.7;
+    }
+    
+    .note-checkbox-item.completed .note-checkbox-text {
+        text-decoration: line-through;
+        color: var(--gray-color);
+    }
+    
+    .note-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: var(--theme-primary);
+    }
+    
+    .note-checkbox-text {
+        flex: 1;
+        font-size: 0.95rem;
     }
     
     .note-footer {
@@ -1002,6 +995,9 @@
         grid-template-columns: 1fr;
         gap: 15px;
         margin-top: 20px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 10px;
     }
     
     .time-slot {
@@ -1051,6 +1047,7 @@
     .calendar-task-card:hover {
         transform: translateX(-5px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        background: var(--theme-border);
     }
     
     .calendar-task-card.no-time {
@@ -1078,6 +1075,9 @@
         grid-template-columns: repeat(7, 1fr);
         gap: 15px;
         margin-top: 20px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 10px;
     }
     
     .day-column {
@@ -1086,6 +1086,8 @@
         padding: 15px;
         border: 1px solid var(--theme-border);
         min-height: 400px;
+        max-height: 500px;
+        overflow-y: auto;
     }
     
     .day-header {
@@ -1093,6 +1095,10 @@
         margin-bottom: 15px;
         padding-bottom: 10px;
         border-bottom: 2px solid var(--theme-primary);
+        position: sticky;
+        top: 0;
+        background: var(--theme-card);
+        z-index: 1;
     }
     
     .day-name {
@@ -1119,6 +1125,9 @@
         grid-template-columns: repeat(7, 1fr);
         gap: 10px;
         margin-top: 20px;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 10px;
     }
     
     .month-day {
@@ -1128,6 +1137,8 @@
         min-height: 120px;
         border: 1px solid var(--theme-border);
         position: relative;
+        overflow-y: auto;
+        max-height: 150px;
     }
     
     .day-number {
@@ -1135,6 +1146,10 @@
         margin-bottom: 10px;
         color: var(--theme-text);
         font-size: 1.2rem;
+        position: sticky;
+        top: 0;
+        background: var(--theme-card);
+        padding: 2px 0;
     }
     
     .today .day-number {
@@ -1336,6 +1351,14 @@
         .main-content {
             margin-right: 70px;
         }
+        
+        .weekly-calendar {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .monthly-calendar {
+            grid-template-columns: repeat(4, 1fr);
+        }
     }
     
     @media (max-width: 768px) {
@@ -1448,7 +1471,7 @@
         border-radius: 10px;
     }
     
-    ::-webkit-scrollbar-thumb {
+    ::webkit-scrollbar-thumb {
         background: var(--theme-primary);
         border-radius: 10px;
     }
@@ -1492,78 +1515,25 @@
                 </button>
             </div>
             
-            <!-- نافذة الإعدادات -->
+            <!-- نافذة الإعدادات (الثيمات فقط) -->
             <div class="settings-popup" id="settings-popup">
-                <h4>الإعدادات</h4>
-                <div class="settings-tabs">
-                    <div class="settings-tab active" data-tab="theme">الثيمات</div>
-                    <div class="settings-tab" data-tab="background">الخلفية</div>
-                </div>
-                
-                <!-- إعدادات الثيم -->
-                <div id="theme-settings" class="settings-content">
-                    <h5>اختر الثيم</h5>
-                    <div class="theme-options">
-                        <div class="theme-option active" data-theme="gray">
-                            <div class="theme-preview theme-gray-preview"></div>
-                            <span class="theme-name">رمادي</span>
-                        </div>
-                        <div class="theme-option" data-theme="black">
-                            <div class="theme-preview theme-black-preview"></div>
-                            <span class="theme-name">أسود</span>
-                        </div>
-                        <div class="theme-option" data-theme="blue">
-                            <div class="theme-preview theme-blue-preview"></div>
-                            <span class="theme-name">أزرق</span>
-                        </div>
-                        <div class="theme-option" data-theme="beige">
-                            <div class="theme-preview theme-beige-preview"></div>
-                            <span class="theme-name">بيج</span>
-                        </div>
+                <h4>اختر الثيم</h4>
+                <div class="theme-options">
+                    <div class="theme-option active" data-theme="gray">
+                        <div class="theme-preview theme-gray-preview"></div>
+                        <span class="theme-name">رمادي</span>
                     </div>
-                </div>
-                
-                <!-- إعدادات الخلفية -->
-                <div id="background-settings" class="settings-content" style="display: none;">
-                    <h5>اختر خلفية</h5>
-                    <div class="background-options">
-                        <div class="background-option" data-bg-type="color" data-bg-value="none">
-                            <div class="background-preview bg-color-preview"></div>
-                            <span class="background-name">لون خالص</span>
-                        </div>
-                        <div class="background-option" data-bg-type="emoji" data-bg-value="nature">
-                            <div class="background-preview bg-nature-preview"></div>
-                            <span class="background-name">طبيعة</span>
-                        </div>
-                        <div class="background-option" data-bg-type="emoji" data-bg-value="sky">
-                            <div class="background-preview bg-sky-preview"></div>
-                            <span class="background-name">سماء</span>
-                        </div>
-                        <div class="background-option" data-bg-type="emoji" data-bg-value="clouds">
-                            <div class="background-preview bg-clouds-preview"></div>
-                            <span class="background-name">غيوم</span>
-                        </div>
-                        <div class="background-option" data-bg-type="emoji" data-bg-value="mountain">
-                            <div class="background-preview bg-mountain-preview"></div>
-                            <span class="background-name">جبال</span>
-                        </div>
-                        <div class="background-option" data-bg-type="emoji" data-bg-value="sea">
-                            <div class="background-preview bg-sea-preview"></div>
-                            <span class="background-name">بحر</span>
-                        </div>
+                    <div class="theme-option" data-theme="black">
+                        <div class="theme-preview theme-black-preview"></div>
+                        <span class="theme-name">أسود</span>
                     </div>
-                    
-                    <!-- اختيار اللون -->
-                    <div id="color-picker-section" style="margin-top: 20px; display: none;">
-                        <h6 style="margin-bottom: 10px;">اختر لون الخلفية</h6>
-                        <div class="color-options">
-                            <div class="color-option" style="background: #f5f7fb;" data-color="#f5f7fb"></div>
-                            <div class="color-option" style="background: #ffffff;" data-color="#ffffff"></div>
-                            <div class="color-option" style="background: #f0f8ff;" data-color="#f0f8ff"></div>
-                            <div class="color-option" style="background: #f8f9fa;" data-color="#f8f9fa"></div>
-                            <div class="color-option" style="background: #fffaf0;" data-color="#fffaf0"></div>
-                            <div class="color-option" style="background: #f5f5f5;" data-color="#f5f5f5"></div>
-                        </div>
+                    <div class="theme-option" data-theme="blue">
+                        <div class="theme-preview theme-blue-preview"></div>
+                        <span class="theme-name">أزرق</span>
+                    </div>
+                    <div class="theme-option" data-theme="beige">
+                        <div class="theme-preview theme-beige-preview"></div>
+                        <span class="theme-name">بيج</span>
                     </div>
                 </div>
             </div>
@@ -1618,9 +1588,14 @@
 
                 <!-- عرض الفئات -->
                 <div id="categories-view" class="view">
-                    <div style="margin-bottom: 25px;">
-                        <h2 style="color: var(--theme-text);">إدارة الفئات</h2>
-                        <p style="color: var(--gray-color); margin-top: 10px;">إدارة فئات المهام وإضافة مهام جديدة لها</p>
+                    <div class="categories-header">
+                        <div>
+                            <h2 style="color: var(--theme-text);">إدارة الفئات</h2>
+                            <p style="color: var(--gray-color); margin-top: 10px;">إدارة فئات المهام وإضافة مهام جديدة لها</p>
+                        </div>
+                        <button class="btn btn-primary" id="add-category-btn">
+                            <i class="fas fa-plus"></i> فئة جديدة
+                        </button>
                     </div>
                     <div class="categories-grid" id="categories-list">
                         <!-- الفئات ستظهر هنا -->
@@ -1763,6 +1738,32 @@
         </div>
     </div>
 
+    <!-- نافذة إضافة/تعديل فئة -->
+    <div class="modal" id="category-modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h3 id="category-modal-title">إضافة فئة جديدة</h3>
+                <button class="close-btn" id="close-category-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="category-form">
+                    <div class="form-group">
+                        <label for="category-name">اسم الفئة *</label>
+                        <input type="text" id="category-name" placeholder="أدخل اسم الفئة" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="category-color">لون الفئة *</label>
+                        <input type="color" id="category-color" value="#5a76e8" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-category">إلغاء</button>
+                <button class="btn btn-primary" id="save-category">حفظ الفئة</button>
+            </div>
+        </div>
+    </div>
+
     <!-- محرر الملاحظات المتقدم -->
     <div class="notes-editor-container" id="notes-editor">
         <div class="notes-toolbar">
@@ -1792,6 +1793,9 @@
                 </div>
             </div>
             <div class="notes-toolbar-right">
+                <button class="btn btn-warning" id="add-checkbox-btn" title="إضافة خانة اختيار">
+                    <i class="fas fa-square-check"></i> خانة اختيار
+                </button>
                 <button class="btn btn-secondary" id="save-notes-btn">
                     <i class="fas fa-save"></i> حفظ
                 </button>
@@ -1852,22 +1856,13 @@
         currentCalendarDate: new Date(),
         currentTaskId: null,
         currentNoteId: null,
+        currentCategoryId: null,
         themes: ['gray', 'black', 'blue', 'beige'],
-        currentTheme: 'gray',
-        backgrounds: {
-            emoji: {
-                nature: '🌿🌳🌱',
-                sky: '☀️🌤️🌈',
-                clouds: '☁️⛅🌥️',
-                mountain: '⛰️🏔️🗻',
-                sea: '🌊🌅🐬'
-            }
-        },
-        currentBackground: { type: 'none', value: 'none', color: '#f5f7fb' }
+        currentTheme: 'gray'
     };
     
-    // ========== إدارة الثيمات والخلفيات ==========
-    function initializeThemesAndBackgrounds() {
+    // ========== إدارة الثيمات ==========
+    function initializeThemes() {
         // تحميل الثيم المحفوظ
         const savedTheme = localStorage.getItem('mytasks_theme');
         if (savedTheme && AppState.themes.includes(savedTheme)) {
@@ -1875,38 +1870,10 @@
             document.body.className = `theme-${savedTheme}`;
         }
         
-        // تحميل الخلفية المحفوظة
-        const savedBg = localStorage.getItem('mytasks_background');
-        if (savedBg) {
-            try {
-                AppState.currentBackground = JSON.parse(savedBg);
-                applyBackground(AppState.currentBackground);
-            } catch (e) {
-                console.error("خطأ في تحميل الخلفية:", e);
-            }
-        }
-        
         // تحديث الأزرار النشطة
         document.querySelectorAll('.theme-option').forEach(option => {
             option.classList.remove('active');
             if (option.dataset.theme === AppState.currentTheme) {
-                option.classList.add('active');
-            }
-        });
-        
-        // تحديث خلفيات الإيموجي النشطة
-        document.querySelectorAll('.background-option').forEach(option => {
-            option.classList.remove('active');
-            if (option.dataset.bgType === AppState.currentBackground.type && 
-                option.dataset.bgValue === AppState.currentBackground.value) {
-                option.classList.add('active');
-            }
-        });
-        
-        // تحديث ألوان الخلفية النشطة
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.classList.remove('active');
-            if (option.dataset.color === AppState.currentBackground.color) {
                 option.classList.add('active');
             }
         });
@@ -1927,63 +1894,11 @@
             });
         });
         
-        // إضافة أحداث تغيير الخلفية
-        document.querySelectorAll('.background-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const type = this.dataset.bgType;
-                const value = this.dataset.bgValue;
-                
-                AppState.currentBackground.type = type;
-                AppState.currentBackground.value = value;
-                
-                if (type === 'color') {
-                    document.getElementById('color-picker-section').style.display = 'block';
-                } else {
-                    document.getElementById('color-picker-section').style.display = 'none';
-                    AppState.currentBackground.color = 'transparent';
-                    applyBackground(AppState.currentBackground);
-                    saveBackground();
-                }
-                
-                document.querySelectorAll('.background-option').forEach(o => o.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-        
-        // إضافة أحداث اختيار اللون
-        document.querySelectorAll('.color-option').forEach(option => {
-            option.addEventListener('click', function() {
-                const color = this.dataset.color;
-                AppState.currentBackground.color = color;
-                applyBackground(AppState.currentBackground);
-                saveBackground();
-                
-                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-        
         // زر الإعدادات
         document.getElementById('settings-btn').addEventListener('click', function(e) {
             e.stopPropagation();
             const popup = document.getElementById('settings-popup');
             popup.classList.toggle('active');
-        });
-        
-        // تبديل تبويبات الإعدادات
-        document.querySelectorAll('.settings-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                const tabId = this.dataset.tab;
-                
-                document.querySelectorAll('.settings-tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                
-                document.querySelectorAll('.settings-content').forEach(content => {
-                    content.style.display = 'none';
-                });
-                
-                document.getElementById(`${tabId}-settings`).style.display = 'block';
-            });
         });
         
         // إغلاق النافذة عند النقر خارجها
@@ -1993,26 +1908,6 @@
                 popup.classList.remove('active');
             }
         });
-    }
-    
-    function applyBackground(background) {
-        const root = document.documentElement;
-        
-        if (background.type === 'color') {
-            root.style.setProperty('--custom-bg', 'none');
-            root.style.setProperty('--custom-bg-color', background.color);
-        } else if (background.type === 'emoji') {
-            const emoji = AppState.backgrounds.emoji[background.value] || '🌿';
-            root.style.setProperty('--custom-bg', `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100'><text x='50%' y='50%' font-size='40' text-anchor='middle' dy='.3em'>${emoji}</text></svg>")`);
-            root.style.setProperty('--custom-bg-color', 'transparent');
-        } else {
-            root.style.setProperty('--custom-bg', 'none');
-            root.style.setProperty('--custom-bg-color', 'transparent');
-        }
-    }
-    
-    function saveBackground() {
-        localStorage.setItem('mytasks_background', JSON.stringify(AppState.currentBackground));
     }
     
     // ========== إدارة البيانات ==========
@@ -2151,7 +2046,7 @@
                 {
                     id: Date.now().toString(),
                     title: 'ملاحظة ترحيبية',
-                    content: 'مرحباً بك في تطبيق الملاحظات!<br><br>يمكنك كتابة ملاحظاتك هنا وتنسيقها كما تريد.',
+                    content: '<div class="note-checkbox-item"><input type="checkbox" class="note-checkbox"> <span class="note-checkbox-text">مراجعة التقرير الشهري</span></div><div class="note-checkbox-item"><input type="checkbox" class="note-checkbox"> <span class="note-checkbox-text">مقابلة العملاء الجدد</span></div><div class="note-checkbox-item"><input type="checkbox" class="note-checkbox"> <span class="note-checkbox-text">شراء مستلزمات المنزل</span></div>',
                     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
                     fontSize: '16',
                     fontWeight: 'normal',
@@ -2245,11 +2140,16 @@
         else if (AppState.currentView === 'notes') renderNotes();
     }
     
+    // توليد معرف فريد
+    function generateId() {
+        return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+    }
+    
     // ========== إدارة المهام ==========
     function addTask(taskData) {
         console.log("إضافة مهمة:", taskData);
         const newTask = {
-            id: Date.now().toString(),
+            id: generateId(),
             title: taskData.title,
             description: taskData.description || '',
             categoryId: taskData.categoryId,
@@ -2320,8 +2220,7 @@
         saveTasks();
         saveDeletedTasks();
         
-        if (AppState.currentView === 'tasks') renderTasks();
-        else if (AppState.currentView === 'calendar') renderCalendar();
+        refreshCurrentView();
     }
     
     function toggleTaskCompletion(taskId) {
@@ -2588,25 +2487,18 @@
     
     function renderDailyCalendar(container) {
         const date = AppState.currentCalendarDate;
-        const today = new Date().toISOString().split('T')[0];
-        const tasksForDay = AppState.tasks.filter(task => task.date === today);
+        const dateStr = date.toISOString().split('T')[0];
+        const tasksForDay = AppState.tasks.filter(task => task.date === dateStr);
         
         let html = `
-            <div class="calendar-controls">
-                <div class="calendar-tabs">
-                    <button class="calendar-tab active" data-range="daily">يومي</button>
-                    <button class="calendar-tab" data-range="weekly">أسبوعي</button>
-                    <button class="calendar-tab" data-range="monthly">شهري</button>
-                </div>
-                <div class="calendar-nav">
-                    <button class="btn btn-secondary btn-sm" id="prev-day">
-                        <i class="fas fa-chevron-right"></i> أمس
-                    </button>
-                    <h3 style="margin: 0 15px;">${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
-                    <button class="btn btn-secondary btn-sm" id="next-day">
-                        غداً <i class="fas fa-chevron-left"></i>
-                    </button>
-                </div>
+            <div class="calendar-nav" style="margin-bottom: 20px;">
+                <button class="btn btn-secondary btn-sm" id="prev-day">
+                    <i class="fas fa-chevron-right"></i> أمس
+                </button>
+                <h3 style="margin: 0 15px;">${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
+                <button class="btn btn-secondary btn-sm" id="next-day">
+                    غداً <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
         `;
         
@@ -2655,13 +2547,13 @@
                     html += `
                         <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
                              onclick="openEditTaskModal('${task.id}')"
-                             style="border-left-color: ${category.color}; border-right-color: ${category.color};">
+                             style="border-left-color: ${category.color}; border-right-color: ${category.color};"
+                             onmouseover="showTaskTooltip(event, '${task.id}')"
+                             onmouseout="hideTooltip()">
                             <div class="calendar-task-title">${task.title}</div>
                             <div class="calendar-task-meta">
                                 <span><i class="fas fa-clock"></i> ${task.time}</span>
                                 <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
-                                <span><i class="fas fa-tag"></i> ${category.name}</span>
-                                ${task.completed ? '<span><i class="fas fa-check-circle"></i> مكتملة</span>' : ''}
                             </div>
                         </div>
                     `;
@@ -2693,10 +2585,11 @@
                 const category = getCategoryById(task.categoryId);
                 
                 html += `
-                    <div class="calendar-task-card no-time" onclick="openEditTaskModal('${task.id}')">
+                    <div class="calendar-task-card no-time" onclick="openEditTaskModal('${task.id}')"
+                         onmouseover="showTaskTooltip(event, '${task.id}')"
+                         onmouseout="hideTooltip()">
                         <div class="calendar-task-title">${task.title}</div>
                         <div class="calendar-task-meta">
-                            <span><i class="fas fa-tag"></i> ${category.name}</span>
                             <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
                         </div>
                     </div>
@@ -2722,14 +2615,6 @@
             AppState.currentCalendarDate.setDate(AppState.currentCalendarDate.getDate() + 1);
             renderCalendar();
         });
-        
-        // إضافة أحداث التبويبات
-        document.querySelectorAll('.calendar-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                AppState.currentCalendarView = this.dataset.range;
-                renderCalendar();
-            });
-        });
     }
     
     function renderWeeklyCalendar(container) {
@@ -2745,21 +2630,14 @@
         }
         
         let html = `
-            <div class="calendar-controls">
-                <div class="calendar-tabs">
-                    <button class="calendar-tab" data-range="daily">يومي</button>
-                    <button class="calendar-tab active" data-range="weekly">أسبوعي</button>
-                    <button class="calendar-tab" data-range="monthly">شهري</button>
-                </div>
-                <div class="calendar-nav">
-                    <button class="btn btn-secondary btn-sm" id="prev-week">
-                        <i class="fas fa-chevron-right"></i> الأسبوع الماضي
-                    </button>
-                    <h3 style="margin: 0 15px;">أسبوع ${today.getWeekNumber()}</h3>
-                    <button class="btn btn-secondary btn-sm" id="next-week">
-                        الأسبوع القادم <i class="fas fa-chevron-left"></i>
-                    </button>
-                </div>
+            <div class="calendar-nav" style="margin-bottom: 20px;">
+                <button class="btn btn-secondary btn-sm" id="prev-week">
+                    <i class="fas fa-chevron-right"></i> الأسبوع الماضي
+                </button>
+                <h3 style="margin: 0 15px;">أسبوع ${today.getWeekNumber()}</h3>
+                <button class="btn btn-secondary btn-sm" id="next-week">
+                    الأسبوع القادم <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
         `;
         
@@ -2789,22 +2667,27 @@
                     </div>
                 `;
             } else {
-                dayTasks.slice(0, 5).forEach(task => {
+                dayTasks.forEach(task => {
                     const category = getCategoryById(task.categoryId);
+                    const isOverdue = isTaskOverdue(task);
                     
                     html += `
-                        <div class="calendar-task-card" onclick="openEditTaskModal('${task.id}')"
-                             style="border-left-color: ${category.color}; border-right-color: ${category.color};">
+                        <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}"
+                             onclick="openEditTaskModal('${task.id}')"
+                             style="border-left-color: ${category.color}; border-right-color: ${category.color};"
+                             onmouseover="showTaskTooltip(event, '${task.id}')"
+                             onmouseout="hideTooltip()">
                             <div class="calendar-task-title">${task.title}</div>
                             <div class="calendar-task-meta">
                                 <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</span>
+                                ${task.completed ? '<span><i class="fas fa-check-circle"></i></span>' : ''}
                             </div>
                         </div>
                     `;
                 });
                 
-                if (dayTasks.length > 5) {
-                    html += `<div style="text-align: center; color: var(--gray-color); font-size: 0.9rem;">+${dayTasks.length - 5} مهمة أخرى</div>`;
+                if (dayTasks.length > 10) {
+                    html += `<div style="text-align: center; color: var(--gray-color); font-size: 0.9rem;">+${dayTasks.length - 10} مهمة أخرى</div>`;
                 }
             }
             
@@ -2827,14 +2710,6 @@
             AppState.currentCalendarDate.setDate(AppState.currentCalendarDate.getDate() + 7);
             renderCalendar();
         });
-        
-        // إضافة أحداث التبويبات
-        document.querySelectorAll('.calendar-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                AppState.currentCalendarView = this.dataset.range;
-                renderCalendar();
-            });
-        });
     }
     
     function renderMonthlyCalendar(container) {
@@ -2850,21 +2725,14 @@
         const startDay = firstDay.getDay();
         
         let html = `
-            <div class="calendar-controls">
-                <div class="calendar-tabs">
-                    <button class="calendar-tab" data-range="daily">يومي</button>
-                    <button class="calendar-tab" data-range="weekly">أسبوعي</button>
-                    <button class="calendar-tab active" data-range="monthly">شهري</button>
-                </div>
-                <div class="calendar-nav">
-                    <button class="btn btn-secondary btn-sm" id="prev-month">
-                        <i class="fas fa-chevron-right"></i> الشهر الماضي
-                    </button>
-                    <h3 style="margin: 0 15px;">${date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' })}</h3>
-                    <button class="btn btn-secondary btn-sm" id="next-month">
-                        الشهر القادم <i class="fas fa-chevron-left"></i>
-                    </button>
-                </div>
+            <div class="calendar-nav" style="margin-bottom: 20px;">
+                <button class="btn btn-secondary btn-sm" id="prev-month">
+                    <i class="fas fa-chevron-right"></i> الشهر الماضي
+                </button>
+                <h3 style="margin: 0 15px;">${date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' })}</h3>
+                <button class="btn btn-secondary btn-sm" id="next-month">
+                    الشهر القادم <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
         `;
         
@@ -2873,12 +2741,12 @@
         // رؤوس الأيام
         const dayHeaders = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
         dayHeaders.forEach(day => {
-            html += `<div class="month-day" style="text-align: center; font-weight: bold; color: var(--theme-primary);">${day}</div>`;
+            html += `<div class="month-day" style="text-align: center; font-weight: bold; color: var(--theme-primary); min-height: auto; padding: 5px;">${day}</div>`;
         });
         
         // أيام فارغة في بداية الشهر
         for (let i = 0; i < startDay; i++) {
-            html += '<div class="month-day" style="background: transparent; border: none;"></div>';
+            html += '<div class="month-day" style="background: transparent; border: none; min-height: auto;"></div>';
         }
         
         // أيام الشهر
@@ -2894,20 +2762,22 @@
             `;
             
             if (dayTasks.length > 0) {
-                dayTasks.slice(0, 3).forEach(task => {
+                dayTasks.forEach(task => {
                     const category = getCategoryById(task.categoryId);
                     const taskColor = category.color;
                     
                     html += `
-                        <div class="month-task-item" onclick="openEditTaskModal('${task.id}')">
+                        <div class="month-task-item" onclick="openEditTaskModal('${task.id}')"
+                             onmouseover="showTaskTooltip(event, '${task.id}')"
+                             onmouseout="hideTooltip()">
                             <span class="month-task-dot" style="background: ${taskColor};"></span>
-                            <span>${task.title}</span>
+                            <span style="font-size: 0.75rem;">${task.title}</span>
                         </div>
                     `;
                 });
                 
-                if (dayTasks.length > 3) {
-                    html += `<div style="font-size: 0.75rem; color: var(--gray-color);">+${dayTasks.length - 3} أخرى</div>`;
+                if (dayTasks.length > 5) {
+                    html += `<div style="font-size: 0.75rem; color: var(--gray-color);">+${dayTasks.length - 5} أخرى</div>`;
                 }
             }
             
@@ -2930,14 +2800,6 @@
             AppState.currentCalendarDate.setMonth(AppState.currentCalendarDate.getMonth() + 1);
             renderCalendar();
         });
-        
-        // إضافة أحداث التبويبات
-        document.querySelectorAll('.calendar-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                AppState.currentCalendarView = this.dataset.range;
-                renderCalendar();
-            });
-        });
     }
     
     // إضافة دالة لرقم الأسبوع
@@ -2949,7 +2811,7 @@
         return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
     };
     
-    // ========== عرض الفئات ==========
+    // ========== إدارة الفئات ==========
     function renderCategories() {
         const container = document.getElementById('categories-list');
         
@@ -2958,7 +2820,7 @@
                 <div class="empty-state" style="text-align: center; padding: 60px 20px; color: var(--gray-color);">
                     <i class="fas fa-tags" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
                     <h3 style="color: var(--theme-text); margin-bottom: 10px;">لا توجد فئات</h3>
-                    <p>اضغط على زر إضافة فئة لإنشاء فئتك الأولى</p>
+                    <p>اضغط على "فئة جديدة" لإنشاء فئتك الأولى</p>
                 </div>
             `;
             return;
@@ -2985,9 +2847,19 @@
             html += `
                 <div class="category-card" data-id="${category.id}">
                     <div class="category-header">
-                        <div class="category-color" style="background: ${category.color}"></div>
+                        <div class="category-color" style="background: ${category.color}" 
+                             onclick="event.stopPropagation(); openEditCategoryModal('${category.id}')"
+                             title="تعديل لون الفئة"></div>
                         <div class="category-name">${category.name}</div>
                         <div class="category-stats">${totalTasks} مهام</div>
+                        <div class="category-actions">
+                            <button class="btn btn-warning btn-xs edit-category-btn" data-id="${category.id}" title="تعديل الفئة">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger btn-xs delete-category-btn" data-id="${category.id}" title="حذف الفئة">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="category-progress-info">
@@ -3018,13 +2890,17 @@
                     html += `
                         <div class="category-task-item ${task.completed ? 'completed' : ''}" 
                              data-id="${task.id}"
-                             onclick="openEditTaskModal('${task.id}')">
-                            <div class="category-task-title">${task.title}</div>
+                             onclick="openEditTaskModal('${task.id}')"
+                             onmouseover="showTaskTooltip(event, '${task.id}')"
+                             onmouseout="hideTooltip()">
+                            <div class="category-task-title">
+                                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
+                                ${task.title}
+                            </div>
                             <div class="category-task-meta">
                                 <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
                                 <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
                                 ${isOverdue ? '<span style="color: #f72585;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
-                                ${task.completed ? '<span style="color: #4cc9f0;"><i class="fas fa-check-circle"></i> مكتملة</span>' : ''}
                             </div>
                         </div>
                     `;
@@ -3043,6 +2919,7 @@
         
         container.innerHTML = html;
         
+        // إضافة الأحداث
         document.querySelectorAll('.category-add-task-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -3050,6 +2927,103 @@
                 openAddTaskModal(categoryId);
             });
         });
+        
+        document.querySelectorAll('.edit-category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const categoryId = e.target.closest('button').dataset.id;
+                openEditCategoryModal(categoryId);
+            });
+        });
+        
+        document.querySelectorAll('.delete-category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const categoryId = e.target.closest('button').dataset.id;
+                deleteCategory(categoryId);
+            });
+        });
+    }
+    
+    function openAddCategoryModal() {
+        AppState.currentCategoryId = null;
+        document.getElementById('category-modal-title').textContent = 'إضافة فئة جديدة';
+        document.getElementById('category-name').value = '';
+        document.getElementById('category-color').value = '#5a76e8';
+        document.getElementById('category-modal').classList.add('active');
+    }
+    
+    function openEditCategoryModal(categoryId) {
+        const category = AppState.categories.find(c => c.id === categoryId);
+        if (!category) return;
+        
+        AppState.currentCategoryId = categoryId;
+        document.getElementById('category-modal-title').textContent = 'تعديل الفئة';
+        document.getElementById('category-name').value = category.name;
+        document.getElementById('category-color').value = category.color;
+        document.getElementById('category-modal').classList.add('active');
+    }
+    
+    function saveCategory() {
+        const name = document.getElementById('category-name').value.trim();
+        const color = document.getElementById('category-color').value;
+        
+        if (!name) {
+            alert('يرجى إدخال اسم الفئة');
+            return;
+        }
+        
+        if (AppState.currentCategoryId) {
+            // تعديل فئة موجودة
+            const categoryIndex = AppState.categories.findIndex(c => c.id === AppState.currentCategoryId);
+            if (categoryIndex !== -1) {
+                AppState.categories[categoryIndex] = {
+                    ...AppState.categories[categoryIndex],
+                    name: name,
+                    color: color
+                };
+                saveCategories();
+                renderCategories();
+            }
+        } else {
+            // إضافة فئة جديدة
+            const newCategory = {
+                id: generateId(),
+                name: name,
+                color: color
+            };
+            
+            AppState.categories.push(newCategory);
+            saveCategories();
+            renderCategories();
+        }
+        
+        closeModal('category-modal');
+    }
+    
+    function deleteCategory(categoryId) {
+        const category = AppState.categories.find(c => c.id === categoryId);
+        if (!category) return;
+        
+        // التحقق من وجود مهام مرتبطة بالفئة
+        const categoryTasks = AppState.tasks.filter(task => task.categoryId === categoryId);
+        if (categoryTasks.length > 0) {
+            if (!confirm(`هذه الفئة تحتوي على ${categoryTasks.length} مهام. هل تريد حذف الفئة مع جميع المهام المرتبطة بها؟`)) {
+                return;
+            }
+            
+            // حذف جميع المهام المرتبطة بالفئة
+            AppState.tasks = AppState.tasks.filter(task => task.categoryId !== categoryId);
+            saveTasks();
+        } else {
+            if (!confirm(`هل أنت متأكد من حذف الفئة: "${category.name}"؟`)) {
+                return;
+            }
+        }
+        
+        AppState.categories = AppState.categories.filter(c => c.id !== categoryId);
+        saveCategories();
+        renderCategories();
     }
     
     // ========== إدارة الملاحظات ==========
@@ -3070,6 +3044,11 @@
         let html = '';
         
         AppState.notes.forEach(note => {
+            // استخراج عناصر الـ checkbox من المحتوى
+            let noteContent = note.content || '';
+            // تحويل checkboxes إلى HTML قابل للتفاعل
+            noteContent = noteContent.replace(/<input type="checkbox"/g, '<input type="checkbox" class="note-checkbox"');
+            
             html += `
                 <div class="note-card" data-id="${note.id}">
                     <div class="note-header">
@@ -3081,7 +3060,7 @@
                     <div class="note-content" 
                          style="font-family: ${note.fontFamily}; font-size: ${note.fontSize}px; font-weight: ${note.fontWeight}; font-style: ${note.fontStyle}; color: ${note.color};"
                          onclick="openNoteEditor('${note.id}')">
-                        ${note.content || '<p style="color: var(--gray-color); opacity: 0.7;">انقر لتحرير الملاحظة...</p>'}
+                        ${noteContent || '<p style="color: var(--gray-color); opacity: 0.7;">انقر لتحرير الملاحظة...</p>'}
                     </div>
                     
                     <div class="note-footer">
@@ -3100,6 +3079,17 @@
         
         container.innerHTML = html;
         
+        // إضافة أحداث الـ checkboxes
+        document.querySelectorAll('.note-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const item = this.closest('.note-checkbox-item');
+                if (item) {
+                    item.classList.toggle('completed');
+                }
+            });
+        });
+        
         document.querySelectorAll('.delete-note-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -3111,7 +3101,7 @@
     
     function addNote() {
         const newNote = {
-            id: Date.now().toString(),
+            id: generateId(),
             title: 'ملاحظة جديدة',
             content: '',
             fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -3204,6 +3194,30 @@
             document.getElementById('notes-editor').classList.remove('active');
         });
         
+        // زر إضافة خانة اختيار
+        document.getElementById('add-checkbox-btn').addEventListener('click', () => {
+            const editor = document.getElementById('notes-editor-content');
+            const checkboxHtml = `<div class="note-checkbox-item"><input type="checkbox" class="note-checkbox"> <span class="note-checkbox-text" contenteditable="true">عنصر جديد</span></div>`;
+            
+            // إدراج HTML في المحرر
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const div = document.createElement('div');
+            div.innerHTML = checkboxHtml;
+            const frag = document.createDocumentFragment();
+            let node;
+            while ((node = div.firstChild)) {
+                frag.appendChild(node);
+            }
+            range.insertNode(frag);
+            
+            // نقل المؤشر إلى نهاية العنصر المدرج
+            range.setStartAfter(frag.lastChild);
+            range.setEndAfter(frag.lastChild);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        });
+        
         // أدوات التنسيق
         document.querySelectorAll('.format-btn').forEach(btn => {
             btn.addEventListener('click', function() {
@@ -3261,6 +3275,34 @@
         document.getElementById('notes-editor').classList.remove('active');
     }
     
+    // ========== التلميحات ==========
+    function showTaskTooltip(event, taskId) {
+        const task = AppState.tasks.find(t => t.id === taskId);
+        if (!task) return;
+        
+        const category = getCategoryById(task.categoryId);
+        const tooltip = document.getElementById('global-tooltip');
+        
+        tooltip.innerHTML = `
+            <strong>${task.title}</strong><br>
+            ${task.description ? `<small>${task.description}</small><br>` : ''}
+            <small>الفئة: ${category.name}</small><br>
+            <small>التاريخ: ${formatDate(task.date)}</small><br>
+            <small>الوقت: ${task.time || 'بدون وقت'}</small><br>
+            <small>المدة: ${task.duration} دقيقة</small><br>
+            <small>الأولوية: ${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</small>
+        `;
+        
+        tooltip.style.left = (event.clientX + 10) + 'px';
+        tooltip.style.top = (event.clientY + 10) + 'px';
+        tooltip.style.display = 'block';
+    }
+    
+    function hideTooltip() {
+        const tooltip = document.getElementById('global-tooltip');
+        tooltip.style.display = 'none';
+    }
+    
     // ========== إدارة العروض ==========
     function switchView(viewName) {
         AppState.currentView = viewName;
@@ -3315,7 +3357,7 @@
         
         // تحميل البيانات
         initializeData();
-        initializeThemesAndBackgrounds();
+        initializeThemes();
         
         // إعداد محرر الملاحظات
         setupNotesEditorEvents();
@@ -3335,9 +3377,22 @@
             });
         });
         
+        // ========== أحداث الجدول الزمني ==========
+        document.querySelectorAll('.calendar-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                AppState.currentCalendarView = this.dataset.range;
+                renderCalendar();
+            });
+        });
+        
         // ========== زر إضافة مهمة ==========
         document.getElementById('add-task-btn').addEventListener('click', () => {
             openAddTaskModal();
+        });
+        
+        // ========== زر إضافة فئة ==========
+        document.getElementById('add-category-btn').addEventListener('click', () => {
+            openAddCategoryModal();
         });
         
         // ========== زر إضافة ملاحظة ==========
@@ -3467,6 +3522,27 @@
             });
         }
         
+        // ========== نافذة الفئة ==========
+        const closeCategoryModalBtn = document.getElementById('close-category-modal');
+        const cancelCategoryBtn = document.getElementById('cancel-category');
+        
+        if (closeCategoryModalBtn) {
+            closeCategoryModalBtn.addEventListener('click', () => {
+                closeModal('category-modal');
+            });
+        }
+        
+        if (cancelCategoryBtn) {
+            cancelCategoryBtn.addEventListener('click', () => {
+                closeModal('category-modal');
+            });
+        }
+        
+        const saveCategoryBtn = document.getElementById('save-category');
+        if (saveCategoryBtn) {
+            saveCategoryBtn.addEventListener('click', saveCategory);
+        }
+        
         // ========== إغلاق النوافذ عند النقر خارجها ==========
         window.addEventListener('click', (e) => {
             if (e.target.classList.contains('modal')) {
@@ -3519,8 +3595,12 @@
     // جعل الوظائف متاحة عالمياً
     window.openEditTaskModal = openEditTaskModal;
     window.openAddTaskModal = openAddTaskModal;
+    window.openEditCategoryModal = openEditCategoryModal;
     window.updateNoteTitle = updateNoteTitle;
     window.openNoteEditor = openNoteEditor;
+    window.showTaskTooltip = showTaskTooltip;
+    window.hideTooltip = hideTooltip;
+    window.toggleTaskCompletion = toggleTaskCompletion;
     
     // بدء التطبيق عند تحميل الصفحة
     document.addEventListener('DOMContentLoaded', initializePage);
