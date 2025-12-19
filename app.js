@@ -1,3 +1,11 @@
+// فحص تحميل CSS
+console.log("CSS المتغيرات:", getComputedStyle(document.documentElement).getPropertyValue('--theme-bg'));
+
+if (!getComputedStyle(document.documentElement).getPropertyValue('--theme-bg')) {
+    console.warn("⚠️ متغيرات CSS غير محملة! إعادة تعيين الثيم...");
+    document.body.className = 'theme-gray';
+}
+
 // ========== حالة التطبيق ==========
 const AppState = {
     tasks: [],
