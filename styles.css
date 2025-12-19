@@ -149,6 +149,37 @@ body {
 .theme-black [style*="color: #e0e0e0"] {
     color: inherit !important;
 }
+/* ========== تحسين إمكانية قراءة النصوص في الثيم الأسود ========== */
+.theme-black {
+    color-scheme: dark;
+}
+
+/* تحسين النصوص الداكنة في الثيم الأسود */
+.theme-black .note-content {
+    filter: brightness(1.2) contrast(1.1);
+}
+
+/* تحويل الألوان الداكنة جداً إلى فاتحة في الملاحظات */
+.theme-black .note-content [style*="color"] {
+    filter: brightness(1.5) !important;
+}
+
+/* تحسين النصوص السوداء في الثيم الأسود */
+.theme-black [style*="#000000"],
+.theme-black [style*="#212529"],
+.theme-black [style*="#333333"],
+.theme-black [style*="#000"],
+.theme-black [style*="black"] {
+    color: #f0f0f0 !important;
+}
+
+/* الحفاظ على النصوص الملونة غير الداكنة */
+.theme-black [style*="#ffffff"],
+.theme-black [style*="#f8f9fa"],
+.theme-black [style*="#f0f0f0"],
+.theme-black [style*="#e0e0e0"] {
+    filter: brightness(1.1) !important;
+}
 
 /* ========== محرر الملاحظات في الثيم الأسود ========== */
 .theme-black .notes-content {
