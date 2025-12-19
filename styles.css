@@ -45,35 +45,73 @@ body {
 /* ========== الثيمات ========== */
 .theme-black {
     --theme-bg: #121212;
-    --theme-sidebar: linear-gradient(180deg, #1e1e1e, #2d2d2d);
-    --theme-text: #f0f0f0; /* تغيير من #e0e0e0 إلى #f0f0f0 ليكون أفتح */
+    --theme-sidebar: linear-gradient(180deg, #1a1a1a, #2d2d2d);
+    --theme-text: #f0f0f0;
     --theme-card: #1e1e1e;
     --theme-border: #333333;
-    --theme-primary: #555555; /* جعل الأزرار أفتح */
-    --theme-hover: #666666;
+    --theme-primary: #4a4a4a;
+    --theme-hover: #555555;
+    --input-text: #ffffff; /* إضافة لون جديد لنص الإدخال */
 }
 
-/* ========== الملاحظات في الثيم الأسود ========== */
+/* ========== تعديلات الثيم الأسود ========== */
+.theme-black .modal-content {
+    background-color: #1e1e1e;
+    color: #f0f0f0;
+}
+
+.theme-black .modal-header h3 {
+    color: #ffffff;
+}
+
+/* ========== تنسيقات الإدخال في الثيم الأسود ========== */
+.theme-black input,
+.theme-black select,
+.theme-black textarea,
+.theme-black .form-group input,
+.theme-black .form-group select,
+.theme-black .form-group textarea,
+.theme-black .notes-title-input,
+.theme-black .font-select,
+.theme-black .font-size-input,
+.theme-black .font-weight-select,
+.theme-black .font-style-select {
+    background-color: #2d2d2d !important;
+    color: #ffffff !important; /* تغيير من #f0f0f0 إلى #ffffff */
+    border-color: #444444 !important;
+}
+
+/* إعادة تلوين placeholder */
+.theme-black input::placeholder,
+.theme-black textarea::placeholder {
+    color: #aaaaaa !important;
+}
+
+/* ========== النصوص في الملاحظات ========== */
+.theme-black .note-title {
+    color: #ffffff !important;
+}
+
 .theme-black .note-content {
-    color: #f0f0f0 !important; /* إجبار اللون الأبيض الفاتح */
+    color: #f0f0f0 !important;
+    background-color: #1e1e1e !important;
 }
 
 .theme-black .note-checkbox-text {
-    color: #f0f0f0 !important; /* إجبار لون النص في checkboxes */
+    color: #f0f0f0 !important;
 }
 
-.theme-black .note-title {
-    color: #ffffff !important; /* جعل عنوان الملاحظة أبيض بالكامل */
+/* ========== الحقول الأخرى ========== */
+.theme-black .task-title {
+    color: #ffffff !important;
 }
 
-/* ========== النصوص في الثيم الأسود ========== */
-.theme-black .task-description,
-.theme-black .task-meta,
-.theme-black .category-stats,
-.theme-black .category-progress-info,
-.theme-black .note-date,
-.theme-black .note-font {
-    color: #b0b0b0 !important; /* جعل النصوص الثانوية أفتح */
+.theme-black .task-description {
+    color: #cccccc !important;
+}
+
+.theme-black .category-name {
+    color: #ffffff !important;
 }
 
 /* ========== محرر الملاحظات في الثيم الأسود ========== */
@@ -86,45 +124,33 @@ body {
     color: #ffffff !important;
 }
 
-/* ========== التلميحات في الثيم الأسود ========== */
-.theme-black .tooltip {
-    background-color: #2d2d2d !important;
-    color: #f0f0f0 !important;
-    border-color: #444444 !important;
-}
-
-.theme-black .tooltip-title {
+/* ========== التأكد من ظهور النص الأبيض في جميع الحقول ========== */
+.theme-black #task-title,
+.theme-black #task-description,
+.theme-black #edit-task-title,
+.theme-black #edit-task-description,
+.theme-black #category-name,
+.theme-black .note-checkbox-text,
+.theme-black .task-meta span,
+.theme-black .category-progress-info span,
+.theme-black .note-date,
+.theme-black .note-font,
+.theme-black .calendar-task-title,
+.theme-black .calendar-task-meta span,
+.theme-black .note-card .note-title {
     color: #ffffff !important;
 }
 
-/* ========== النوافذ المنبثقة في الثيم الأسود ========== */
-.theme-black .modal-content {
-    background-color: #1e1e1e !important;
-    color: #f0f0f0 !important;
-}
-
-.theme-black .modal-header h3 {
+/* ========== نصوص التاريخ والملاحظات ========== */
+.theme-black #current-date,
+.theme-black .current-date,
+.theme-black .form-group label,
+.theme-black .modal-header h3,
+.theme-black .notes-title-input,
+.theme-black .note-title {
     color: #ffffff !important;
 }
 
-.theme-black .form-group label {
-    color: #f0f0f0 !important;
-}
-
-.theme-black .form-group input,
-.theme-black .form-group select,
-.theme-black .form-group textarea {
-    background-color: #2d2d2d !important;
-    color: #f0f0f0 !important;
-    border-color: #444444 !important;
-}
-
-.theme-black .form-group input:focus,
-.theme-black .form-group select:focus,
-.theme-black .form-group textarea:focus {
-    border-color: #555555 !important;
-    box-shadow: 0 0 0 3px rgba(85, 85, 85, 0.1) !important;
-}
 
 .theme-blue {
     --theme-bg: #f0f7ff;
