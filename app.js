@@ -1,9 +1,15 @@
-// فحص تحميل CSS
-console.log("CSS المتغيرات:", getComputedStyle(document.documentElement).getPropertyValue('--theme-bg'));
-
-if (!getComputedStyle(document.documentElement).getPropertyValue('--theme-bg')) {
-    console.warn("⚠️ متغيرات CSS غير محملة! إعادة تعيين الثيم...");
-    document.body.className = 'theme-gray';
+// ========== اختبار تحميل الصفحة ==========
+function testPageLoad() {
+    console.log("فحص تحميل الصفحة...");
+    console.log("CSS محمل؟", document.styleSheets.length > 0);
+    console.log("لون الخلفية:", getComputedStyle(document.body).backgroundColor);
+    
+    // إذا لم يكن CSS محملاً، أضف أنماط طارئة
+    if (getComputedStyle(document.body).backgroundColor === 'rgba(0, 0, 0, 0)') {
+        console.warn("⚠️ CSS غير محمل! إضافة أنماط طارئة...");
+        document.body.style.backgroundColor = '#f8f9fa';
+        document.body.style.color = '#212529';
+    }
 }
 
 // ========== حالة التطبيق ==========
@@ -24,19 +30,27 @@ const AppState = {
 };
 
 // ========== إدارة الثيمات ==========
+// ========== إدارة الثيمات ==========
 function initializeThemes() {
-    // تأخير بسيط لضمان تحميل CSS
+    console.log("تهيئة الثيمات...");
+    
+    // اختبار سريع
+    testPageLoad();
+    
+    // تأخير لضمان تحميل CSS
     setTimeout(() => {
         // تحميل الثيم المحفوظ
         const savedTheme = localStorage.getItem('mytasks_theme');
         if (savedTheme && AppState.themes.includes(savedTheme)) {
             AppState.currentTheme = savedTheme;
             document.body.className = `theme-${savedTheme}`;
+            console.log("تم تحميل الثيم المحفوظ:", savedTheme);
         } else {
-            // تعيين الثيم الافتراضي بوضوح
+            // تعيين الثيم الافتراضي
             AppState.currentTheme = 'gray';
             document.body.className = 'theme-gray';
             localStorage.setItem('mytasks_theme', 'gray');
+            console.log("تم تعيين الثيم الافتراضي: gray");
         }
         
         // تحديث الأزرار النشطة
@@ -45,9 +59,35 @@ function initializeThemes() {
         // إضافة أحداث تغيير الثيم
         setupThemeEvents();
         
+        // إعدادات الإعدادات
+        setupSettingsEvents();
+        
         // تحديث ألوان النص في الملاحظات
         updateNotesTextColorForTheme();
-    }, 100);
+    }, 200); // زيادة التأخير
+}
+
+// دالة جديدة للإعدادات
+function setupSettingsEvents() {
+    // زر الإعدادات
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const popup = document.getElementById('settings-popup');
+            if (popup) {
+                popup.classList.toggle('active');
+            }
+        });
+    }
+    
+    // إغلاق النافذة عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        const popup = document.getElementById('settings-popup');
+        if (popup && !popup.contains(e.target) && e.target.id !== 'settings-btn') {
+            popup.classList.remove('active');
+        }
+    });
 }
 
 
