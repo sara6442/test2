@@ -31,7 +31,17 @@ body {
     --theme-hover: #5a6268;
 }
 
-/* ========== الثيمات ========== */
+/* === هنا أضف ثيم البيج أولاً === */
+.theme-beige {
+    --theme-bg: #fefaf6;
+    --theme-sidebar: linear-gradient(180deg, #d7ccc8, #bcaaa4);
+    --theme-text: #5d4037;
+    --theme-card: white;
+    --theme-border: #d7ccc8;
+    --theme-primary: #8d6e63;
+    --theme-hover: #6d4c41;
+}
+
 .theme-gray {
     --theme-bg: #ffffff;
     --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
@@ -39,19 +49,18 @@ body {
     --theme-card: white;
     --theme-border: #dee2e6;
     --theme-primary: #6c757d;
-    --theme-hover: #5a6268;[
+    --theme-hover: #5a6268;
 }
 
-/* ========== الثيمات ========== */
+/* === الثيم الأسود المعدل === */
 .theme-black {
-    --theme-bg: #121212;
+    --theme-bg: #2d2d2d; /* خلفية رمادية غامقة */
     --theme-sidebar: linear-gradient(180deg, #1a1a1a, #2d2d2d);
-    --theme-text: #f0f0f0;
-    --theme-card: #1e1e1e;
-    --theme-border: #333333;
-    --theme-primary: #4a4a4a;
-    --theme-hover: #555555;
-    --input-text: #ffffff; /* إضافة لون جديد لنص الإدخال */
+    --theme-text: #ffffff; /* خطوط بيضاء فاتحة */
+    --theme-card: #3a3a3a; /* بطاقات بلون رمادي غامق بدلاً من أبيض */
+    --theme-border: #555555;
+    --theme-primary: #5a6268;
+    --theme-hover: #6c757d;
 }
 
 /* ========== تعديلات الثيم الأسود ========== */
@@ -87,23 +96,30 @@ body {
     color: #aaaaaa !important;
 }
 
-/* ========== النصوص في الملاحظات ========== */
+/* ========== تعديلات الملاحظات في الثيم الأسود ========== */
+.theme-black .note-content * {
+    color: inherit !important; /* يرث اللون من العنصر الأب */
+}
+
+/* إذا كان لون النص داكن في الثيم الأسود، اجعله فاتح */
+.theme-black .note-content,
+.theme-black .note-checkbox-text,
 .theme-black .note-title {
     color: #ffffff !important;
 }
 
-.theme-black .note-content {
-    color: #f0f0f0 !important;
-    background-color: #1e1e1e !important;
-}
-
-.theme-black .note-checkbox-text {
+/* تحسين ألوان النصوص الداكنة */
+.theme-black .note-content [style*="color: #000000"],
+.theme-black .note-content [style*="color: #212529"],
+.theme-black .note-content [style*="color: #333333"] {
     color: #f0f0f0 !important;
 }
 
-/* ========== الحقول الأخرى ========== */
-.theme-black .task-title {
-    color: #ffffff !important;
+/* إذا كان اللون فاتحاً بالفعل، اتركه كما هو */
+.theme-black .note-content [style*="color: #ffffff"],
+.theme-black .note-content [style*="color: #f0f0f0"],
+.theme-black .note-content [style*="color: #e0e0e0"] {
+    color: inherit !important;
 }
 
 .theme-black .task-description {
@@ -124,6 +140,11 @@ body {
     color: #ffffff !important;
 }
 
+/* أضف هذا لتحسين قراءة النصوص الملونة */
+.theme-black .note-content [style*="color"] {
+    filter: brightness(1.3) !important; /* زيادة السطوع */
+}
+
 /* ========== التأكد من ظهور النص الأبيض في جميع الحقول ========== */
 .theme-black #task-title,
 .theme-black #task-description,
@@ -140,7 +161,38 @@ body {
 .theme-black .note-card .note-title {
     color: #ffffff !important;
 }
+/* ========== تحسين البطاقات في الثيم الأسود ========== */
+.theme-black .task-card,
+.theme-black .category-card,
+.theme-black .note-card,
+.theme-black .time-slot,
+.theme-black .day-column,
+.theme-black .month-day {
+    background-color: #3a3a3a !important; /* رمادي غامق للبطاقات */
+    border-color: #555555 !important;
+}
 
+/* تحسين ألوان النص في البطاقات */
+.theme-black .task-title,
+.theme-black .category-name,
+.theme-black .note-title,
+.theme-black .calendar-task-title {
+    color: #ffffff !important;
+}
+
+.theme-black .task-description,
+.theme-black .category-progress-info,
+.theme-black .note-date,
+.theme-black .calendar-task-meta {
+    color: #cccccc !important;
+}
+
+.theme-black .task-card:hover,
+.theme-black .category-card:hover,
+.theme-black .note-card:hover {
+    background-color: #444444 !important;
+    border-color: #666666 !important;
+}
 /* ========== نصوص التاريخ والملاحظات ========== */
 .theme-black #current-date,
 .theme-black .current-date,
@@ -151,6 +203,21 @@ body {
     color: #ffffff !important;
 }
 
+/* تحسين إمكانية الوصول */
+:focus-visible {
+    outline: 2px solid var(--theme-primary);
+    outline-offset: 2px;
+}
+
+/* تحسين التباين في الثيم الأسود */
+.theme-black .task-card.overdue {
+    background: rgba(247, 37, 133, 0.1) !important;
+}
+
+/* تحسين الظلال في الثيمات الداكنة */
+.theme-black .modal-content {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
 
 .theme-blue {
     --theme-bg: #f0f7ff;
@@ -162,14 +229,20 @@ body {
     --theme-hover: #3a56d4;
 }
 
-.theme-beige {
-    --theme-bg: #fefaf6;
-    --theme-sidebar: linear-gradient(180deg, #d7ccc8, #bcaaa4);
-    --theme-text: #5d4037;
+.theme-custom {
+    /* سيتم تعيين هذه المتغيرات ديناميكياً عبر JavaScript */
+    --theme-bg: #ffffff;
+    --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
+    --theme-text: #212529;
     --theme-card: white;
-    --theme-border: #d7ccc8;
-    --theme-primary: #8d6e63;
-    --theme-hover: #6d4c41;
+    --theme-border: #dee2e6;
+    --theme-primary: #6c757d;
+    --theme-hover: #5a6268;
+}
+
+/* معاينة الثيم المخصص */
+.theme-custom-preview {
+    background: linear-gradient(45deg, var(--custom-color1, #5a6268), var(--custom-color2, #495057));
 }
 
 /* ========== الأساسيات ========== */
@@ -346,6 +419,32 @@ body {
     background: linear-gradient(135deg, #3ab5e0, #2a9ec8);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
+}
+
+.theme-black .btn-primary {
+    background-color: #5a6268 !important;
+    border-color: #6c757d !important;
+}
+
+.theme-black .btn-primary:hover {
+    background-color: #6c757d !important;
+}
+
+.theme-black .btn-secondary {
+    background-color: #444444 !important;
+    color: #ffffff !important;
+    border-color: #555555 !important;
+}
+
+.theme-black .btn-secondary:hover {
+    background-color: #555555 !important;
+}
+
+/* تحسين حالة العناصر المعطلة */
+.btn:disabled,
+input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 /* ========== منطقة المحتوى ========== */
 .content-area {
@@ -903,3 +1002,15 @@ body {
 ::-webkit-scrollbar-track { background: var(--theme-card); border-radius: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--theme-primary); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--theme-hover); }
+
+.theme-black ::-webkit-scrollbar-track {
+    background: #2d2d2d !important;
+}
+
+.theme-black ::-webkit-scrollbar-thumb {
+    background: #555555 !important;
+}
+
+.theme-black ::-webkit-scrollbar-thumb:hover {
+    background: #666666 !important;
+}
