@@ -1,3 +1,20 @@
+/* ========== الأنماط الطارئة ========== */
+/* هذه تضمن ظهور شيء حتى لو فشل تحميل CSS */
+body {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+}
+
+.app-container {
+    min-height: 100vh;
+}
+
+/* إظهار العناصر الأساسية */
+.header, .sidebar, .content-area {
+    display: block !important;
+    visibility: visible !important;
+}
 /* ========== تحميل تأكيدي ========== */
 /* هذه للفحص فقط - يمكن حذفها لاحقاً */
 body::before {
