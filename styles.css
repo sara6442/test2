@@ -335,6 +335,18 @@ body {
 .btn-sm { padding: 8px 16px; font-size: 0.9rem; border-radius: 8px; }
 .btn-xs { padding: 4px 10px; font-size: 0.8rem; border-radius: 6px; }
 
+/* ========== زر حالة الفئات ========== */
+.btn-info {
+    background: linear-gradient(135deg, #4cc9f0, #3ab5e0);
+    color: white;
+    border: none;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #3ab5e0, #2a9ec8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
+}
 /* ========== منطقة المحتوى ========== */
 .content-area {
     background: var(--theme-card);
@@ -477,6 +489,23 @@ body {
 
 .category-task-title { font-weight: 500; margin-bottom: 5px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
 .category-task-meta { display: flex; gap: 12px; font-size: 0.85rem; color: var(--gray-color); }
+
+/* ========== نمط نافذة حالة الفئات ========== */
+.categories-status-container {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.category-status-card {
+    transition: var(--transition);
+    border: 1px solid var(--theme-border);
+}
+
+.category-status-card:hover {
+    transform: translateX(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
 
 /* ========== عرض الملاحظات ========== */
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 25px; }
