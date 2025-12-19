@@ -1,5 +1,14 @@
-/* ========== المتغيرات والأساسيات ========== */
+/* ========== تحميل تأكيدي ========== */
+/* هذه للفحص فقط - يمكن حذفها لاحقاً */
+body::before {
+    content: "✅ CSS loaded successfully!";
+    display: none;
+}
+
+/* التأكد من تحميل المتغيرات */
 :root {
+    /* تأكيد تحميل المتغيرات */
+    --css-loaded: true;
     --primary-color: #4361ee;
     --secondary-color: #3a0ca3;
     --accent-color: #7209b7;
@@ -24,7 +33,12 @@
     --theme-hover: #5a6268;
 }
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
+
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -35,6 +49,22 @@ body {
     transition: var(--transition);
     position: relative;
 }
+
+/* فحص مرئي (اختياري - يمكن إزالته) */
+#css-load-check {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background: #10b981;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 9999;
+    display: none; /* تغيير إلى block لرؤيته */
+}
+
+/* ========== باقي CSS ... */
 
 /* ========== تنسيقات الثيمات ========== */
 .theme-gray {
