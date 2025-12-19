@@ -91,12 +91,12 @@ function initializeThemes() {
     } else {
         // تعيين الثيم الافتراضي
         AppState.currentTheme = 'gray';
-        document.body.className = 'theme-gray';
-        localStorage.setItem('mytasks_theme', 'gray');
-        console.log("تم تعيين الثيم الافتراضي: gray");
+        document.body.className = 'theme-beige';
+        localStorage.setItem('mytasks_theme', 'beige');
+        console.log("تم تعيين الثيم الافتراضي: beige");
         
         // تحديث ألوان الملاحظات للثيم الافتراضي
-        updateNotesColorsForTheme('gray');
+        updateNotesColorsForTheme('beige');
     }
     
     // تحديث الأزرار النشطة
