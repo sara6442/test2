@@ -1155,3 +1155,26 @@ window.toggleTaskCompletion = toggleTaskCompletion;
 
 // بدء التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', initializePage);
+
+window.addEventListener('load', function() {
+    console.log("✅ الصفحة محملة بالكامل");
+    console.log("عدد أنماط CSS:", document.styleSheets.length);
+    
+    // إظهار رسالة تأكيد
+    const msg = document.createElement('div');
+    msg.style.cssText = `
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        background: #10b981;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        z-index: 99999;
+        font-family: Arial;
+    `;
+    msg.textContent = '✅ التطبيق جاهز!';
+    document.body.appendChild(msg);
+    
+    setTimeout(() => msg.remove(), 3000);
+});
