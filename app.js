@@ -71,8 +71,8 @@ const AppState = {
     currentTaskId: null,
     currentNoteId: null,
     currentCategoryId: null,
-    themes: ['gray', 'black', 'blue', 'beige'],
-    currentTheme: 'gray'
+   themes: ['gray', 'black', 'blue', 'beige', 'custom'], // ← إضافة 'custom'
+    currentTheme: 'beige' // ← تغيير من 'gray' إلى 'beige'
 };
 
 // ========== إدارة الثيمات ==========
@@ -185,6 +185,13 @@ function isColorDark(color) {
 // دالة لتغيير الثيم
 function changeTheme(theme) {
     AppState.currentTheme = theme;
+    
+    if (theme === 'custom') {
+        // إذا كان الثيم مخصصاً، ننتظر حتى يختار المستخدم الألوان
+        openCustomThemeModal();
+        return;
+    }
+    
     document.body.className = `theme-${theme}`;
     localStorage.setItem('mytasks_theme', theme);
     
@@ -193,6 +200,7 @@ function changeTheme(theme) {
     
     updateThemeButtons();
     refreshCurrentView();
+    updateNotesTextColorForTheme();
 }
 
 // دالة جديدة للإعدادات
@@ -563,6 +571,15 @@ function refreshCurrentView() {
 // ========== إدارة المهام ==========
 function addTask(taskData) {
     console.log("إضافة مهمة:", taskData);
+    
+    // التحقق من الحيز الزمني
+    const timeframeCheck = checkCategoryTimeframe(taskData.categoryId, parseInt(taskData.duration) || 30);
+    
+    if (!timeframeCheck.allowed) {
+        showTimeframeWarning(timeframeCheck, taskData);
+        return; // لا نضيف المهمة الآن، ننتظر قرار المستخدم
+    }
+    
     const newTask = {
         id: generateId(),
         title: taskData.title,
@@ -605,6 +622,269 @@ function updateTask(taskId, taskData) {
     
     closeModal('edit-task-modal');
 }
+// ========== التحقق من الحيز الزمني ==========
+function checkCategoryTimeframe(categoryId, newTaskDuration = 0) {
+    const category = AppState.categories.find(c => c.id === categoryId);
+    if (!category || !category.timeframeMinutes) return { allowed: true };
+    
+    const categoryTasks = AppState.tasks.filter(task => task.categoryId === categoryId);
+    const totalDuration = categoryTasks.reduce((sum, task) => sum + (task.duration || 0), 0) + newTaskDuration;
+    
+    // تحويل الحيز الزمني إلى دقائق
+    let categoryTimeframeMinutes = category.timeframeMinutes || 60;
+    if (category.timeframeType === 'hours') {
+        categoryTimeframeMinutes *= 60;
+    } else if (category.timeframeType === 'days') {
+        categoryTimeframeMinutes *= 1440;
+    }
+    
+    if (totalDuration <= categoryTimeframeMinutes) {
+        return { allowed: true };
+    }
+    
+    // إذا تجاوز الحيز الزمني، نرجع معلومات للمستخدم
+    return {
+        allowed: false,
+        totalDuration: totalDuration,
+        categoryTimeframe: categoryTimeframeMinutes,
+        exceedBy: totalDuration - categoryTimeframeMinutes,
+        categoryName: category.name,
+        categoryTasks: categoryTasks
+    };
+}
+// ========== عرض تحذير الحيز الزمني ==========
+function showTimeframeWarning(timeframeCheck, taskData) {
+    // إنشاء نافذة التحذير
+    const warningHTML = `
+        <div class="modal" id="timeframe-warning-modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>⚠️ تحذير: تجاوز الحيز الزمني</h3>
+                    <button class="close-btn" onclick="closeModal('timeframe-warning-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="padding: 20px; background: rgba(247, 37, 133, 0.1); border-radius: 8px; margin-bottom: 20px;">
+                        <p style="color: var(--danger-color); font-weight: 600; margin-bottom: 10px;">
+                            فئة "${timeframeCheck.categoryName}" قد تجاوزت الحيز الزمني المسموح!
+                        </p>
+                        <p style="color: var(--theme-text);">
+                            • الوقت الإجمالي: ${timeframeCheck.totalDuration} دقيقة<br>
+                            • الحد المسموح: ${timeframeCheck.categoryTimeframe} دقيقة<br>
+                            • التجاوز: ${timeframeCheck.exceedBy} دقيقة
+                        </p>
+                    </div>
+                    
+                    <h4 style="margin-bottom: 15px; color: var(--theme-text);">ماذا تريد أن تفعل؟</h4>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button class="btn btn-warning" id="add-anyway-btn" style="text-align: right;">
+                            <i class="fas fa-plus-circle"></i> إنشاء المهمة الجديدة على أي حال
+                        </button>
+                        
+                        <button class="btn btn-secondary" id="delete-and-replace-btn" style="text-align: right;">
+                            <i class="fas fa-exchange-alt"></i> حذف مهمة سابقة وإضافة المهمة الجديدة
+                        </button>
+                        
+                        <button class="btn btn-danger" id="cancel-add-btn" style="text-align: right;">
+                            <i class="fas fa-times"></i> إلغاء إضافة المهمة
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // إضافة النافذة إلى DOM
+    const existingModal = document.getElementById('timeframe-warning-modal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    document.body.insertAdjacentHTML('beforeend', warningHTML);
+    const modal = document.getElementById('timeframe-warning-modal');
+    modal.classList.add('active');
+    
+    // حفظ بيانات المهمة مؤقتاً
+    window.pendingTaskData = taskData;
+    window.timeframeCheck = timeframeCheck;
+    
+    // إضافة الأحداث للأزرار
+    setTimeout(() => {
+        document.getElementById('add-anyway-btn').addEventListener('click', () => {
+            addTaskAnyway(taskData);
+            closeModal('timeframe-warning-modal');
+        });
+        
+        document.getElementById('delete-and-replace-btn').addEventListener('click', () => {
+            showDeleteReplaceOptions(timeframeCheck, taskData);
+        });
+        
+        document.getElementById('cancel-add-btn').addEventListener('click', () => {
+            closeModal('timeframe-warning-modal');
+            delete window.pendingTaskData;
+            delete window.timeframeCheck;
+        });
+    }, 100);
+}
+
+// ========== عرض خيارات الحذف والاستبدال ==========
+function showDeleteReplaceOptions(timeframeCheck, taskData) {
+    // إنشاء نافذة اختيار المهمة للحذف
+    const optionsHTML = `
+        <div class="modal" id="delete-replace-modal">
+            <div class="modal-content" style="max-width: 600px; max-height: 80vh;">
+                <div class="modal-header">
+                    <h3>اختر مهمة للحذف</h3>
+                    <button class="close-btn" onclick="closeModal('delete-replace-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p style="margin-bottom: 20px; color: var(--theme-text);">
+                        اختر مهمة من فئة "${timeframeCheck.categoryName}" لحذفها وإضافة المهمة الجديدة:
+                    </p>
+                    
+                    <div id="tasks-to-delete-list" style="max-height: 300px; overflow-y: auto;">
+                        <!-- المهام ستظهر هنا -->
+                    </div>
+                    
+                    <div class="modal-footer" style="margin-top: 20px;">
+                        <button class="btn btn-secondary" onclick="closeModal('delete-replace-modal')">
+                            <i class="fas fa-arrow-right"></i> رجوع
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // إضافة النافذة
+    const existingModal = document.getElementById('delete-replace-modal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', optionsHTML);
+    
+    // إغلاق النافذة السابقة وفتح الجديدة
+    closeModal('timeframe-warning-modal');
+    setTimeout(() => {
+        document.getElementById('delete-replace-modal').classList.add('active');
+        renderTasksToDelete(timeframeCheck.categoryTasks, taskData);
+    }, 300);
+}
+// ========== عرض المهام المتاحة للحذف ==========
+function renderTasksToDelete(tasks, newTaskData) {
+    const container = document.getElementById('tasks-to-delete-list');
+    
+    if (!tasks || tasks.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--gray-color);">
+                <i class="fas fa-inbox" style="font-size: 2rem; opacity: 0.3; margin-bottom: 15px;"></i>
+                <p>لا توجد مهام في هذه الفئة للحذف</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '';
+    
+    tasks.forEach(task => {
+        html += `
+            <div class="task-card" style="margin-bottom: 10px; cursor: pointer;" 
+                 onclick="deleteAndReplaceTask('${task.id}', window.pendingTaskData)">
+                <div class="task-content">
+                    <div class="task-title">${task.title}</div>
+                    <div class="task-description">${task.description || ''}</div>
+                    <div class="task-meta">
+                        <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
+                        <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
+                        ${task.completed ? '<span><i class="fas fa-check-circle" style="color: var(--success-color);"></i> مكتملة</span>' : ''}
+                    </div>
+                </div>
+                <div class="task-actions">
+                    <button class="btn btn-danger btn-sm" onclick="event.stopPropagation(); deleteAndReplaceTask('${task.id}', window.pendingTaskData)">
+                        <i class="fas fa-trash"></i> حذف وإضافة المهمة الجديدة
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+// ========== حذف مهمة وإضافة أخرى مكانها ==========
+function deleteAndReplaceTask(taskIdToDelete, newTaskData) {
+    // حذف المهمة القديمة
+    const taskIndex = AppState.tasks.findIndex(task => task.id === taskIdToDelete);
+    if (taskIndex !== -1) {
+        AppState.deletedTasks.push({
+            ...AppState.tasks[taskIndex],
+            deletedAt: new Date().toISOString(),
+            replacedBy: newTaskData.title
+        });
+        
+        AppState.tasks.splice(taskIndex, 1);
+    }
+    
+    // إضافة المهمة الجديدة
+    const newTask = {
+        id: generateId(),
+        title: newTaskData.title,
+        description: newTaskData.description || '',
+        categoryId: newTaskData.categoryId,
+        duration: parseInt(newTaskData.duration) || 30,
+        date: newTaskData.date || new Date().toISOString().split('T')[0],
+        time: newTaskData.time || '',
+        priority: newTaskData.priority || 'medium',
+        completed: false,
+        createdAt: new Date().toISOString(),
+        replacedTask: taskIdToDelete
+    };
+    
+    AppState.tasks.push(newTask);
+    
+    saveTasks();
+    saveDeletedTasks();
+    refreshCurrentView();
+    
+    // إغلاق جميع النوافذ
+    closeModal('delete-replace-modal');
+    closeModal('add-task-modal');
+    
+    // تنظيف البيانات المؤقتة
+    delete window.pendingTaskData;
+    delete window.timeframeCheck;
+    
+    // عرض رسالة نجاح
+    alert(`تم حذف المهمة القديمة وإضافة المهمة الجديدة "${newTaskData.title}" بنجاح.`);
+}
+
+// ========== إضافة المهمة على أي حال ==========
+function addTaskAnyway(taskData) {
+    const newTask = {
+        id: generateId(),
+        title: taskData.title,
+        description: taskData.description || '',
+        categoryId: taskData.categoryId,
+        duration: parseInt(taskData.duration) || 30,
+        date: taskData.date || new Date().toISOString().split('T')[0],
+        time: taskData.time || '',
+        priority: taskData.priority || 'medium',
+        completed: false,
+        createdAt: new Date().toISOString(),
+        addedAnyway: true
+    };
+    
+    AppState.tasks.push(newTask);
+    saveTasks();
+    refreshCurrentView();
+    
+    closeModal('add-task-modal');
+    document.getElementById('task-form').reset();
+    
+    delete window.pendingTaskData;
+    delete window.timeframeCheck;
+    
+    alert(`تمت إضافة المهمة "${taskData.title}" على الرغم من تجاوز الحيز الزمني.`);
+}
+
 
 function deleteTask(taskId) {
     const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
@@ -636,6 +916,51 @@ function deleteTask(taskId) {
     saveDeletedTasks();
     
     refreshCurrentView();
+}
+// ========== تعديل رسائل الفئة ==========
+function openEditCategoryMessages(categoryId) {
+    const category = AppState.categories.find(c => c.id === categoryId);
+    if (!category) return;
+    
+    const modalHTML = `
+        <div class="modal" id="edit-category-messages-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3>تعديل رسائل فئة "${category.name}"</h3>
+                    <button class="close-btn" onclick="closeModal('edit-category-messages-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="category-messages-form">
+                        <div class="form-group">
+                            <label for="message-empty">رسالة عند عدم وجود مهام</label>
+                            <textarea id="message-empty" rows="2" placeholder="رسالة تظهر عندما لا توجد مهام في الفئة">${category.messageEmpty || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message-completed">رسالة عند اكتمال جميع المهام</label>
+                            <textarea id="message-completed" rows="2" placeholder="رسالة تظهر عند اكتمال جميع مهام الفئة">${category.messageCompleted || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message-exceeded">رسالة عند تجاوز الحيز الزمني</label>
+                            <textarea id="message-exceeded" rows="2" placeholder="رسالة تظهر عند تجاوز الحيز الزمني">${category.messageExceeded || ''}</textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('edit-category-messages-modal')">إلغاء</button>
+                    <button class="btn btn-primary" onclick="saveCategoryMessages('${categoryId}')">حفظ التعديلات</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // إضافة النافذة
+    const existingModal = document.getElementById('edit-category-messages-modal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('edit-category-messages-modal').classList.add('active');
 }
 
 function toggleTaskCompletion(taskId) {
@@ -1259,14 +1584,17 @@ function renderCategories() {
                          title="تعديل لون الفئة"></div>
                     <div class="category-name">${category.name}</div>
                     <div class="category-stats">${totalTasks} مهام</div>
-                    <div class="category-actions">
-                        <button class="btn btn-warning btn-xs edit-category-btn" data-id="${category.id}" title="تعديل الفئة">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-danger btn-xs delete-category-btn" data-id="${category.id}" title="حذف الفئة">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+                   <div class="category-actions">
+    <button class="btn btn-info btn-xs edit-messages-btn" data-id="${category.id}" title="تعديل الرسائل">
+        <i class="fas fa-comment-dots"></i>
+    </button>
+    <button class="btn btn-warning btn-xs edit-category-btn" data-id="${category.id}" title="تعديل الفئة">
+        <i class="fas fa-edit"></i>
+    </button>
+    <button class="btn btn-danger btn-xs delete-category-btn" data-id="${category.id}" title="حذف الفئة">
+        <i class="fas fa-trash"></i>
+    </button>
+</div>
                 </div>
                 
                 <div class="category-progress-info">
@@ -1349,6 +1677,14 @@ function renderCategories() {
         });
     });
 }
+// إضافة حدث تعديل الرسائل
+document.querySelectorAll('.edit-messages-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const categoryId = e.target.closest('button').dataset.id;
+        openEditCategoryMessages(categoryId);
+    });
+});
 
 function openAddCategoryModal() {
     AppState.currentCategoryId = null;
@@ -1421,6 +1757,33 @@ function saveCategory() {
     closeModal('category-modal');
 }
     
+// ========== حفظ رسائل الفئة ==========
+function saveCategoryMessages(categoryId) {
+    const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
+    if (categoryIndex === -1) return;
+    
+    const messageEmpty = document.getElementById('message-empty').value.trim();
+    const messageCompleted = document.getElementById('message-completed').value.trim();
+    const messageExceeded = document.getElementById('message-exceeded').value.trim();
+    
+    AppState.categories[categoryIndex] = {
+        ...AppState.categories[categoryIndex],
+        messageEmpty: messageEmpty || 'لا توجد مهام في هذه الفئة',
+        messageCompleted: messageCompleted || 'ممتاز! لقد أكملت جميع المهام في هذه الفئة.',
+        messageExceeded: messageExceeded || 'لقد تجاوزت الوقت المخصص لهذه الفئة. حاول إدارة وقتك بشكل أفضل!'
+    };
+    
+    saveCategories();
+    closeModal('edit-category-messages-modal');
+    
+    // إذا كنا في عرض الفئات، نحدثه
+    if (AppState.currentView === 'categories') {
+        renderCategories();
+    }
+    
+    // نحدث عرض حالة الفئات
+    renderCategoriesStatus();
+}
 
 function deleteCategory(categoryId) {
     const category = AppState.categories.find(c => c.id === categoryId);
