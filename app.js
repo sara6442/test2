@@ -554,13 +554,12 @@ function refreshCurrentView() {
     else if (AppState.currentView === 'calendar') renderCalendar();
     else if (AppState.currentView === 'categories') renderCategories();
     else if (AppState.currentView === 'notes') renderNotes();
+    
+    // تحديث زر حالة الفئات (دالة جديدة)
+    if (typeof renderCategoriesStatus === 'function') {
+        renderCategoriesStatus();
+        }
 }
-
-// توليد معرف فريد
-function generateId() {
-    return Date.now().toString() + Math.random().toString(36).substr(2, 9);
-}
-
 // ========== إدارة المهام ==========
 function addTask(taskData) {
     console.log("إضافة مهمة:", taskData);
