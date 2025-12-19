@@ -1,17 +1,62 @@
-// ========== اختبار تحميل الصفحة ==========
-function testPageLoad() {
-    console.log("فحص تحميل الصفحة...");
-    console.log("CSS محمل؟", document.styleSheets.length > 0);
-    console.log("لون الخلفية:", getComputedStyle(document.body).backgroundColor);
+// اختبار تحميل CSS
+function checkCSS() {
+    console.log("🔍 فحص تحميل CSS...");
     
-    // إذا لم يكن CSS محملاً، أضف أنماط طارئة
-    if (getComputedStyle(document.body).backgroundColor === 'rgba(0, 0, 0, 0)') {
-        console.warn("⚠️ CSS غير محمل! إضافة أنماط طارئة...");
-        document.body.style.backgroundColor = '#f8f9fa';
-        document.body.style.color = '#212529';
+    // اختبار 1: فحص عدد أنماط CSS المحملة
+    const cssCount = document.styleSheets.length;
+    console.log("عدد ملفات CSS:", cssCount);
+    
+    // اختبار 2: فحص متغيرات CSS
+    const rootStyles = getComputedStyle(document.documentElement);
+    const themeBg = rootStyles.getPropertyValue('--theme-bg').trim();
+    console.log("متغير --theme-bg:", themeBg);
+    
+    if (!themeBg || themeBg === 'initial' || themeBg === '') {
+        console.error("❌ متغيرات CSS غير محملة!");
+        
+        // تطبيق أنماط طارئة
+        document.body.style.cssText = `
+            background-color: #f8f9fa !important;
+            color: #212529 !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+        `;
+        
+        // إضافة رسالة تحذير
+        const warning = document.createElement('div');
+        warning.id = 'css-warning';
+        warning.style.cssText = `
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: #f8d7da;
+            color: #721c24;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 99999;
+            font-family: Arial;
+            border: 1px solid #f5c6cb;
+        `;
+        warning.innerHTML = '⚠️ مشكلة في تحميل التنسيقات. الرجاء تحديث الصفحة.';
+        document.body.appendChild(warning);
+        
+        return false;
     }
+    
+    console.log("✅ CSS محمل بنجاح");
+    return true;
 }
 
+// تشغيل فحص CSS بعد تحميل الصفحة
+window.addEventListener('load', function() {
+    console.log("📄 الصفحة محملة");
+    checkCSS();
+    
+    // إزالة التحذير إذا ظهر
+    setTimeout(() => {
+        const warning = document.getElementById('css-warning');
+        if (warning) warning.remove();
+    }, 5000);
+});
 // ========== حالة التطبيق ==========
 const AppState = {
     tasks: [],
