@@ -25,14 +25,14 @@
         --custom-bg: none;
         --custom-bg-color: transparent;
         
-        /* ثيم افتراضي (أزرق معدل) */
-        --theme-bg: #f5f7fb;
-        --theme-sidebar: linear-gradient(180deg, #5a76e8, #4a5fcc);
-        --theme-text: #212529;
-        --theme-card: white;
+        /* ثيم افتراضي (رمادي) */
+        --theme-bg: #ffffff;
+        --theme-sidebar: linear-gradient(180deg, #e1e3e3, #d1d3d3);
+        --theme-text: #000000;
+        --theme-card: #ffffff;
         --theme-border: #dee2e6;
-        --theme-primary: #5a76e8;
-        --theme-hover: #4a5fcc;
+        --theme-primary: #6c757d;
+        --theme-hover: #5a6268;
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -64,47 +64,47 @@
         z-index: -1;
         pointer-events: none;
     }
-  /* ========== تنسيقات الثيمات ========== */
-
-.theme-black {
-    --theme-bg: #000000;
-    --theme-sidebar: linear-gradient(180deg, #1a1a1a, #0a0a0a);
-    --theme-text: #ffffff;
-    --theme-card: #1a1a1a;
-    --theme-border: #333333;
-    --theme-primary: #666666;
-    --theme-hover: #888888;
-}
-
-.theme-blue {
-    --theme-bg: #f0f7ff;
-    --theme-sidebar: linear-gradient(180deg, #aec5d4, #9eb5c4);
-    --theme-text: #212529;
-    --theme-card: #e8f2ff;
-    --theme-border: #c2d6e6;
-    --theme-primary: #aec5d4;
-    --theme-hover: #9eb5c4;
-}
-
-.theme-gray {
-    --theme-bg: #f8f9fa;
-    --theme-sidebar: linear-gradient(180deg, #e1e3e3, #d1d3d3);
-    --theme-text: #212529;
-    --theme-card: #ffffff;
-    --theme-border: #dee2e6;
-    --theme-primary: #6c757d;
-    --theme-hover: #5a6268;
-}
-
-.theme-beige {
-    --theme-bg: #fefaf6;
-    --theme-sidebar: linear-gradient(180deg, #d7ccc8, #bcaaa4);
-    --theme-text: #5d4037;
-    --theme-card: white;
-    --theme-border: #d7ccc8;
-    --theme-primary: #8d6e63;
-    --theme-hover: #6d4c41;
-}
+    
+    /* ========== تنسيقات الثيمات ========== */
+    .theme-black {
+        --theme-bg: #000000;
+        --theme-sidebar: linear-gradient(180deg, #1a1a1a, #0a0a0a);
+        --theme-text: #ffffff;
+        --theme-card: #1a1a1a;
+        --theme-border: #333333;
+        --theme-primary: #666666;
+        --theme-hover: #888888;
+    }
+    
+    .theme-blue {
+        --theme-bg: #e8f2ff;
+        --theme-sidebar: linear-gradient(180deg, #aec5d4, #9eb5c4);
+        --theme-text: #212529;
+        --theme-card: #f0f7ff;
+        --theme-border: #c2d6e6;
+        --theme-primary: #aec5d4;
+        --theme-hover: #9eb5c4;
+    }
+    
+    .theme-gray {
+        --theme-bg: #ffffff;
+        --theme-sidebar: linear-gradient(180deg, #e1e3e3, #d1d3d3);
+        --theme-text: #000000;
+        --theme-card: #ffffff;
+        --theme-border: #dee2e6;
+        --theme-primary: #6c757d;
+        --theme-hover: #5a6268;
+    }
+    
+    .theme-beige {
+        --theme-bg: #fefaf6;
+        --theme-sidebar: linear-gradient(180deg, #d7ccc8, #bcaaa4);
+        --theme-text: #5d4037;
+        --theme-card: white;
+        --theme-border: #d7ccc8;
+        --theme-primary: #8d6e63;
+        --theme-hover: #6d4c41;
+    }
     
     /* ========== الهيكل الرئيسي ========== */
     .app-container {
@@ -294,9 +294,9 @@
         color: var(--theme-text);
     }
     
-    .theme-dark-preview { background: linear-gradient(45deg, #2d3748, #1a202c); }
-    .theme-light-preview { background: linear-gradient(45deg, #4a5568, #2d3748); }
-    .theme-blue-preview { background: linear-gradient(45deg, #5a76e8, #4a5fcc); }
+    .theme-black-preview { background: linear-gradient(45deg, #1a1a1a, #0a0a0a); }
+    .theme-blue-preview { background: linear-gradient(45deg, #aec5d4, #9eb5c4); }
+    .theme-gray-preview { background: linear-gradient(45deg, #e1e3e3, #d1d3d3); }
     .theme-beige-preview { background: linear-gradient(45deg, #d7ccc8, #bcaaa4); }
     
     /* معاينات الخلفيات */
@@ -364,70 +364,71 @@
         color: var(--gray-color);
         font-size: 0.95rem;
     }
+    
     /* ========== الأزرار ========== */
-.btn {
-    padding: 12px 24px;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 1rem;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    transition: var(--transition);
-    font-weight: 500;
-}
-
-.btn-primary {
-    background: var(--theme-primary);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--theme-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-secondary {
-    background: var(--theme-card);
-    color: var(--theme-text);
-    border: 1px solid var(--theme-border);
-}
-
-.btn-secondary:hover {
-    background: var(--theme-border);
-    transform: translateY(-2px);
-}
-
-.btn-danger {
-    background: #edd8df;
-    color: #8a4b5c;
-    border: 1px solid #d9c2ca;
-}
-
-.btn-danger:hover {
-    background: #dec9d1;
-    color: #7a3b4c;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(139, 75, 92, 0.15);
-}
-
-.btn-success {
-    background: var(--success-color);
-    color: white;
-}
-
-.btn-success:hover {
-    background: #3ab5e0;
-    transform: translateY(-2px);
-}
-
-.btn-sm {
-    padding: 8px 16px;
-    font-size: 0.9rem;
-    border-radius: 8px;
-}
+    .btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: var(--transition);
+        font-weight: 500;
+    }
+    
+    .btn-primary {
+        background: var(--theme-primary);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: var(--theme-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-secondary {
+        background: var(--theme-card);
+        color: var(--theme-text);
+        border: 1px solid var(--theme-border);
+    }
+    
+    .btn-secondary:hover {
+        background: var(--theme-border);
+        transform: translateY(-2px);
+    }
+    
+    .btn-danger {
+        background: #edd8df;
+        color: #8a4b5c;
+        border: 1px solid #d9c2ca;
+    }
+    
+    .btn-danger:hover {
+        background: #dec9d1;
+        color: #7a3b4c;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(139, 75, 92, 0.15);
+    }
+    
+    .btn-success {
+        background: var(--success-color);
+        color: white;
+    }
+    
+    .btn-success:hover {
+        background: #3ab5e0;
+        transform: translateY(-2px);
+    }
+    
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
     
     /* ========== منطقة المحتوى ========== */
     .content-area {
@@ -1052,6 +1053,96 @@
         background-color: rgba(0,0,0,0.03);
     }
     
+    /* الجدول الأسبوعي */
+    .weekly-calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .day-column {
+        background: var(--theme-card);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid var(--theme-border);
+        min-height: 400px;
+    }
+    
+    .day-header {
+        text-align: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--theme-primary);
+    }
+    
+    .day-name {
+        font-weight: 600;
+        color: var(--theme-primary);
+        font-size: 1.1rem;
+    }
+    
+    .day-date {
+        color: var(--gray-color);
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    /* الجدول الشهري */
+    .monthly-calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .month-day {
+        background: var(--theme-card);
+        border-radius: 8px;
+        padding: 10px;
+        min-height: 120px;
+        border: 1px solid var(--theme-border);
+        position: relative;
+    }
+    
+    .day-number {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--theme-text);
+    }
+    
+    .today .day-number {
+        color: var(--theme-primary);
+        font-weight: bold;
+    }
+    
+    .month-tasks {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .month-task-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 5px;
+        display: inline-block;
+    }
+    
+    .month-task-item {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: var(--transition);
+        background: rgba(0,0,0,0.05);
+    }
+    
+    .month-task-item:hover {
+        background: rgba(0,0,0,0.1);
+    }
+    
     /* ========== النوافذ المنبثقة ========== */
     .modal {
         display: none;
@@ -1333,7 +1424,7 @@
     }
     </style>
 </head>
-<body class="theme-blue">
+<body class="theme-gray">
     <div class="app-container">
         <!-- الشريط الجانبي -->
         <aside class="sidebar">
@@ -1379,17 +1470,17 @@
                 <div id="theme-settings" class="settings-content">
                     <h5>اختر الثيم</h5>
                     <div class="theme-options">
-                        <div class="theme-option active" data-theme="blue">
+                        <div class="theme-option active" data-theme="gray">
+                            <div class="theme-preview theme-gray-preview"></div>
+                            <span class="theme-name">رمادي</span>
+                        </div>
+                        <div class="theme-option" data-theme="blue">
                             <div class="theme-preview theme-blue-preview"></div>
                             <span class="theme-name">أزرق</span>
                         </div>
-                        <div class="theme-option" data-theme="dark">
-                            <div class="theme-preview theme-dark-preview"></div>
-                            <span class="theme-name">داكن</span>
-                        </div>
-                        <div class="theme-option" data-theme="light">
-                            <div class="theme-preview theme-light-preview"></div>
-                            <span class="theme-name">فاتح</span>
+                        <div class="theme-option" data-theme="black">
+                            <div class="theme-preview theme-black-preview"></div>
+                            <span class="theme-name">أسود</span>
                         </div>
                         <div class="theme-option" data-theme="beige">
                             <div class="theme-preview theme-beige-preview"></div>
@@ -1432,12 +1523,12 @@
                     <div id="color-picker-section" style="margin-top: 20px; display: none;">
                         <h6 style="margin-bottom: 10px;">اختر لون الخلفية</h6>
                         <div class="color-options">
-                            <div class="color-option" style="background: #f5f7fb;" data-color="#f5f7fb"></div>
                             <div class="color-option" style="background: #ffffff;" data-color="#ffffff"></div>
                             <div class="color-option" style="background: #f0f8ff;" data-color="#f0f8ff"></div>
                             <div class="color-option" style="background: #f8f9fa;" data-color="#f8f9fa"></div>
                             <div class="color-option" style="background: #fffaf0;" data-color="#fffaf0"></div>
                             <div class="color-option" style="background: #f5f5f5;" data-color="#f5f5f5"></div>
+                            <div class="color-option" style="background: #e8f2ff;" data-color="#e8f2ff"></div>
                         </div>
                     </div>
                 </div>
@@ -1726,8 +1817,8 @@
         currentCalendarView: 'daily',
         currentTaskId: null,
         currentNoteId: null,
-        themes: ['dark', 'light', 'blue', 'beige'],
-        currentTheme: 'blue',
+        themes: ['gray', 'blue', 'black', 'beige'],
+        currentTheme: 'gray',
         backgrounds: {
             emoji: {
                 nature: '🌿🌳🌱',
@@ -1737,7 +1828,7 @@
                 sea: '🌊🌅🐬'
             }
         },
-        currentBackground: { type: 'none', value: 'none', color: '#f5f7fb' }
+        currentBackground: { type: 'none', value: 'none', color: '#ffffff' }
     };
     
     // ========== إدارة الثيمات والخلفيات ==========
@@ -1987,6 +2078,30 @@
                     priority: 'low',
                     completed: true,
                     createdAt: new Date().toISOString()
+                },
+                {
+                    id: (Date.now() + 3).toString(),
+                    title: 'اجتماع فريق العمل',
+                    description: 'مناقشة المشروع الجديد',
+                    categoryId: 'work',
+                    duration: 60,
+                    date: today,
+                    time: '10:00',
+                    priority: 'high',
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                },
+                {
+                    id: (Date.now() + 4).toString(),
+                    title: 'تسوق أسبوعي',
+                    description: 'شراء مستلزمات المنزل',
+                    categoryId: 'personal',
+                    duration: 90,
+                    date: tomorrowStr,
+                    time: '17:00',
+                    priority: 'medium',
+                    completed: false,
+                    createdAt: new Date().toISOString()
                 }
             ];
             saveTasks();
@@ -2060,6 +2175,18 @@
     function getCategoryById(categoryId) {
         return AppState.categories.find(cat => cat.id === categoryId) || 
                { name: 'عام', color: '#6c757d' };
+    }
+    
+    function getLightColor(hexColor, percent = 30) {
+        let r = parseInt(hexColor.substr(1, 2), 16);
+        let g = parseInt(hexColor.substr(3, 2), 16);
+        let b = parseInt(hexColor.substr(5, 2), 16);
+        
+        r = Math.min(255, r + percent * 2.55);
+        g = Math.min(255, g + percent * 2.55);
+        b = Math.min(255, b + percent * 2.55);
+        
+        return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
     }
     
     function isTaskOverdue(task) {
@@ -2161,8 +2288,7 @@
         saveTasks();
         saveDeletedTasks();
         
-        if (AppState.currentView === 'tasks') renderTasks();
-        else if (AppState.currentView === 'calendar') renderCalendar();
+        refreshCurrentView();
     }
     
     function toggleTaskCompletion(taskId) {
@@ -2437,6 +2563,7 @@
             });
             
             const progressPercent = totalDuration > 0 ? Math.round((completedDuration / totalDuration) * 100) : 0;
+            const lightColor = getLightColor(category.color, 40);
             
             html += `
                 <div class="category-card" data-id="${category.id}">
@@ -2470,11 +2597,13 @@
             } else {
                 categoryTasks.forEach(task => {
                     const isOverdue = isTaskOverdue(task);
+                    const taskLightColor = getLightColor(category.color, 60);
                     
                     html += `
                         <div class="category-task-item ${task.completed ? 'completed' : ''}" 
                              data-id="${task.id}"
-                             onclick="openEditTaskModal('${task.id}')">
+                             onclick="openEditTaskModal('${task.id}')"
+                             style="border-color: ${taskLightColor}; background: ${taskLightColor}20;">
                             <div class="category-task-title">${task.title}</div>
                             <div class="category-task-meta">
                                 <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
@@ -2508,6 +2637,304 @@
         });
     }
     
+    // ========== الجدول الزمني ==========
+    function renderCalendar() {
+        const container = document.getElementById('calendar-content');
+        
+        if (AppState.currentCalendarView === 'daily') {
+            renderDailyCalendar(container);
+        } else if (AppState.currentCalendarView === 'weekly') {
+            renderWeeklyCalendar(container);
+        } else if (AppState.currentCalendarView === 'monthly') {
+            renderMonthlyCalendar(container);
+        }
+    }
+    
+    function renderDailyCalendar(container) {
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        
+        // المهام لليوم
+        const todayTasks = AppState.tasks.filter(task => task.date === todayStr);
+        
+        // تقسيم اليوم إلى فترات زمنية
+        const timeSlots = [
+            { id: 'morning', name: 'الصباح', icon: 'fa-sun', start: 6, end: 12 },
+            { id: 'afternoon', name: 'بعد الظهر', icon: 'fa-sun', start: 12, end: 17 },
+            { id: 'evening', name: 'المساء', icon: 'fa-moon', start: 17, end: 22 },
+            { id: 'night', name: 'الليل', icon: 'fa-star', start: 22, end: 6 }
+        ];
+        
+        // المهام بدون وقت محدد
+        const noTimeTasks = todayTasks.filter(task => !task.time);
+        
+        let html = `
+            <div style="margin-bottom: 20px; text-align: center;">
+                <h3 style="color: var(--theme-primary);">الجدول اليومي - ${formatDate(todayStr)}</h3>
+            </div>
+            <div class="daily-calendar">
+        `;
+        
+        // عرض المهام بدون وقت محدد أولاً
+        if (noTimeTasks.length > 0) {
+            html += `
+                <div class="time-slot">
+                    <div class="time-header">
+                        <div class="time-title">
+                            <i class="fas fa-clock"></i>
+                            <span>مهام بدون وقت محدد</span>
+                        </div>
+                    </div>
+                    <div class="time-tasks">
+            `;
+            
+            noTimeTasks.forEach(task => {
+                const category = getCategoryById(task.categoryId);
+                html += `
+                    <div class="calendar-task-card no-time" 
+                         data-id="${task.id}"
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="border-left-color: ${category.color}; border-right-color: ${category.color};">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>${task.title}</strong>
+                            <span style="background: ${category.color}20; color: ${category.color}; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">
+                                ${category.name}
+                            </span>
+                        </div>
+                        ${task.description ? `<p style="margin-top: 8px; font-size: 0.9rem; color: var(--gray-color);">${task.description}</p>` : ''}
+                        <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.85rem; color: var(--gray-color);">
+                            <span><i class="fas fa-hourglass"></i> ${task.duration} دقيقة</span>
+                            <span><i class="fas fa-flag" style="color: ${task.priority === 'high' ? '#f72585' : task.priority === 'medium' ? '#f8961e' : '#4cc9f0'}"></i> ${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</span>
+                            ${task.completed ? '<span style="color: #4cc9f0;"><i class="fas fa-check-circle"></i> مكتملة</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        // عرض الفترات الزمنية
+        timeSlots.forEach(slot => {
+            // تصفية المهام لهذه الفترة
+            const slotTasks = todayTasks.filter(task => {
+                if (!task.time) return false;
+                const hour = parseInt(task.time.split(':')[0]);
+                
+                if (slot.id === 'night') {
+                    return hour >= slot.start || hour < slot.end;
+                } else {
+                    return hour >= slot.start && hour < slot.end;
+                }
+            });
+            
+            html += `
+                <div class="time-slot">
+                    <div class="time-header">
+                        <div class="time-title">
+                            <i class="fas ${slot.icon}"></i>
+                            <span>${slot.name} (${slot.start}:00 - ${slot.end === 6 ? '06:00' : slot.end + ':00'})</span>
+                        </div>
+                        <span class="category-stats">${slotTasks.length} مهمة</span>
+                    </div>
+                    <div class="time-tasks">
+            `;
+            
+            if (slotTasks.length === 0) {
+                html += `
+                    <div style="text-align: center; padding: 20px; color: var(--gray-color);">
+                        <i class="fas fa-tasks" style="opacity: 0.3;"></i>
+                        <p>لا توجد مهام في هذا الوقت</p>
+                    </div>
+                `;
+            } else {
+                // ترتيب المهام حسب الوقت
+                slotTasks.sort((a, b) => {
+                    if (!a.time) return 1;
+                    if (!b.time) return -1;
+                    return a.time.localeCompare(b.time);
+                });
+                
+                slotTasks.forEach(task => {
+                    const category = getCategoryById(task.categoryId);
+                    html += `
+                        <div class="calendar-task-card" 
+                             data-id="${task.id}"
+                             onclick="openEditTaskModal('${task.id}')"
+                             style="border-left-color: ${category.color}; border-right-color: ${category.color};">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <strong>${task.title}</strong>
+                                    <div style="font-size: 0.9rem; color: var(--gray-color); margin-top: 3px;">
+                                        <i class="fas fa-clock"></i> ${task.time}
+                                    </div>
+                                </div>
+                                <span style="background: ${category.color}20; color: ${category.color}; padding: 3px 8px; border-radius: 4px; font-size: 0.85rem;">
+                                    ${category.name}
+                                </span>
+                            </div>
+                            ${task.description ? `<p style="margin-top: 8px; font-size: 0.9rem; color: var(--gray-color);">${task.description}</p>` : ''}
+                            <div style="display: flex; gap: 15px; margin-top: 10px; font-size: 0.85rem; color: var(--gray-color);">
+                                <span><i class="fas fa-hourglass"></i> ${task.duration} دقيقة</span>
+                                <span><i class="fas fa-flag" style="color: ${task.priority === 'high' ? '#f72585' : task.priority === 'medium' ? '#f8961e' : '#4cc9f0'}"></i> ${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</span>
+                                ${task.completed ? '<span style="color: #4cc9f0;"><i class="fas fa-check-circle"></i> مكتملة</span>' : ''}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+    
+    function renderWeeklyCalendar(container) {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay()); // الأحد
+        
+        let html = `
+            <div style="margin-bottom: 20px; text-align: center;">
+                <h3 style="color: var(--theme-primary);">الجدول الأسبوعي</h3>
+            </div>
+            <div class="weekly-calendar">
+        `;
+        
+        const daysOfWeek = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        
+        for (let i = 0; i < 7; i++) {
+            const day = new Date(startOfWeek);
+            day.setDate(startOfWeek.getDate() + i);
+            const dayStr = day.toISOString().split('T')[0];
+            
+            const dayTasks = AppState.tasks.filter(task => task.date === dayStr);
+            const isToday = dayStr === new Date().toISOString().split('T')[0];
+            
+            html += `
+                <div class="day-column ${isToday ? 'today' : ''}">
+                    <div class="day-header">
+                        <div class="day-name">${daysOfWeek[i]}</div>
+                        <div class="day-date">${formatDate(dayStr)}</div>
+                    </div>
+                    <div class="time-tasks" style="max-height: 300px; overflow-y: auto;">
+            `;
+            
+            if (dayTasks.length === 0) {
+                html += `
+                    <div style="text-align: center; padding: 20px; color: var(--gray-color);">
+                        <i class="fas fa-tasks" style="opacity: 0.3;"></i>
+                        <p>لا توجد مهام</p>
+                    </div>
+                `;
+            } else {
+                dayTasks.forEach(task => {
+                    const category = getCategoryById(task.categoryId);
+                    html += `
+                        <div class="calendar-task-card" 
+                             data-id="${task.id}"
+                             onclick="openEditTaskModal('${task.id}')"
+                             style="border-left-color: ${category.color}; border-right-color: ${category.color}; margin-bottom: 10px;">
+                            <strong>${task.title}</strong>
+                            <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.85rem;">
+                                <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</span>
+                                <span style="color: ${category.color};">${category.name}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+    
+    function renderMonthlyCalendar(container) {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        
+        // أول يوم من الشهر
+        const firstDay = new Date(year, month, 1);
+        // آخر يوم من الشهر
+        const lastDay = new Date(year, month + 1, 0);
+        // عدد الأيام في الشهر
+        const daysInMonth = lastDay.getDate();
+        // يوم الأسبوع لأول يوم (0 = الأحد)
+        const firstDayOfWeek = firstDay.getDay();
+        
+        let html = `
+            <div style="margin-bottom: 20px; text-align: center;">
+                <h3 style="color: var(--theme-primary);">الجدول الشهري - ${now.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' })}</h3>
+            </div>
+            <div class="monthly-calendar">
+        `;
+        
+        // رؤوس الأيام
+        const dayNames = ['أح', 'إث', 'ث', 'أر', 'خ', 'ج', 'س'];
+        dayNames.forEach(day => {
+            html += `<div class="month-day" style="text-align: center; font-weight: bold;">${day}</div>`;
+        });
+        
+        // أيام فارغة قبل أول يوم
+        for (let i = 0; i < firstDayOfWeek; i++) {
+            html += `<div class="month-day" style="background: var(--theme-border); opacity: 0.5;"></div>`;
+        }
+        
+        // أيام الشهر
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dayTasks = AppState.tasks.filter(task => task.date === dateStr);
+            const isToday = dateStr === new Date().toISOString().split('T')[0];
+            
+            html += `
+                <div class="month-day ${isToday ? 'today' : ''}">
+                    <div class="day-number">${day}</div>
+                    <div class="month-tasks">
+            `;
+            
+            if (dayTasks.length > 0) {
+                dayTasks.slice(0, 3).forEach(task => {
+                    const category = getCategoryById(task.categoryId);
+                    html += `
+                        <div class="month-task-item" 
+                             data-id="${task.id}"
+                             onclick="openEditTaskModal('${task.id}')">
+                            <span class="month-task-dot" style="background: ${category.color};"></span>
+                            ${task.title}
+                        </div>
+                    `;
+                });
+                
+                if (dayTasks.length > 3) {
+                    html += `<div style="font-size: 0.8rem; color: var(--gray-color); text-align: center;">+${dayTasks.length - 3} أخرى</div>`;
+                }
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        }
+        
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+    
     // ========== إدارة الملاحظات ==========
     function renderNotes() {
         const container = document.getElementById('notes-list');
@@ -2529,457 +2956,4 @@
             html += `
                 <div class="note-card" data-id="${note.id}">
                     <div class="note-header">
-                        <input type="text" class="note-title" value="${note.title}" 
-                               onchange="updateNoteTitle('${note.id}', this.value)">
-                        <div class="note-date">${formatDate(note.updatedAt)}</div>
-                    </div>
-                    
-                    <div class="note-content" 
-                         style="font-family: ${note.fontFamily}; font-size: ${note.fontSize}px; font-weight: ${note.fontWeight}; font-style: ${note.fontStyle}; color: ${note.color};"
-                         onclick="openNoteEditor('${note.id}')">
-                        ${note.content || '<p style="color: var(--gray-color); opacity: 0.7;">انقر لتحرير الملاحظة...</p>'}
-                    </div>
-                    
-                    <div class="note-footer">
-                        <div class="note-font">
-                            ${note.fontFamily.split(',')[0].replace(/'/g, '')} - ${note.fontSize}px
-                        </div>
-                        <div class="note-actions">
-                            <button class="btn btn-danger btn-sm delete-note-btn" data-id="${note.id}" title="حذف">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        });
-        
-        container.innerHTML = html;
-        
-        document.querySelectorAll('.delete-note-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const noteId = e.target.closest('button').dataset.id;
-                deleteNote(noteId);
-            });
-        });
-    }
-    
-    function addNote() {
-        const newNote = {
-            id: Date.now().toString(),
-            title: 'ملاحظة جديدة',
-            content: '',
-            fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-            fontSize: '16',
-            fontWeight: 'normal',
-            fontStyle: 'normal',
-            color: '#000000',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        
-        AppState.notes.push(newNote);
-        saveNotes();
-        renderNotes();
-        
-        // فتح المحرر للملاحظة الجديدة
-        setTimeout(() => {
-            openNoteEditor(newNote.id);
-        }, 100);
-    }
-    
-    function updateNoteTitle(noteId, newTitle) {
-        const note = AppState.notes.find(n => n.id === noteId);
-        if (note) {
-            note.title = newTitle;
-            note.updatedAt = new Date().toISOString();
-            saveNotes();
-        }
-    }
-    
-    function updateNote(noteId, noteData) {
-        const noteIndex = AppState.notes.findIndex(n => n.id === noteId);
-        if (noteIndex === -1) return;
-        
-        AppState.notes[noteIndex] = {
-            ...AppState.notes[noteIndex],
-            ...noteData,
-            updatedAt: new Date().toISOString()
-        };
-        
-        saveNotes();
-        renderNotes();
-    }
-    
-    function deleteNote(noteId) {
-        const note = AppState.notes.find(n => n.id === noteId);
-        if (!note) return;
-        
-        if (confirm(`هل أنت متأكد من حذف الملاحظة: "${note.title}"؟`)) {
-            AppState.notes = AppState.notes.filter(n => n.id !== noteId);
-            saveNotes();
-            renderNotes();
-        }
-    }
-    
-    function openNoteEditor(noteId) {
-        const note = AppState.notes.find(n => n.id === noteId);
-        if (!note) return;
-        
-        AppState.currentNoteId = noteId;
-        
-        document.getElementById('notes-editor-title').value = note.title;
-        document.getElementById('notes-font-family').value = note.fontFamily;
-        document.getElementById('notes-font-size').value = note.fontSize;
-        document.getElementById('notes-font-weight').value = note.fontWeight;
-        document.getElementById('notes-font-style').value = note.fontStyle;
-        document.getElementById('notes-font-color').value = note.color;
-        
-        const editor = document.getElementById('notes-editor-content');
-        editor.innerHTML = note.content || '';
-        editor.style.fontFamily = note.fontFamily;
-        editor.style.fontSize = note.fontSize + 'px';
-        editor.style.fontWeight = note.fontWeight;
-        editor.style.fontStyle = note.fontStyle;
-        editor.style.color = note.color;
-        
-        document.getElementById('notes-editor').classList.add('active');
-        
-        setTimeout(() => {
-            editor.focus();
-        }, 100);
-    }
-    
-    function setupNotesEditorEvents() {
-        // حفظ الملاحظات
-        document.getElementById('save-notes-btn').addEventListener('click', saveNote);
-        
-        // إغلاق المحرر
-        document.getElementById('close-notes-btn').addEventListener('click', () => {
-            document.getElementById('notes-editor').classList.remove('active');
-        });
-        
-        // أدوات التنسيق
-        document.querySelectorAll('.format-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const command = this.dataset.command;
-                document.execCommand(command, false, null);
-                this.classList.toggle('active');
-            });
-        });
-        
-        // إعدادات الخط
-        document.getElementById('notes-font-family').addEventListener('change', function() {
-            document.execCommand('fontName', false, this.value);
-        });
-        
-        document.getElementById('notes-font-size').addEventListener('change', function() {
-            document.execCommand('fontSize', false, this.value);
-        });
-        
-        document.getElementById('notes-font-weight').addEventListener('change', function() {
-            const editor = document.getElementById('notes-editor-content');
-            editor.style.fontWeight = this.value;
-        });
-        
-        document.getElementById('notes-font-style').addEventListener('change', function() {
-            const editor = document.getElementById('notes-editor-content');
-            editor.style.fontStyle = this.value;
-        });
-        
-        document.getElementById('notes-font-color').addEventListener('change', function() {
-            document.execCommand('foreColor', false, this.value);
-        });
-    }
-    
-    function saveNote() {
-        if (!AppState.currentNoteId) return;
-        
-        const title = document.getElementById('notes-editor-title').value;
-        const content = document.getElementById('notes-editor-content').innerHTML;
-        const fontFamily = document.getElementById('notes-font-family').value;
-        const fontSize = document.getElementById('notes-font-size').value;
-        const fontWeight = document.getElementById('notes-font-weight').value;
-        const fontStyle = document.getElementById('notes-font-style').value;
-        const color = document.getElementById('notes-font-color').value;
-        
-        updateNote(AppState.currentNoteId, {
-            title: title,
-            content: content,
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-            fontWeight: fontWeight,
-            fontStyle: fontStyle,
-            color: color
-        });
-        
-        document.getElementById('notes-editor').classList.remove('active');
-    }
-    
-    // ========== إدارة العروض ==========
-    function switchView(viewName) {
-        AppState.currentView = viewName;
-        
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.classList.remove('active');
-            if (item.dataset.view === viewName) {
-                item.classList.add('active');
-            }
-        });
-        
-        const titles = {
-            tasks: 'المهام',
-            calendar: 'الجدول الزمني',
-            categories: 'الفئات',
-            notes: 'الملاحظات'
-        };
-        document.getElementById('page-title').textContent = titles[viewName] || viewName;
-        
-        document.querySelectorAll('.view').forEach(view => {
-            view.classList.remove('active');
-        });
-        document.getElementById(`${viewName}-view`).classList.add('active');
-        
-        refreshCurrentView();
-    }
-    
-    function setFilter(filterName) {
-        AppState.currentFilter = filterName;
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.classList.remove('active');
-            if (btn.dataset.filter === filterName) {
-                btn.classList.add('active');
-            }
-        });
-        renderTasks();
-    }
-    
-    // ========== تهيئة الصفحة ==========
-    function initializePage() {
-        console.log("تهيئة الصفحة...");
-        
-        // تحديث التاريخ
-        const now = new Date();
-        const arabicDate = now.toLocaleDateString('ar-SA', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        });
-        document.getElementById('current-date').textContent = arabicDate;
-        
-        // تحميل البيانات
-        initializeData();
-        initializeThemesAndBackgrounds();
-        
-        // إعداد محرر الملاحظات
-        setupNotesEditorEvents();
-        
-        // ========== أحداث التنقل ==========
-        document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function(e) {
-                e.preventDefault();
-                switchView(this.dataset.view);
-            });
-        });
-        
-        // ========== أحداث المرشحات ==========
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                setFilter(this.dataset.filter);
-            });
-        });
-        
-        // ========== زر إضافة مهمة ==========
-        document.getElementById('add-task-btn').addEventListener('click', () => {
-            openAddTaskModal();
-        });
-        
-        // ========== زر إضافة ملاحظة ==========
-        document.getElementById('add-note-btn').addEventListener('click', () => {
-            addNote();
-        });
-        
-        // ========== نافذة إضافة مهمة ==========
-        const closeTaskModalBtn = document.getElementById('close-task-modal');
-        const cancelTaskBtn = document.getElementById('cancel-task');
-        
-        if (closeTaskModalBtn) {
-            closeTaskModalBtn.addEventListener('click', () => {
-                closeModal('add-task-modal');
-            });
-        }
-        
-        if (cancelTaskBtn) {
-            cancelTaskBtn.addEventListener('click', () => {
-                closeModal('add-task-modal');
-            });
-        }
-        
-        const saveTaskBtn = document.getElementById('save-task');
-        if (saveTaskBtn) {
-            saveTaskBtn.addEventListener('click', () => {
-                const titleInput = document.getElementById('task-title');
-                const categorySelect = document.getElementById('task-category');
-                
-                if (!titleInput || !categorySelect) return;
-                
-                const title = titleInput.value.trim();
-                const category = categorySelect.value;
-                
-                if (!title) {
-                    alert('يرجى إدخال عنوان المهمة');
-                    return;
-                }
-                
-                if (!category) {
-                    alert('يرجى اختيار فئة للمهمة');
-                    return;
-                }
-                
-                const durationInput = document.getElementById('task-duration');
-                const dateInput = document.getElementById('task-date');
-                const timeInput = document.getElementById('task-time');
-                const prioritySelect = document.getElementById('task-priority');
-                const descriptionTextarea = document.getElementById('task-description');
-                
-                addTask({
-                    title: title,
-                    description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
-                    categoryId: category,
-                    duration: durationInput ? durationInput.value : 30,
-                    date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
-                    time: timeInput ? timeInput.value : '',
-                    priority: prioritySelect ? prioritySelect.value : 'medium'
-                });
-            });
-        }
-        
-        // ========== نافذة تعديل مهمة ==========
-        const closeEditTaskModalBtn = document.getElementById('close-edit-task-modal');
-        const cancelEditTaskBtn = document.getElementById('cancel-edit-task');
-        
-        if (closeEditTaskModalBtn) {
-            closeEditTaskModalBtn.addEventListener('click', () => {
-                closeModal('edit-task-modal');
-            });
-        }
-        
-        if (cancelEditTaskBtn) {
-            cancelEditTaskBtn.addEventListener('click', () => {
-                closeModal('edit-task-modal');
-            });
-        }
-        
-        const deleteEditTaskBtn = document.getElementById('delete-edit-task');
-        if (deleteEditTaskBtn) {
-            deleteEditTaskBtn.addEventListener('click', () => {
-                if (AppState.currentTaskId) {
-                    deleteTask(AppState.currentTaskId);
-                    closeModal('edit-task-modal');
-                }
-            });
-        }
-        
-        const saveEditTaskBtn = document.getElementById('save-edit-task');
-        if (saveEditTaskBtn) {
-            saveEditTaskBtn.addEventListener('click', () => {
-                if (!AppState.currentTaskId) return;
-                
-                const titleInput = document.getElementById('edit-task-title');
-                const categorySelect = document.getElementById('edit-task-category');
-                
-                if (!titleInput || !categorySelect) return;
-                
-                const title = titleInput.value.trim();
-                const category = categorySelect.value;
-                
-                if (!title) {
-                    alert('يرجى إدخال عنوان المهمة');
-                    return;
-                }
-                
-                if (!category) {
-                    alert('يرجى اختيار فئة للمهمة');
-                    return;
-                }
-                
-                const durationInput = document.getElementById('edit-task-duration');
-                const dateInput = document.getElementById('edit-task-date');
-                const timeInput = document.getElementById('edit-task-time');
-                const prioritySelect = document.getElementById('edit-task-priority');
-                const descriptionTextarea = document.getElementById('edit-task-description');
-                
-                updateTask(AppState.currentTaskId, {
-                    title: title,
-                    description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
-                    categoryId: category,
-                    duration: durationInput ? durationInput.value : 30,
-                    date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
-                    time: timeInput ? timeInput.value : '',
-                    priority: prioritySelect ? prioritySelect.value : 'medium'
-                });
-            });
-        }
-        
-        // ========== إغلاق النوافذ عند النقر خارجها ==========
-        window.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal')) {
-                closeModal(e.target.id);
-            }
-        });
-        
-        // ========== تحميل العرض الأولي ==========
-        renderTasks();
-        console.log("✅ التطبيق جاهز للاستخدام!");
-    }
-    
-    function openAddTaskModal(preselectedCategory = null) {
-        const categorySelect = document.getElementById('task-category');
-        categorySelect.innerHTML = '<option value="">-- اختر الفئة --</option>';
-        
-        AppState.categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            if (preselectedCategory === category.id) {
-                option.selected = true;
-            }
-            categorySelect.appendChild(option);
-        });
-        
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = document.getElementById('task-date');
-        if (dateInput) {
-            dateInput.value = today;
-        }
-        
-        document.getElementById('add-task-modal').classList.add('active');
-        
-        const titleInput = document.getElementById('task-title');
-        if (titleInput) {
-            setTimeout(() => {
-                titleInput.focus();
-            }, 100);
-        }
-    }
-    
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.classList.remove('active');
-        }
-    }
-    
-    // جعل الوظائف متاحة عالمياً
-    window.openEditTaskModal = openEditTaskModal;
-    window.openAddTaskModal = openAddTaskModal;
-    window.updateNoteTitle = updateNoteTitle;
-    window.openNoteEditor = openNoteEditor;
-    
-    // بدء التطبيق عند تحميل الصفحة
-    document.addEventListener('DOMContentLoaded', initializePage);
-    </script>
-</body>
-</html>
+                        <
