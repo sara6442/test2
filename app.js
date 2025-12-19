@@ -85,12 +85,18 @@ function initializeThemes() {
         AppState.currentTheme = savedTheme;
         document.body.className = `theme-${savedTheme}`;
         console.log("تم تحميل الثيم المحفوظ:", savedTheme);
+        
+        // تحديث ألوان الملاحظات للثيم الحالي
+        updateNotesColorsForTheme(savedTheme);
     } else {
         // تعيين الثيم الافتراضي
         AppState.currentTheme = 'gray';
         document.body.className = 'theme-gray';
         localStorage.setItem('mytasks_theme', 'gray');
         console.log("تم تعيين الثيم الافتراضي: gray");
+        
+        // تحديث ألوان الملاحظات للثيم الافتراضي
+        updateNotesColorsForTheme('gray');
     }
     
     // تحديث الأزرار النشطة
@@ -101,9 +107,92 @@ function initializeThemes() {
     
     // إعدادات الإعدادات
     setupSettingsEvents();
+}
+
+// دالة جديدة لتحديث ألوان الملاحظات بناءً على الثيم
+function updateNotesColorsForTheme(theme) {
+    console.log("تحديث ألوان الملاحظات للثيم:", theme);
     
-    // تحديث ألوان النص في الملاحظات
-    updateNotesTextColorForTheme();
+    if (theme === 'black') {
+        // إذا كان الثيم أسود، نجعل ألوان النص فاتحة
+        AppState.notes.forEach(note => {
+            // حفظ اللون الأصلي إذا لم يكن محفوظاً
+            if (!note.originalColor) {
+                note.originalColor = note.color || '#000000';
+            }
+            
+            // تغيير اللون إلى فاتح إذا كان داكن
+            const isDarkColor = isColorDark(note.color || note.originalColor);
+            if (isDarkColor) {
+                note.color = '#f0f0f0'; // لون فاتح للقراءة
+            }
+        });
+    } else {
+        // إذا كان الثيم غير أسود، نرجع الألوان الأصلية
+        AppState.notes.forEach(note => {
+            if (note.originalColor) {
+                note.color = note.originalColor;
+            } else {
+                // إذا لم يكن هناك لون أصلي محفوظ
+                note.color = note.color || '#000000';
+            }
+        });
+    }
+    
+    saveNotes();
+    
+    // تحديث العرض إذا كنا في عرض الملاحظات
+    if (AppState.currentView === 'notes') {
+        renderNotes();
+    }
+}
+
+// دالة مساعدة للتحقق إذا كان اللون داكناً
+function isColorDark(color) {
+    // تحويل HEX إلى RGB
+    let r, g, b;
+    
+    if (color.startsWith('#')) {
+        if (color.length === 4) {
+            r = parseInt(color[1] + color[1], 16);
+            g = parseInt(color[2] + color[2], 16);
+            b = parseInt(color[3] + color[3], 16);
+        } else {
+            r = parseInt(color.substr(1, 2), 16);
+            g = parseInt(color.substr(3, 2), 16);
+            b = parseInt(color.substr(5, 2), 16);
+        }
+    } else if (color.startsWith('rgb')) {
+        const match = color.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+        if (match) {
+            r = parseInt(match[1]);
+            g = parseInt(match[2]);
+            b = parseInt(match[3]);
+        } else {
+            return true; // إذا كان هناك خطأ، نعتبره داكن
+        }
+    } else {
+        return true; // إذا لم يكن لوناً معروفاً، نعتبره داكن
+    }
+    
+    // حساب السطوع (Brightness)
+    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    
+    // إذا كان السطوع أقل من 128 فهو داكن
+    return brightness < 128;
+}
+
+// دالة لتغيير الثيم
+function changeTheme(theme) {
+    AppState.currentTheme = theme;
+    document.body.className = `theme-${theme}`;
+    localStorage.setItem('mytasks_theme', theme);
+    
+    // تحديث ألوان الملاحظات للثيم الجديد
+    updateNotesColorsForTheme(theme);
+    
+    updateThemeButtons();
+    refreshCurrentView();
 }
 
 // دالة جديدة للإعدادات
