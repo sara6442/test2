@@ -1,62 +1,3 @@
-// اختبار تحميل CSS
-function checkCSS() {
-    console.log("🔍 فحص تحميل CSS...");
-    
-    // اختبار 1: فحص عدد أنماط CSS المحملة
-    const cssCount = document.styleSheets.length;
-    console.log("عدد ملفات CSS:", cssCount);
-    
-    // اختبار 2: فحص متغيرات CSS
-    const rootStyles = getComputedStyle(document.documentElement);
-    const themeBg = rootStyles.getPropertyValue('--theme-bg').trim();
-    console.log("متغير --theme-bg:", themeBg);
-    
-    if (!themeBg || themeBg === 'initial' || themeBg === '') {
-        console.error("❌ متغيرات CSS غير محملة!");
-        
-        // تطبيق أنماط طارئة
-        document.body.style.cssText = `
-            background-color: #f8f9fa !important;
-            color: #212529 !important;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        `;
-        
-        // إضافة رسالة تحذير
-        const warning = document.createElement('div');
-        warning.id = 'css-warning';
-        warning.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 99999;
-            font-family: Arial;
-            border: 1px solid #f5c6cb;
-        `;
-        warning.innerHTML = '⚠️ مشكلة في تحميل التنسيقات. الرجاء تحديث الصفحة.';
-        document.body.appendChild(warning);
-        
-        return false;
-    }
-    
-    console.log("✅ CSS محمل بنجاح");
-    return true;
-}
-
-// تشغيل فحص CSS بعد تحميل الصفحة
-window.addEventListener('load', function() {
-    console.log("📄 الصفحة محملة");
-    checkCSS();
-    
-    // إزالة التحذير إذا ظهر
-    setTimeout(() => {
-        const warning = document.getElementById('css-warning');
-        if (warning) warning.remove();
-    }, 5000);
-});
 // ========== حالة التطبيق ==========
 const AppState = {
     tasks: [],
@@ -75,41 +16,34 @@ const AppState = {
 };
 
 // ========== إدارة الثيمات ==========
-// ========== إدارة الثيمات ==========
 function initializeThemes() {
     console.log("تهيئة الثيمات...");
     
-    // اختبار سريع
-    testPageLoad();
+    // تحميل الثيم المحفوظ
+    const savedTheme = localStorage.getItem('mytasks_theme');
+    if (savedTheme && AppState.themes.includes(savedTheme)) {
+        AppState.currentTheme = savedTheme;
+        document.body.className = `theme-${savedTheme}`;
+        console.log("تم تحميل الثيم المحفوظ:", savedTheme);
+    } else {
+        // تعيين الثيم الافتراضي
+        AppState.currentTheme = 'gray';
+        document.body.className = 'theme-gray';
+        localStorage.setItem('mytasks_theme', 'gray');
+        console.log("تم تعيين الثيم الافتراضي: gray");
+    }
     
-    // تأخير لضمان تحميل CSS
-    setTimeout(() => {
-        // تحميل الثيم المحفوظ
-        const savedTheme = localStorage.getItem('mytasks_theme');
-        if (savedTheme && AppState.themes.includes(savedTheme)) {
-            AppState.currentTheme = savedTheme;
-            document.body.className = `theme-${savedTheme}`;
-            console.log("تم تحميل الثيم المحفوظ:", savedTheme);
-        } else {
-            // تعيين الثيم الافتراضي
-            AppState.currentTheme = 'gray';
-            document.body.className = 'theme-gray';
-            localStorage.setItem('mytasks_theme', 'gray');
-            console.log("تم تعيين الثيم الافتراضي: gray");
-        }
-        
-        // تحديث الأزرار النشطة
-        updateThemeButtons();
-        
-        // إضافة أحداث تغيير الثيم
-        setupThemeEvents();
-        
-        // إعدادات الإعدادات
-        setupSettingsEvents();
-        
-        // تحديث ألوان النص في الملاحظات
-        updateNotesTextColorForTheme();
-    }, 200); // زيادة التأخير
+    // تحديث الأزرار النشطة
+    updateThemeButtons();
+    
+    // إضافة أحداث تغيير الثيم
+    setupThemeEvents();
+    
+    // إعدادات الإعدادات
+    setupSettingsEvents();
+    
+    // تحديث ألوان النص في الملاحظات
+    updateNotesTextColorForTheme();
 }
 
 // دالة جديدة للإعدادات
@@ -134,7 +68,6 @@ function setupSettingsEvents() {
         }
     });
 }
-
 
 // دالة منفصلة لتحديث أزرار الثيم
 function updateThemeButtons() {
@@ -164,25 +97,6 @@ function changeTheme(theme) {
     
     updateThemeButtons();
     refreshCurrentView();
-    updateNotesTextColorForTheme();
-}
-    
-    // زر الإعدادات
-    document.getElementById('settings-btn').addEventListener('click', function(e) {
-        e.stopPropagation();
-        const popup = document.getElementById('settings-popup');
-        popup.classList.toggle('active');
-    });
-    
-    // إغلاق النافذة عند النقر خارجها
-    document.addEventListener('click', function(e) {
-        const popup = document.getElementById('settings-popup');
-        if (popup && !popup.contains(e.target) && e.target.id !== 'settings-btn') {
-            popup.classList.remove('active');
-        }
-    });
-    
-    // تعديل ألوان النص في الملاحظات بناءً على الثيم
     updateNotesTextColorForTheme();
 }
 
@@ -1200,26 +1114,3 @@ window.toggleTaskCompletion = toggleTaskCompletion;
 
 // بدء التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', initializePage);
-
-window.addEventListener('load', function() {
-    console.log("✅ الصفحة محملة بالكامل");
-    console.log("عدد أنماط CSS:", document.styleSheets.length);
-    
-    // إظهار رسالة تأكيد
-    const msg = document.createElement('div');
-    msg.style.cssText = `
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        background: #10b981;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        z-index: 99999;
-        font-family: Arial;
-    `;
-    msg.textContent = '✅ التطبيق جاهز!';
-    document.body.appendChild(msg);
-    
-    setTimeout(() => msg.remove(), 3000);
-});
