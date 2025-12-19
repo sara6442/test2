@@ -1451,6 +1451,16 @@ function renderNotes() {
     AppState.notes.forEach(note => {
         // استخراج عناصر الـ checkbox من المحتوى
         let noteContent = note.content || '';
+        
+        // إضافة استايل لكل checkbox لضمان لونه المناسب للثيم
+        if (AppState.currentTheme === 'black') {
+            noteContent = noteContent.replace(/class="note-checkbox-text"/g, 
+                'class="note-checkbox-text" style="color: #f0f0f0 !important;"');
+        } else {
+            noteContent = noteContent.replace(/class="note-checkbox-text"/g, 
+                'class="note-checkbox-text" style="color: var(--theme-text) !important;"');
+        }
+        
         // تحويل checkboxes إلى HTML قابل للتفاعل
         noteContent = noteContent.replace(/<input type="checkbox"/g, '<input type="checkbox" class="note-checkbox"');
         
@@ -1465,7 +1475,7 @@ function renderNotes() {
                 <div class="note-content" 
                      style="font-family: ${note.fontFamily}; font-size: ${note.fontSize}px; font-weight: ${note.fontWeight}; font-style: ${note.fontStyle}; color: ${note.color};"
                      onclick="openNoteEditor('${note.id}')">
-                    ${noteContent || '<p style="color: var(--gray-color); opacity: 0.7;">انقر لتحرير الملاحظة...</p>'}
+                    ${noteContent || '<p style="color: var(--theme-text); opacity: 0.7;">انقر لتحرير الملاحظة...</p>'}
                 </div>
                 
                 <div class="note-footer">
