@@ -10,17 +10,6 @@ body {
     min-height: 100vh;
 }
 
-/* إظهار العناصر الأساسية */
-.header, .sidebar, .content-area {
-    display: block !important;
-    visibility: visible !important;
-}
-/* ========== تحميل تأكيدي ========== */
-/* هذه للفحص فقط - يمكن حذفها لاحقاً */
-body::before {
-    content: "✅ CSS loaded successfully!";
-    display: none;
-}
 
 /* التأكد من تحميل المتغيرات */
 :root {
@@ -66,22 +55,6 @@ body {
     transition: var(--transition);
     position: relative;
 }
-
-/* فحص مرئي (اختياري - يمكن إزالته) */
-#css-load-check {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background: #10b981;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    font-size: 12px;
-    z-index: 9999;
-    display: none; /* تغيير إلى block لرؤيته */
-}
-
-/* ========== باقي CSS ... */
 
 /* ========== تنسيقات الثيمات ========== */
 .theme-gray {
