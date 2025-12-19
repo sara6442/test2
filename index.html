@@ -12,18 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- 3. أنماط التطبيق -->
-    <style>
-    /* ========== الأنماط الطارئة ========== */
-    body {
-        background-color: #f8f9fa !important;
-        color: #212529 !important;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-    }
-
-    .app-container { min-height: 100vh; }
-
-    /* سيتم تحميل بقية الأنماط من ملف CSS */
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body class="theme-gray">
@@ -46,10 +35,6 @@
                 <a href="#" class="nav-item" data-view="categories">
                     <i class="fas fa-tags"></i>
                     <span>الفئات</span>
-                </a>
-                <a href="#" class="nav-item" data-view="categories-status">
-                    <i class="fas fa-chart-bar"></i>
-                    <span>حالة الفئات</span>
                 </a>
                 <a href="#" class="nav-item" data-view="notes">
                     <i class="fas fa-sticky-note"></i>
@@ -140,7 +125,7 @@
                     <div class="categories-header">
                         <div>
                             <h2 style="color: var(--theme-text);">إدارة الفئات</h2>
-                            <p style="color: var(--theme-text-light); margin-top: 10px;">إدارة فئات المهام وإضافة مهام جديدة لها</p>
+                            <p style="color: var(--gray-color); margin-top: 10px;">إدارة فئات المهام وإضافة مهام جديدة لها</p>
                         </div>
                         <button class="btn btn-primary" id="add-category-btn">
                             <i class="fas fa-plus"></i> فئة جديدة
@@ -151,17 +136,12 @@
                     </div>
                 </div>
 
-                <!-- عرض حالة الفئات (سيتم تحميله من ملف منفصل) -->
-                <div id="categories-status-view" class="view">
-                    <!-- محتوى عرض حالة الفئات سيتم تحميله هنا -->
-                </div>
-
                 <!-- عرض الملاحظات -->
                 <div id="notes-view" class="view">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
                         <div>
                             <h2 style="color: var(--theme-text);">الملاحظات</h2>
-                            <p style="color: var(--theme-text-light); margin-top: 10px;">إدارة ملاحظاتك الخاصة مع تنسيق متكامل</p>
+                            <p style="color: var(--gray-color); margin-top: 10px;">إدارة ملاحظاتك الخاصة مع تنسيق متكامل</p>
                         </div>
                         <button class="btn btn-primary" id="add-note-btn">
                             <i class="fas fa-plus"></i> ملاحظة جديدة
@@ -194,7 +174,6 @@
                         <label for="task-category">الفئة *</label>
                         <select id="task-category" required>
                             <option value="">-- اختر الفئة --</option>
-                            <!-- الفئات ستضاف هنا -->
                         </select>
                     </div>
                     <div class="form-row">
@@ -251,7 +230,6 @@
                         <label for="edit-task-category">الفئة *</label>
                         <select id="edit-task-category" required>
                             <option value="">-- اختر الفئة --</option>
-                            <!-- الفئات ستضاف هنا -->
                         </select>
                     </div>
                     <div class="form-row">
@@ -294,7 +272,7 @@
 
     <!-- نافذة إضافة/تعديل فئة -->
     <div class="modal" id="category-modal">
-        <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h3 id="category-modal-title">إضافة فئة جديدة</h3>
                 <button class="close-btn" id="close-category-modal">&times;</button>
@@ -308,48 +286,6 @@
                     <div class="form-group">
                         <label for="category-color">لون الفئة *</label>
                         <input type="color" id="category-color" value="#5a76e8" required>
-                    </div>
-                  <!-- الحيز الزمني المعدل -->
-<div class="form-group">
-    <label for="category-duration">مدة الفئة (دقائق/مهمة)</label>
-    <input type="number" id="category-duration" min="1" value="30" placeholder="مدة كل مهمة بالدقائق">
-</div>
-
-<div class="form-group">
-    <label for="category-repeat">التكرار</label>
-    <select id="category-repeat">
-        <option value="none">بدون تكرار</option>
-        <option value="daily">يومي</option>
-        <option value="weekly">أسبوعي</option>
-        <option value="monthly">شهري</option>
-        <option value="custom">مخصص</option>
-    </select>
-</div>
-
-<div id="custom-repeat-container" style="display: none;">
-    <div class="form-group">
-        <label for="custom-repeat-days">عدد أيام التكرار</label>
-        <input type="number" id="custom-repeat-days" min="1" value="7" placeholder="كل كم يوم">
-    </div>
-</div>
-                    <div id="custom-timeframe-container" style="display: none;">
-                        <div class="form-group">
-                            <label for="custom-timeframe-days">عدد الأيام (للفترة المخصصة)</label>
-                            <input type="number" id="custom-timeframe-days" min="1" value="7" placeholder="عدد الأيام">
-                        </div>
-                    </div>
-                    <!-- رسائل الفئة الثلاث -->
-                    <div class="form-group">
-                        <label for="category-message-empty">رسالة الفئة (حالة فارغة) *</label>
-                        <textarea id="category-message-empty" rows="2" placeholder="أدخل رسالة الفئة عندما تكون فارغة أو بها مهام غير مكتملة" required>لا توجد مهام في هذه الفئة بعد. أضف مهام جديدة لبدء العمل!</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="category-message-completed">رسالة الفئة (حالة الإكمال) *</label>
-                        <textarea id="category-message-completed" rows="2" placeholder="أدخل رسالة الفئة عند اكتمال جميع المهام" required>ممتاز! لقد أكملت جميع المهام في هذه الفئة. استمر في العمل الجيد!</textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="category-message-pending">رسالة الفئة (مهام معلقة) *</label>
-                        <textarea id="category-message-pending" rows="2" placeholder="أدخل رسالة الفئة عندما تكون هناك مهام معلقة" required>هناك مهام معلقة في هذه الفئة. واصل العمل لإنجازها!</textarea>
                     </div>
                 </form>
             </div>
@@ -433,82 +369,10 @@
         <div contenteditable="true" class="notes-content" id="notes-editor-content" placeholder="اكتب ملاحظاتك هنا..."></div>
     </div>
 
-    <!-- التلميحات المحسنة -->
-    <div id="global-tooltip" class="tooltip">
-        <div class="tooltip-content">
-            <div class="tooltip-title" id="tooltip-title"></div>
-            <div class="tooltip-info" id="tooltip-info"></div>
-        </div>
-    </div>
-    
-    <!-- ملفات JavaScript -->
+    <!-- تلميحات عامة -->
+    <div id="global-tooltip" class="tooltip"></div>
+
+    <!-- ملف JavaScript الرئيسي -->
     <script src="app.js"></script>
-    
-    <!-- تهيئة الصفحة -->
-    <script>
-        // تأكد من تحميل الصفحة أولاً
-        document.addEventListener('DOMContentLoaded', function() {
-            // اختبار تحميل CSS
-            function testPageLoad() {
-                console.log("✅ الصفحة محملة!");
-                
-                // إظهار رسالة تأكيد
-                const msg = document.createElement('div');
-                msg.style.cssText = `
-                    position: fixed;
-                    top: 10px;
-                    left: 10px;
-                    background: #10b981;
-                    color: white;
-                    padding: 10px 20px;
-                    border-radius: 5px;
-                    z-index: 99999;
-                    font-family: Arial;
-                `;
-                msg.textContent = '✅ التطبيق جاهز!';
-                document.body.appendChild(msg);
-                
-                setTimeout(() => msg.remove(), 3000);
-            }
-            
-            // تشغيل الاختبار بعد تحميل كامل الصفحة
-            window.addEventListener('load', testPageLoad);
-            
-            // إذا كان هناك خطأ في CSS، أضف الأنماط الاضافية
-            setTimeout(() => {
-                const rootStyles = getComputedStyle(document.documentElement);
-                const themeBg = rootStyles.getPropertyValue('--theme-bg').trim();
-                
-                if (!themeBg || themeBg === 'initial' || themeBg === '') {
-                    console.warn("⚠️ CSS لم يتم تحميله بالكامل");
-                    
-                    // تطبيق أنماط الطارئة
-                    document.body.style.backgroundColor = "#f8f9fa";
-                    document.body.style.color = "#212529";
-                    
-                    const warning = document.createElement('div');
-                    warning.id = 'css-warning';
-                    warning.style.cssText = `
-                        position: fixed;
-                        top: 50px;
-                        right: 10px;
-                        background: #f8d7da;
-                        color: #721c24;
-                        padding: 10px 20px;
-                        border-radius: 5px;
-                        z-index: 99999;
-                        font-family: Arial;
-                        border: 1px solid #f5c6cb;
-                    `;
-                    warning.innerHTML = '⚠️ تم تحميل التطبيق بنجاح!';
-                    document.body.appendChild(warning);
-                    
-                    setTimeout(() => {
-                        if (warning) warning.remove();
-                    }, 5000);
-                }
-            }, 1000);
-        });
-    </script>
 </body>
 </html>
