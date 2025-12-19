@@ -79,6 +79,9 @@ const AppState = {
 function initializeThemes() {
     console.log("تهيئة الثيمات...");
     
+    // تحميل الثيم المخصص أولاً
+    loadCustomTheme();
+    
     // تحميل الثيم المحفوظ
     const savedTheme = localStorage.getItem('mytasks_theme');
     if (savedTheme && AppState.themes.includes(savedTheme)) {
@@ -90,7 +93,7 @@ function initializeThemes() {
         updateNotesColorsForTheme(savedTheme);
     } else {
         // تعيين الثيم الافتراضي
-        AppState.currentTheme = 'gray';
+        AppState.currentTheme = 'beige';
         document.body.className = 'theme-beige';
         localStorage.setItem('mytasks_theme', 'beige');
         console.log("تم تعيين الثيم الافتراضي: beige");
@@ -2292,6 +2295,98 @@ function setFilter(filterName) {
         }
     });
     renderTasks();
+}
+// ========== الثيم المخصص ==========
+function openCustomThemeModal() {
+    const modalHTML = `
+        <div class="modal" id="custom-theme-modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>🎨 تخصيص الثيم</h3>
+                    <button class="close-btn" onclick="closeModal('custom-theme-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <div class="theme-preview" id="custom-theme-live-preview" 
+                             style="width: 100px; height: 100px; margin: 0 auto 20px; border-radius: 50%; border: 3px solid var(--theme-border);">
+                        </div>
+                        <p style="color: var(--gray-color);">معاينة التدرج اللوني</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="custom-color1">اللون الأول (أعلى)</label>
+                        <input type="color" id="custom-color1" value="#5a76e8" onchange="updateCustomPreview()">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="custom-color2">اللون الثاني (أسفل)</label>
+                        <input type="color" id="custom-color2" value="#3a56d4" onchange="updateCustomPreview()">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('custom-theme-modal')">إلغاء</button>
+                    <button class="btn btn-primary" onclick="applyCustomTheme()">تطبيق الثيم</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // إضافة النافذة
+    const existingModal = document.getElementById('custom-theme-modal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('custom-theme-modal').classList.add('active');
+    
+    // تحديث المعاينة فوراً
+    setTimeout(updateCustomPreview, 100);
+}
+
+// تحديث معاينة الثيم المخصص
+function updateCustomPreview() {
+    const color1 = document.getElementById('custom-color1').value;
+    const color2 = document.getElementById('custom-color2').value;
+    const preview = document.getElementById('custom-theme-live-preview');
+    
+    if (preview) {
+        preview.style.background = `linear-gradient(45deg, ${color1}, ${color2})`;
+    }
+}
+
+// تطبيق الثيم المخصص
+function applyCustomTheme() {
+    const color1 = document.getElementById('custom-color1').value;
+    const color2 = document.getElementById('custom-color2').value;
+    
+    // تحديث متغيرات CSS
+    document.documentElement.style.setProperty('--custom-color1', color1);
+    document.documentElement.style.setProperty('--custom-color2', color2);
+    
+    // تغيير الثيم
+    AppState.currentTheme = 'custom';
+    document.body.className = 'theme-custom';
+    localStorage.setItem('mytasks_theme', 'custom');
+    
+    // حفظ ألوان الثيم المخصص
+    localStorage.setItem('mytasks_custom_colors', JSON.stringify({ color1, color2 }));
+    
+    updateThemeButtons();
+    refreshCurrentView();
+    closeModal('custom-theme-modal');
+}
+
+// تحميل الثيم المخصص المحفوظ
+function loadCustomTheme() {
+    const customColors = localStorage.getItem('mytasks_custom_colors');
+    if (customColors) {
+        try {
+            const { color1, color2 } = JSON.parse(customColors);
+            document.documentElement.style.setProperty('--custom-color1', color1);
+            document.documentElement.style.setProperty('--custom-color2', color2);
+        } catch (e) {
+            console.error("خطأ في تحميل ألوان الثيم المخصص:", e);
+        }
+    }
 }
 
 // ========== تهيئة الصفحة ==========
