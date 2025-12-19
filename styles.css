@@ -1,3 +1,4 @@
+/* أنماط CSS الكاملة - انسخ محتوى قسم ++style++ هنا كاملاً */
 /* ========== الأنماط الطارئة ========== */
 /* هذه تضمن ظهور شيء حتى لو فشل تحميل CSS */
 body {
@@ -32,7 +33,7 @@ body {
     --theme-bg: #ffffff;
     --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
     --theme-text: #212529;
-    --theme-text-light: #6c757d; /* جديد: لون نص فاتح */
+    --theme-text-light: #6c757d;
     --theme-card: white;
     --theme-border: #dee2e6;
     --theme-primary: #6c757d;
