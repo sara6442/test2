@@ -949,7 +949,6 @@
     .notes-content:focus {
         outline: none;
     }
-    
     /* ========== الجدول الزمني ========== */
     .calendar-controls {
         display: flex;
@@ -981,8 +980,7 @@
         border-color: var(--theme-primary);
         color: var(--theme-primary);
     }
-    
-    .calendar-tab.active {
+     .calendar-tab.active {
         background: var(--theme-primary);
         color: white;
         border-color: var(--theme-primary);
@@ -1012,8 +1010,7 @@
         padding-bottom: 10px;
         border-bottom: 2px solid var(--theme-primary);
     }
-    
-    .time-title {
+          .time-title {
         font-weight: 600;
         color: var(--theme-primary);
         font-size: 1.1rem;
@@ -1040,8 +1037,7 @@
         border: 1px solid var(--theme-border);
         margin-bottom: 10px;
     }
-    
-    .calendar-task-card:hover {
+         .calendar-task-card:hover {
         transform: translateX(-5px);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
@@ -1050,6 +1046,94 @@
         border-left-color: #999;
         border-right-color: #999;
         background-color: rgba(0,0,0,0.03);
+    }
+    
+    /* الجدول الأسبوعي */
+    .weekly-calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .day-column {
+        background: var(--theme-card);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid var(--theme-border);
+        min-height: 400px;
+    }
+          .day-header {
+        text-align: center;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid var(--theme-primary);
+    }
+    
+    .day-name {
+        font-weight: 600;
+        color: var(--theme-primary);
+        font-size: 1.1rem;
+    }
+    
+    .day-date {
+        color: var(--gray-color);
+        font-size: 0.9rem;
+        margin-top: 5px;
+    }
+    
+    /* الجدول الشهري */
+    .monthly-calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 10px;
+        margin-top: 20px;
+    }
+
+          .month-day {
+        background: var(--theme-card);
+        border-radius: 8px;
+        padding: 10px;
+        min-height: 120px;
+        border: 1px solid var(--theme-border);
+        position: relative;
+    }
+    
+    .day-number {
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--theme-text);
+    }
+    
+    .today .day-number {
+        color: var(--theme-primary);
+        font-weight: bold;
+    }
+    
+    .month-tasks {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+    
+    .month-task-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        margin-right: 5px;
+        display: inline-block;
+    }
+         .month-task-item {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: var(--transition);
+        background: rgba(0,0,0,0.05);
+    }
+    
+    .month-task-item:hover {
+        background: rgba(0,0,0,0.1);
     }
     
     /* ========== النوافذ المنبثقة ========== */
