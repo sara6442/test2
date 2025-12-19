@@ -17,39 +17,62 @@ const AppState = {
 
 // ========== إدارة الثيمات ==========
 function initializeThemes() {
-    // تحميل الثيم المحفوظ
-    const savedTheme = localStorage.getItem('mytasks_theme');
-    if (savedTheme && AppState.themes.includes(savedTheme)) {
-        AppState.currentTheme = savedTheme;
-        document.body.className = `theme-${savedTheme}`;
-    }
-    
-    // تحديث الأزرار النشطة
+    // تأخير بسيط لضمان تحميل CSS
+    setTimeout(() => {
+        // تحميل الثيم المحفوظ
+        const savedTheme = localStorage.getItem('mytasks_theme');
+        if (savedTheme && AppState.themes.includes(savedTheme)) {
+            AppState.currentTheme = savedTheme;
+            document.body.className = `theme-${savedTheme}`;
+        } else {
+            // تعيين الثيم الافتراضي بوضوح
+            AppState.currentTheme = 'gray';
+            document.body.className = 'theme-gray';
+            localStorage.setItem('mytasks_theme', 'gray');
+        }
+        
+        // تحديث الأزرار النشطة
+        updateThemeButtons();
+        
+        // إضافة أحداث تغيير الثيم
+        setupThemeEvents();
+        
+        // تحديث ألوان النص في الملاحظات
+        updateNotesTextColorForTheme();
+    }, 100);
+}
+
+
+// دالة منفصلة لتحديث أزرار الثيم
+function updateThemeButtons() {
     document.querySelectorAll('.theme-option').forEach(option => {
         option.classList.remove('active');
         if (option.dataset.theme === AppState.currentTheme) {
             option.classList.add('active');
         }
     });
-    
-    // إضافة أحداث تغيير الثيم
+}
+
+// دالة منفصلة لإعداد أحداث الثيم
+function setupThemeEvents() {
     document.querySelectorAll('.theme-option').forEach(option => {
         option.addEventListener('click', function() {
             const theme = this.dataset.theme;
-            AppState.currentTheme = theme;
-            document.body.className = `theme-${theme}`;
-            localStorage.setItem('mytasks_theme', theme);
-            
-            document.querySelectorAll('.theme-option').forEach(o => o.classList.remove('active'));
-            this.classList.add('active');
-            
-            // إعادة تحميل البيانات للتأكد من التحديث
-            refreshCurrentView();
-            
-            // تحديث ألوان النص في الملاحظات للثيم الأسود
-            updateNotesTextColorForTheme();
+            changeTheme(theme);
         });
     });
+}
+
+// دالة لتغيير الثيم
+function changeTheme(theme) {
+    AppState.currentTheme = theme;
+    document.body.className = `theme-${theme}`;
+    localStorage.setItem('mytasks_theme', theme);
+    
+    updateThemeButtons();
+    refreshCurrentView();
+    updateNotesTextColorForTheme();
+}
     
     // زر الإعدادات
     document.getElementById('settings-btn').addEventListener('click', function(e) {
