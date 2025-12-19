@@ -298,19 +298,29 @@
                         <label for="category-color">لون الفئة *</label>
                         <input type="color" id="category-color" value="#5a76e8" required>
                     </div>
-                    <!-- الحيز الزمني الجديد -->
-                    <div class="form-group">
-                        <label for="category-timeframe">الحيز الزمني (اختياري)</label>
-                        <select id="category-timeframe">
-                            <option value="">بدون حيز زمني</option>
-                            <option value="daily">يومي</option>
-                            <option value="weekly">أسبوعي</option>
-                            <option value="monthly">شهري</option>
-                            <option value="quarterly">ربع سنوي</option>
-                            <option value="yearly">سنوي</option>
-                            <option value="custom">مخصص</option>
-                        </select>
-                    </div>
+                  <!-- الحيز الزمني المعدل -->
+<div class="form-group">
+    <label for="category-duration">مدة الفئة (دقائق/مهمة)</label>
+    <input type="number" id="category-duration" min="1" value="30" placeholder="مدة كل مهمة بالدقائق">
+</div>
+
+<div class="form-group">
+    <label for="category-repeat">التكرار</label>
+    <select id="category-repeat">
+        <option value="none">بدون تكرار</option>
+        <option value="daily">يومي</option>
+        <option value="weekly">أسبوعي</option>
+        <option value="monthly">شهري</option>
+        <option value="custom">مخصص</option>
+    </select>
+</div>
+
+<div id="custom-repeat-container" style="display: none;">
+    <div class="form-group">
+        <label for="custom-repeat-days">عدد أيام التكرار</label>
+        <input type="number" id="custom-repeat-days" min="1" value="7" placeholder="كل كم يوم">
+    </div>
+</div>
                     <div id="custom-timeframe-container" style="display: none;">
                         <div class="form-group">
                             <label for="custom-timeframe-days">عدد الأيام (للفترة المخصصة)</label>
