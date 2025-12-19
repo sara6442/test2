@@ -130,6 +130,26 @@ body {
     color: #ffffff !important;
 }
 
+/* تحويل الألوان الداكنة إلى فاتحة تلقائياً في الثيم الأسود */
+.theme-black .note-content *[style*="color"] {
+    filter: invert(0.8) brightness(1.5) !important;
+}
+
+/* تحويل الألوان المحددة إلى فاتحة */
+.theme-black [style*="color: #000000"],
+.theme-black [style*="color: #212529"],
+.theme-black [style*="color: #333333"],
+.theme-black [style*="color: #000"] {
+    color: #f0f0f0 !important;
+}
+
+/* الحفاظ على الألوان الفاتحة كما هي */
+.theme-black [style*="color: #ffffff"],
+.theme-black [style*="color: #f0f0f0"],
+.theme-black [style*="color: #e0e0e0"] {
+    color: inherit !important;
+}
+
 /* ========== محرر الملاحظات في الثيم الأسود ========== */
 .theme-black .notes-content {
     color: #f0f0f0 !important;
