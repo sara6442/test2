@@ -5,16 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>مهامي - تطبيق إدارة المهام المتقدم</title>
     
-     <!-- أولاً: الخطوط -->
+    <!-- 1. الخطوط العربية -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
     
-    <!-- ثانياً: Font Awesome -->
+    <!-- 2. Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- ثالثاً: أنماطنا (الأهم) -->
-    <link rel="stylesheet" href="styles.css">
-    
-</head>  <!-- ✨ هذا كان مفقوداً! -->
+    <!-- 3. أنماط التطبيق -->
+    <style>
+    /* ========== الأنماط الطارئة ========== */
+    body {
+        background-color: #f8f9fa !important;
+        color: #212529 !important;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+    }
+
+    .app-container { min-height: 100vh; }
+
+    /* سيتم تحميل بقية الأنماط من ملف CSS */
+    </style>
+</head>
+
 <body class="theme-gray">
     <div class="app-container">
         <!-- الشريط الجانبي -->
@@ -422,14 +433,82 @@
         <div contenteditable="true" class="notes-content" id="notes-editor-content" placeholder="اكتب ملاحظاتك هنا..."></div>
     </div>
 
-    <!-- تلميحات محسنة -->
+    <!-- التلميحات المحسنة -->
     <div id="global-tooltip" class="tooltip">
         <div class="tooltip-content">
             <div class="tooltip-title" id="tooltip-title"></div>
             <div class="tooltip-info" id="tooltip-info"></div>
-            
         </div>
     </div>
+    
+    <!-- ملفات JavaScript -->
     <script src="app.js"></script>
+    
+    <!-- تهيئة الصفحة -->
+    <script>
+        // تأكد من تحميل الصفحة أولاً
+        document.addEventListener('DOMContentLoaded', function() {
+            // اختبار تحميل CSS
+            function testPageLoad() {
+                console.log("✅ الصفحة محملة!");
+                
+                // إظهار رسالة تأكيد
+                const msg = document.createElement('div');
+                msg.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    left: 10px;
+                    background: #10b981;
+                    color: white;
+                    padding: 10px 20px;
+                    border-radius: 5px;
+                    z-index: 99999;
+                    font-family: Arial;
+                `;
+                msg.textContent = '✅ التطبيق جاهز!';
+                document.body.appendChild(msg);
+                
+                setTimeout(() => msg.remove(), 3000);
+            }
+            
+            // تشغيل الاختبار بعد تحميل كامل الصفحة
+            window.addEventListener('load', testPageLoad);
+            
+            // إذا كان هناك خطأ في CSS، أضف الأنماط الاضافية
+            setTimeout(() => {
+                const rootStyles = getComputedStyle(document.documentElement);
+                const themeBg = rootStyles.getPropertyValue('--theme-bg').trim();
+                
+                if (!themeBg || themeBg === 'initial' || themeBg === '') {
+                    console.warn("⚠️ CSS لم يتم تحميله بالكامل");
+                    
+                    // تطبيق أنماط الطارئة
+                    document.body.style.backgroundColor = "#f8f9fa";
+                    document.body.style.color = "#212529";
+                    
+                    const warning = document.createElement('div');
+                    warning.id = 'css-warning';
+                    warning.style.cssText = `
+                        position: fixed;
+                        top: 50px;
+                        right: 10px;
+                        background: #f8d7da;
+                        color: #721c24;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        z-index: 99999;
+                        font-family: Arial;
+                        border: 1px solid #f5c6cb;
+                    `;
+                    warning.innerHTML = '⚠️ تم تحميل التطبيق بنجاح!';
+                    document.body.appendChild(warning);
+                    
+                    setTimeout(() => {
+                        if (warning) warning.remove();
+                    }, 5000);
+                }
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
