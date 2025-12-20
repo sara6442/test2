@@ -2337,7 +2337,162 @@ function setupSettingsEvents() {
         });
     });
 }
+// ========== إعداد تأثيرات المرور على المهام ==========
+function setupTaskHoverEffects() {
+    // إضافة Tooltip للمهام
+    document.querySelectorAll('.task-card:not(.deleted)').forEach(card => {
+        card.addEventListener('mouseenter', function(e) {
+            const taskId = this.dataset.id;
+            const task = AppState.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            showTaskTooltip(e, task);
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            hideTooltip();
+        });
+        
+        // عند النقر على البطاقة تفتح نافذة التعديل
+        card.addEventListener('click', function(e) {
+            // تجنب فتح التعديل عند النقر على الأزرار
+            if (!e.target.closest('.task-actions') && !e.target.closest('input[type="checkbox"]')) {
+                const taskId = this.dataset.id;
+                openEditTaskModal(taskId);
+            }
+        });
+    });
+    
+    // إضافة Tooltip لمهام الجدول الزمني
+    document.querySelectorAll('.calendar-task-card').forEach(card => {
+        card.addEventListener('mouseenter', function(e) {
+            const taskTitle = this.querySelector('.calendar-task-title')?.textContent;
+            const taskMeta = this.querySelector('.calendar-task-meta')?.innerHTML;
+            
+            showCalendarTooltip(e, taskTitle, taskMeta);
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            hideTooltip();
+        });
+    });
+}
 
+function showTaskTooltip(event, task) {
+    const category = getCategoryById(task.categoryId);
+    
+    const tooltipHTML = `
+        <div class="task-tooltip" style="
+            position: fixed;
+            background: var(--theme-card);
+            border: 2px solid var(--theme-primary);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10000;
+            max-width: 300px;
+            color: var(--theme-text);
+            font-family: inherit;
+        ">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <strong style="color: var(--theme-primary);">${task.title}</strong>
+                <span style="background: ${category.color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                    ${category.name}
+                </span>
+            </div>
+            
+            ${task.description ? `<p style="margin: 10px 0; color: var(--theme-text);">${task.description}</p>` : ''}
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; font-size: 0.9rem;">
+                <div>
+                    <i class="fas fa-calendar" style="color: var(--gray-color); margin-left: 5px;"></i>
+                    <span>${formatDate(task.date)}</span>
+                </div>
+                <div>
+                    <i class="fas fa-clock" style="color: var(--gray-color); margin-left: 5px;"></i>
+                    <span>${task.duration} دقيقة</span>
+                </div>
+                <div>
+                    <i class="fas fa-flag" style="color: ${
+                        task.priority === 'high' ? '#f72585' : 
+                        task.priority === 'medium' ? '#f8961e' : '#4cc9f0'
+                    }; margin-left: 5px;"></i>
+                    <span>${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</span>
+                </div>
+                <div>
+                    <i class="fas ${task.completed ? 'fa-check-circle' : 'fa-clock'}" 
+                       style="color: ${task.completed ? 'var(--success-color)' : 'var(--warning-color)'}; margin-left: 5px;"></i>
+                    <span>${task.completed ? 'مكتملة' : 'قيد التنفيذ'}</span>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; text-align: center; color: var(--gray-color); font-size: 0.85rem;">
+                <i class="fas fa-mouse-pointer"></i> انقر لفتح التعديل
+            </div>
+        </div>
+    `;
+    
+    // إضافة الـ Tooltip إلى DOM
+    const existingTooltip = document.querySelector('.task-tooltip');
+    if (existingTooltip) existingTooltip.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', tooltipHTML);
+    
+    // وضع الـ Tooltip بجانب المؤشر
+    const tooltip = document.querySelector('.task-tooltip');
+    const x = event.clientX + 15;
+    const y = event.clientY + 15;
+    
+    tooltip.style.left = `${x}px`;
+    tooltip.style.top = `${y}px`;
+}
+
+function showCalendarTooltip(event, title, meta) {
+    const tooltipHTML = `
+        <div class="calendar-tooltip" style="
+            position: fixed;
+            background: var(--theme-card);
+            border: 2px solid var(--theme-primary);
+            border-radius: 8px;
+            padding: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            z-index: 10000;
+            max-width: 250px;
+            color: var(--theme-text);
+            font-family: inherit;
+        ">
+            <div style="margin-bottom: 8px;">
+                <strong style="color: var(--theme-primary);">${title}</strong>
+            </div>
+            <div style="color: var(--gray-color); font-size: 0.9rem;">
+                ${meta}
+            </div>
+            <div style="margin-top: 10px; text-align: center; color: var(--gray-color); font-size: 0.8rem;">
+                <i class="fas fa-mouse-pointer"></i> انقر لفتح التعديل
+            </div>
+        </div>
+    `;
+    
+    // إضافة الـ Tooltip
+    const existingTooltip = document.querySelector('.calendar-tooltip');
+    if (existingTooltip) existingTooltip.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', tooltipHTML);
+    
+    // وضع الـ Tooltip
+    const tooltip = document.querySelector('.calendar-tooltip');
+    const x = event.clientX + 15;
+    const y = event.clientY + 15;
+    
+    tooltip.style.left = `${x}px`;
+    tooltip.style.top = `${y}px`;
+}
+
+function hideTooltip() {
+    document.querySelectorAll('.task-tooltip, .calendar-tooltip').forEach(tooltip => {
+        tooltip.remove();
+    });
+}
 // ========== النوافذ والتنقل ==========
 function openEditTaskModal(taskId) {
     const task = AppState.tasks.find(t => t.id === taskId);
