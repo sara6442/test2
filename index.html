@@ -169,46 +169,46 @@
                 <button class="close-btn" id="close-task-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="task-form">
-                    <div class="form-group">
-                        <label for="task-title">عنوان المهمة *</label>
-                        <input type="text" id="task-title" placeholder="أدخل عنوان المهمة" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-category">الفئة *</label>
-                        <select id="task-category" required>
-                            <option value="">-- اختر الفئة --</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="task-date">تاريخ الاستحقاق</label>
-                            <input type="date" id="task-date">
-                        </div>
-                        <div class="form-group">
-                            <label for="task-time">الوقت</label>
-                            <input type="time" id="task-time">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="task-duration">المدة (دقائق)</label>
-                            <input type="number" id="task-duration" min="1" value="30">
-                        </div>
-                        <div class="form-group">
-                            <label for="task-priority">الأولوية</label>
-                            <select id="task-priority">
-                                <option value="low">منخفضة</option>
-                                <option value="medium" selected>متوسطة</option>
-                                <option value="high">عالية</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="task-description">الوصف</label>
-                        <textarea id="task-description" placeholder="أدخل وصف المهمة" rows="4"></textarea>
-                    </div>
-                </form>
+              <form id="task-form">
+    <div class="form-group">
+        <label for="task-title">عنوان المهمة *</label>
+        <input type="text" id="task-title" placeholder="أدخل عنوان المهمة" required>
+    </div>
+    <div class="form-group">
+        <label for="task-category">الفئة *</label>
+        <select id="task-category" required>
+            <!-- سيتم ملؤها بواسطة JavaScript -->
+        </select>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="task-date">تاريخ الاستحقاق</label>
+            <input type="date" id="task-date">
+        </div>
+        <div class="form-group">
+            <label for="task-time">الوقت</label>
+            <input type="time" id="task-time">
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="task-duration">المدة (دقائق)</label>
+            <input type="number" id="task-duration" min="1" value="30">
+        </div>
+        <div class="form-group">
+            <label for="task-priority">الأولوية</label>
+            <select id="task-priority">
+                <option value="low">منخفضة</option>
+                <option value="medium" selected>متوسطة</option>
+                <option value="high">عالية</option>
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="task-description">الوصف</label>
+        <textarea id="task-description" placeholder="أدخل وصف المهمة" rows="4"></textarea>
+    </div>
+</form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancel-task">إلغاء</button>
