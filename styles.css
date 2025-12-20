@@ -1427,3 +1427,60 @@ input:disabled {
     max-height: 200px;
     overflow-y: auto;
 }
+
+/* ========== تنسيق متقدم للبطاقات ========== */
+.task-card {
+    position: relative;
+    overflow: hidden;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease !important;
+}
+
+.task-card::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 5px;
+    background: var(--theme-primary);
+    transition: width 0.3s ease;
+}
+
+.task-card:hover::before {
+    width: 8px;
+}
+
+.task-card:hover {
+    transform: translateX(-8px) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-bottom: none !important;
+    outline: none !important;
+}
+
+/* ========== تنسيق البطاقات في الشريط الجانبي ========== */
+.sidebar {
+    transition: background 0.5s ease;
+}
+
+/* ========== تحسين ثيم الثيمات الأخرى ========== */
+.theme-gray .task-card::before {
+    background: linear-gradient(180deg, #5a6268, #495057);
+}
+
+.theme-black .task-card::before {
+    background: linear-gradient(180deg, #1a1a1a, #2d2d2d);
+}
+
+.theme-blue .task-card::before {
+    background: linear-gradient(180deg, #4361ee, #3a56d4);
+}
+
+.theme-beige .task-card::before {
+    background: linear-gradient(180deg, #d7ccc8, #bcaaa4);
+}
+
+.theme-custom .task-card::before {
+    background: linear-gradient(180deg, var(--custom-color1), var(--custom-color2));
+}
