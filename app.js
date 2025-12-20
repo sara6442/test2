@@ -1949,29 +1949,6 @@ function calculateCategoryStatus(categoryId) {
         categoryTimeframe: categoryTimeframeMinutes
     };
 }
-    
-    if (totalDuration > categoryTimeframeMinutes) {
-        return {
-            status: 'exceeded',
-            message: category.messageExceeded || 'لقد تجاوزت الوقت المخصص لهذه الفئة',
-            totalTasks: categoryTasks.length,
-            completedTasks: completedTasks.length,
-            totalDuration: totalDuration,
-            completedDuration: completedDuration,
-            categoryTimeframe: categoryTimeframeMinutes
-        };
-    }
-    
-    return {
-        status: 'pending',
-        message: category.messagePending || 'هناك مهام معلقة في هذه الفئة',
-        totalTasks: categoryTasks.length,
-        completedTasks: completedTasks.length,
-        totalDuration: totalDuration,
-        completedDuration: completedDuration,
-        categoryTimeframe: categoryTimeframeMinutes
-    };
-}
 
 function renderCategoriesStatus() {
     const container = document.querySelector('.content-area');
