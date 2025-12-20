@@ -52,182 +52,71 @@ body {
     --theme-hover: #5a6268;
 }
 
-/* === الثيم الأسود المعدل === */
+/* === الثيم الأسود المعدل والمبسط === */
 .theme-black {
-    --theme-bg: #2d2d2d; /* خلفية رمادية غامقة */
+    --theme-bg: #121212; /* خلفية سوداء داكنة */
     --theme-sidebar: linear-gradient(180deg, #1a1a1a, #2d2d2d);
-    --theme-text: #ffffff; /* خطوط بيضاء فاتحة */
-    --theme-card: #3a3a3a; /* بطاقات بلون رمادي غامق بدلاً من أبيض */
-    --theme-border: #555555;
+    --theme-text: #ffffff;
+    --theme-card: #1e1e1e; /* رمادي غامق */
+    --theme-border: #444444;
     --theme-primary: #5a6268;
     --theme-hover: #6c757d;
 }
 
-/* ========== تعديلات الثيم الأسود ========== */
-.theme-black .modal-content {
-    background-color: #1e1e1e;
-    color: #f0f0f0;
+/* ========== تصحيح الألوان العامة ========== */
+.theme-black,
+.theme-black *:not(input):not(textarea):not(select) {
+    color: #ffffff !important;
 }
 
-.theme-black .modal-header h3 {
-    color: #1e1e1e;
-}
-
-/* ========== تنسيقات الإدخال في الثيم الأسود ========== */
 .theme-black input,
-.theme-black select,
 .theme-black textarea,
-.theme-black .form-group input,
-.theme-black .form-group select,
-.theme-black .form-group textarea,
-.theme-black .notes-title-input,
-.theme-black .font-select,
-.theme-black .font-size-input,
-.theme-black .font-weight-select,
-.theme-black .font-style-select {
+.theme-black select {
+    color: #ffffff !important;
     background-color: #2d2d2d !important;
-    color: #ffffff !important; /* تغيير من #f0f0f0 إلى #ffffff */
-    border-color: #444444 !important;
+    border-color: #555555 !important;
 }
 
-/* إعادة تلوين placeholder */
 .theme-black input::placeholder,
 .theme-black textarea::placeholder {
     color: #aaaaaa !important;
 }
 
-/* ========== تعديلات الملاحظات في الثيم الأسود ========== */
-.theme-black .note-content * {
-    color: inherit !important; /* يرث اللون من العنصر الأب */
-}
-
-/* إذا كان لون النص داكن في الثيم الأسود، اجعله فاتح */
+/* ========== محتوى الملاحظات ========== */
+.theme-black .notes-content,
 .theme-black .note-content,
+.theme-black .note-content *,
 .theme-black .note-checkbox-text,
-.theme-black .note-title {
+.theme-black .note-title,
+.theme-black .note-checkbox-item {
     color: #ffffff !important;
-}
-
-/* تحسين ألوان النصوص الداكنة */
-.theme-black .note-content [style*="color: #000000"],
-.theme-black .note-content [style*="color: #212529"],
-.theme-black .note-content [style*="color: #333333"] {
-    color: #f0f0f0 !important;
-}
-
-/* إذا كان اللون فاتحاً بالفعل، اتركه كما هو */
-.theme-black .note-content [style*="color: #ffffff"],
-.theme-black .note-content [style*="color: #f0f0f0"],
-.theme-black .note-content [style*="color: #e0e0e0"] {
-    color: inherit !important;
-}
-
-.theme-black .task-description {
-    color: #cccccc !important;
-}
-
-.theme-black .category-name {
-    color: #ffffff !important;
-}
-
-/* تحويل الألوان الداكنة إلى فاتحة تلقائياً في الثيم الأسود */
-.theme-black .note-content *[style*="color"] {
-    filter: invert(0.8) brightness(1.5) !important;
-}
-
-/* تحويل الألوان المحددة إلى فاتحة */
-.theme-black [style*="color: #000000"],
-.theme-black [style*="color: #212529"],
-.theme-black [style*="color: #333333"],
-.theme-black [style*="color: #000"] {
-    color: #f0f0f0 !important;
-}
-
-/* الحفاظ على الألوان الفاتحة كما هي */
-.theme-black [style*="color: #ffffff"],
-.theme-black [style*="color: #f0f0f0"],
-.theme-black [style*="color: #e0e0e0"] {
-    color: inherit !important;
-}
-/* ========== تحسين إمكانية قراءة النصوص في الثيم الأسود ========== */
-.theme-black {
-    color-scheme: dark;
-}
-
-/* تحسين النصوص الداكنة في الثيم الأسود */
-.theme-black .note-content {
-    filter: brightness(1.2) contrast(1.1);
-}
-
-/* تحويل الألوان الداكنة جداً إلى فاتحة في الملاحظات */
-.theme-black .note-content [style*="color"] {
-    filter: brightness(1.5) !important;
-}
-
-/* تحسين النصوص السوداء في الثيم الأسود */
-.theme-black [style*="#000000"],
-.theme-black [style*="#212529"],
-.theme-black [style*="#333333"],
-.theme-black [style*="#000"],
-.theme-black [style*="black"] {
-    color: #f0f0f0 !important;
-}
-
-/* الحفاظ على النصوص الملونة غير الداكنة */
-.theme-black [style*="#ffffff"],
-.theme-black [style*="#f8f9fa"],
-.theme-black [style*="#f0f0f0"],
-.theme-black [style*="#e0e0e0"] {
-    filter: brightness(1.1) !important;
-}
-
-/* ========== محرر الملاحظات في الثيم الأسود ========== */
-.theme-black .notes-content {
-    color: #f0f0f0 !important;
     background-color: #1e1e1e !important;
 }
 
-.theme-black .notes-title-input {
-    color: #ffffff !important;
-}
-
-/* أضف هذا لتحسين قراءة النصوص الملونة */
-.theme-black .note-content [style*="color"] {
-    filter: brightness(1.3) !important; /* زيادة السطوع */
-}
-
-/* ========== التأكد من ظهور النص الأبيض في جميع الحقول ========== */
-.theme-black #task-title,
-.theme-black #task-description,
-.theme-black #edit-task-title,
-.theme-black #edit-task-description,
-.theme-black #category-name,
-.theme-black .note-checkbox-text,
-.theme-black .task-meta span,
-.theme-black .category-progress-info span,
-.theme-black .note-date,
-.theme-black .note-font,
-.theme-black .calendar-task-title,
-.theme-black .calendar-task-meta span,
-.theme-black .note-card .note-title {
-    color: #ffffff !important;
-}
-/* ========== تحسين البطاقات في الثيم الأسود ========== */
+/* ========== البطاقات والحاويات ========== */
 .theme-black .task-card,
 .theme-black .category-card,
 .theme-black .note-card,
+.theme-black .modal-content,
+.theme-black .content-area,
+.theme-black .header,
 .theme-black .time-slot,
 .theme-black .day-column,
 .theme-black .month-day {
-    background-color: #3a3a3a !important; /* رمادي غامق للبطاقات */
-    border-color: #555555 !important;
+    background-color: #1e1e1e !important;
+    border-color: #444444 !important;
 }
 
-/* تحسين ألوان النص في البطاقات */
+/* ========== النصوص ========== */
 .theme-black .task-title,
 .theme-black .category-name,
 .theme-black .note-title,
-.theme-black .calendar-task-title {
+.theme-black .task-description,
+.theme-black .category-progress-info,
+.theme-black .note-date,
+.theme-black .note-font,
+.theme-black .calendar-task-title,
+.theme-black .calendar-task-meta {
     color: #ffffff !important;
 }
 
@@ -238,37 +127,45 @@ body {
     color: #cccccc !important;
 }
 
-.theme-black .task-card:hover,
-.theme-black .category-card:hover,
-.theme-black .note-card:hover {
-    background-color: #444444 !important;
-    border-color: #666666 !important;
-}
-/* ========== نصوص التاريخ والملاحظات ========== */
-.theme-black #current-date,
-.theme-black .current-date,
-.theme-black .form-group label,
-.theme-black .modal-header h3,
-.theme-black .notes-title-input,
-.theme-black .note-title {
-    color: #ffffff !important;
+/* ========== الأزرار ========== */
+.theme-black .btn-primary {
+    background-color: #5a6268 !important;
+    border-color: #6c757d !important;
 }
 
-/* تحسين إمكانية الوصول */
-:focus-visible {
-    outline: 2px solid var(--theme-primary);
+.theme-black .btn-primary:hover {
+    background-color: #6c757d !important;
+}
+
+.theme-black .btn-secondary {
+    background-color: #2d2d2d !important;
+    color: #ffffff !important;
+    border-color: #444444 !important;
+}
+
+.theme-black .btn-secondary:hover {
+    background-color: #3d3d3d !important;
+}
+
+/* ========== شريط التمرير ========== */
+.theme-black ::-webkit-scrollbar-track {
+    background: #1e1e1e !important;
+}
+
+.theme-black ::-webkit-scrollbar-thumb {
+    background: #555555 !important;
+}
+
+.theme-black ::-webkit-scrollbar-thumb:hover {
+    background: #666666 !important;
+}
+
+/* ========== التركيز والتفاعل ========== */
+.theme-black :focus-visible {
+    outline: 2px solid #5a6268;
     outline-offset: 2px;
 }
 
-/* تحسين التباين في الثيم الأسود */
-.theme-black .task-card.overdue {
-    background: rgba(247, 37, 133, 0.1) !important;
-}
-
-/* تحسين الظلال في الثيمات الداكنة */
-.theme-black .modal-content {
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-}
 
 .theme-blue {
     --theme-bg: #f0f7ff;
