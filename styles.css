@@ -1484,3 +1484,86 @@ input:disabled {
 .theme-custom .task-card::before {
     background: linear-gradient(180deg, var(--custom-color1), var(--custom-color2));
 }
+
+/* ========== جعل المحتوى طويلاً بدون شريط تمرير داخلي ========== */
+.content-area {
+    background-color: var(--theme-bg) !important;
+    border-radius: var(--border-radius);
+    padding: 30px;
+    box-shadow: var(--box-shadow);
+    min-height: calc(100vh - 150px); /* جعل المحتوى طويلاً */
+    border: 1px solid var(--theme-border);
+    transition: var(--transition);
+    /* إزالة overflow-y */
+    overflow-y: visible !important;
+    max-height: none !important;
+}
+
+/* إزالة شريط التمرير من الحاويات الداخلية */
+.tasks-list,
+.categories-grid,
+.notes-grid,
+.categories-status-container {
+    max-height: none !important;
+    overflow-y: visible !important;
+    padding-right: 0 !important;
+}
+
+/* الحفاظ على شريط التمرير الداخلي فقط للمهام داخل الفئات */
+.category-tasks-container {
+    max-height: 250px;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin: 15px 0;
+    background: var(--theme-card);
+    border-radius: 8px;
+    border: 1px solid var(--theme-border);
+    padding: 15px;
+}
+
+/* ========== تحسين الشريط الجانبي ========== */
+.main-content {
+    flex: 1;
+    margin-right: 280px;
+    padding: 25px;
+    transition: var(--transition);
+    /* إضافة شريط تمرير رئيسي */
+    overflow-y: auto;
+    height: 100vh;
+}
+
+/* تحسين شريط التمرير الرئيسي */
+.main-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.main-content::-webkit-scrollbar-track {
+    background: var(--theme-bg);
+}
+
+.main-content::-webkit-scrollbar-thumb {
+    background: var(--theme-primary);
+    border-radius: 5px;
+}
+
+.main-content::-webkit-scrollbar-thumb:hover {
+    background: var(--theme-hover);
+}
+
+/* ========== تحسين الجدول الزمني ========== */
+.daily-calendar,
+.weekly-calendar,
+.monthly-calendar {
+    max-height: none !important;
+    overflow-y: visible !important;
+}
+
+/* جعل خلايا الجدول أطول */
+.month-day {
+    min-height: 150px; /* زيادة الارتفاع */
+    max-height: 200px; /* زيادة الارتفاع الأقصى */
+}
+
+.day-column {
+    min-height: 500px; /* زيادة ارتفاع الأعمدة الأسبوعية */
+}
