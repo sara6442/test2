@@ -399,19 +399,17 @@ function initializeThemes() {
     
     // إعدادات الإعدادات
     setupSettingsEvents();
-}
-
-function applyCustomTheme() {
+}function applyCustomTheme() {
     const color1 = document.getElementById('custom-color1').value;
     const color2 = document.getElementById('custom-color2').value;
     
-    // إنشاء ألوان فاتحة من الألوان المختارة
-    function lightenColor(color, percent) {
+    // وظيفة لتحويل الألوان بشكل جميل
+    function adjustColor(color, percent) {
         const num = parseInt(color.slice(1), 16);
         const amt = Math.round(2.55 * percent);
-        const R = (num >> 16) + amt;
-        const G = (num >> 8 & 0x00FF) + amt;
-        const B = (num & 0x0000FF) + amt;
+        const R = Math.min(255, Math.max(0, (num >> 16) + amt));
+        const G = Math.min(255, Math.max(0, (num >> 8 & 0x00FF) + amt));
+        const B = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
         return `#${(
             0x1000000 +
             (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
@@ -420,25 +418,30 @@ function applyCustomTheme() {
         ).toString(16).slice(1)}`;
     }
     
-    const lightColor1 = lightenColor(color1, 30);
-    const lightColor2 = lightenColor(color2, 30);
+    // توليد ألوان متناسقة
+    const lightBg = adjustColor(color1, 30); // خلفية فاتحة
+    const lightCard = adjustColor(color1, 15); // بطاقات أفتح قليلاً
+    const borderColor = adjustColor(color1, 10); // حدود
     
-    // حفظ جميع الألوان
+    // حفظ الألوان
     localStorage.setItem('mytasks_custom_colors', JSON.stringify({ 
-        color1, color2,
-        lightColor1, lightColor2
+        color1, 
+        color2,
+        lightBg,
+        lightCard,
+        borderColor
     }));
     
-    // تطبيق الألوان
+    // تطبيق الألوان كمتغيرات CSS
     document.documentElement.style.setProperty('--custom-color1', color1);
     document.documentElement.style.setProperty('--custom-color2', color2);
-    document.documentElement.style.setProperty('--custom-bg', lightColor1);
-    document.documentElement.style.setProperty('--custom-card', lightColor2);
-    document.documentElement.style.setProperty('--custom-text', '#212529');
-    document.documentElement.style.setProperty('--custom-border', lightenColor(color1, 40));
-    document.documentElement.style.setProperty('--custom-primary', color1);
-    document.documentElement.style.setProperty('--custom-hover', color2);
+    document.documentElement.style.setProperty('--theme-bg', lightBg);
+    document.documentElement.style.setProperty('--theme-card', lightCard);
+    document.documentElement.style.setProperty('--theme-border', borderColor);
+    document.documentElement.style.setProperty('--theme-primary', color1);
+    document.documentElement.style.setProperty('--theme-hover', color2);
     
+    // تحديث الثيم
     AppState.currentTheme = 'custom';
     document.body.className = 'theme-custom';
     localStorage.setItem('mytasks_theme', 'custom');
@@ -448,6 +451,23 @@ function applyCustomTheme() {
     closeModal('custom-theme-modal');
     
     alert('تم تطبيق الثيم المخصص بنجاح!');
+}
+
+// وفي دالة loadCustomTheme:
+function loadCustomTheme() {
+    const customColors = localStorage.getItem('mytasks_custom_colors');
+    if (customColors) {
+        try {
+            const colors = JSON.parse(customColors);
+            document.documentElement.style.setProperty('--custom-color1', colors.color1);
+            document.documentElement.style.setProperty('--custom-color2', colors.color2);
+            document.documentElement.style.setProperty('--theme-bg', colors.lightBg || '#ffffff');
+            document.documentElement.style.setProperty('--theme-card', colors.lightCard || '#ffffff');
+            document.documentElement.style.setProperty('--theme-border', colors.borderColor || '#dee2e6');
+        } catch (e) {
+            console.error("خطأ في تحميل ألوان الثيم المخصص:", e);
+        }
+    }
 }
 
 function updateNotesColorsForTheme(theme) {
@@ -1393,7 +1413,175 @@ function renderDailyCalendar(container) {
     html += '</div>';
     container.innerHTML = html;
 }
+function renderWeeklyCalendar(container) {
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
+        days.push(day);
+    }
+    
+    let html = `
+        <div class="calendar-nav" style="margin-bottom: 20px;">
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarWeek(-1)">
+                <i class="fas fa-chevron-right"></i> الأسبوع الماضي
+            </button>
+            <h3 style="margin: 0 15px;">أسبوع ${today.getWeekNumber()}</h3>
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarWeek(1)">
+                الأسبوع القادم <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+    `;
+    
+    html += '<div class="weekly-calendar">';
+    
+    const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+    
+    days.forEach((day, index) => {
+        const dateStr = day.toISOString().split('T')[0];
+        const dayTasks = AppState.tasks.filter(task => task.date === dateStr);
+        const isToday = dateStr === new Date().toISOString().split('T')[0];
+        
+        html += `
+            <div class="day-column ${isToday ? 'today' : ''}">
+                <div class="day-header">
+                    <div class="day-name">${dayNames[index]}</div>
+                    <div class="day-date">${day.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })}</div>
+                </div>
+                <div class="day-tasks">
+        `;
+        
+        if (dayTasks.length === 0) {
+            html += `
+                <div style="text-align: center; padding: 20px 10px; color: var(--gray-color);">
+                    <i class="fas fa-calendar-day" style="opacity: 0.3;"></i>
+                    <p style="font-size: 0.9rem;">لا توجد مهام</p>
+                </div>
+            `;
+        } else {
+            dayTasks.forEach(task => {
+                const category = getCategoryById(task.categoryId);
+                const isOverdue = isTaskOverdue(task);
+                
+                html += `
+                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}"
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="border-left-color: ${category.color}; border-right-color: ${category.color};">
+                        <div class="calendar-task-title">${task.title}</div>
+                        <div class="calendar-task-meta">
+                            <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</span>
+                            ${task.completed ? '<span><i class="fas fa-check-circle"></i></span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            if (dayTasks.length > 10) {
+                html += `<div style="text-align: center; color: var(--gray-color); font-size: 0.9rem;">+${dayTasks.length - 10} مهمة أخرى</div>`;
+            }
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
 
+function renderMonthlyCalendar(container) {
+    const date = AppState.currentCalendarDate;
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const today = new Date().toISOString().split('T')[0];
+    
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    const startDay = firstDay.getDay();
+    
+    let html = `
+        <div class="calendar-nav" style="margin-bottom: 20px;">
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarMonth(-1)">
+                <i class="fas fa-chevron-right"></i> الشهر الماضي
+            </button>
+            <h3 style="margin: 0 15px;">${date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long' })}</h3>
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarMonth(1)">
+                الشهر القادم <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+    `;
+    
+    html += '<div class="monthly-calendar">';
+    
+    // رؤوس الأيام
+    const dayHeaders = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
+    dayHeaders.forEach(day => {
+        html += `<div class="month-day" style="text-align: center; font-weight: bold; color: var(--theme-primary); min-height: auto; padding: 5px;">${day}</div>`;
+    });
+    
+    // أيام فارغة في بداية الشهر
+    for (let i = 0; i < startDay; i++) {
+        html += '<div class="month-day" style="background: transparent; border: none; min-height: auto;"></div>';
+    }
+    
+    // أيام الشهر
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${(month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+        const dayTasks = AppState.tasks.filter(task => task.date === dateStr);
+        const isToday = dateStr === today;
+        
+        html += `
+            <div class="month-day ${isToday ? 'today' : ''}">
+                <div class="day-number">${day}</div>
+                <div class="month-tasks">
+        `;
+        
+        if (dayTasks.length > 0) {
+            dayTasks.forEach(task => {
+                const category = getCategoryById(task.categoryId);
+                const taskColor = category.color;
+                
+                html += `
+                    <div class="month-task-item" onclick="openEditTaskModal('${task.id}')">
+                        <span class="month-task-dot" style="background: ${taskColor};"></span>
+                        <span style="font-size: 0.75rem;">${task.title}</span>
+                    </div>
+                `;
+            });
+            
+            if (dayTasks.length > 5) {
+                html += `<div style="font-size: 0.75rem; color: var(--gray-color);">+${dayTasks.length - 5} أخرى</div>`;
+            }
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// دوال التنقل في الجدول
+function changeCalendarWeek(weeks) {
+    AppState.currentCalendarDate.setDate(AppState.currentCalendarDate.getDate() + (weeks * 7));
+    renderCalendar();
+}
+
+function changeCalendarMonth(months) {
+    AppState.currentCalendarDate.setMonth(AppState.currentCalendarDate.getMonth() + months);
+    renderCalendar();
+}
 function changeCalendarDate(days) {
     AppState.currentCalendarDate.setDate(AppState.currentCalendarDate.getDate() + days);
     renderCalendar();
