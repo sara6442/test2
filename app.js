@@ -1452,15 +1452,15 @@ function renderDailyCalendar(container) {
             </div>
         `;
     } else {
-        // تقسيم اليوم إلى 6 فترات (كل 4 ساعات)
-        const timeSlots = [
-            { start: '00:00', end: '04:00', label: 'فجر (12-4 ص)' },
-            { start: '04:00', end: '08:00', label: 'صباح مبكر (4-8 ص)' },
-            { start: '08:00', end: '12:00', label: 'صباح (8-12 ظ)' },
-            { start: '12:00', end: '16:00', label: 'ظهر (12-4 م)' },
-            { start: '16:00', end: '20:00', label: 'مساء (4-8 م)' },
-            { start: '20:00', end: '24:00', label: 'ليل (8-12 ل)' }
-        ];
+const timeSlots = [
+    { start: '00:00', end: '04:00', label: 'ليل (12-4 ص)' },
+    { start: '04:00', end: '06:00', label: 'فجر (4-6 ص)' },
+    { start: '06:00', end: '12:00', label: 'صباح (6-12 ص)' },
+    { start: '12:00', end: '16:00', label: 'ظهر (12-4 م)' },
+    { start: '16:00', end: '18:00', label: 'عصر (4-6 م)' },
+    { start: '18:00', end: '19:00', label: 'مساء (6-7 م)' },
+    { start: '19:00', end: '24:00', label: 'ليل (8-12 م)' }
+];
         
         timeSlots.forEach(slot => {
             const slotTasks = tasksForDay.filter(task => {
@@ -2569,8 +2569,24 @@ function openNoteEditor(noteId) {
     
     AppState.currentNoteId = noteId;
     
-    // ... (الكود الحالي يبقى كما هو)
+    document.getElementById('notes-editor-title').value = note.title;
+    document.getElementById('notes-font-family').value = note.fontFamily;
+    document.getElementById('notes-font-size').value = note.fontSize;
+    document.getElementById('notes-font-weight').value = note.fontWeight;
+    document.getElementById('notes-font-style').value = note.fontStyle;
+    document.getElementById('notes-font-color').value = note.color;
     
+    const editor = document.getElementById('notes-editor-content');
+    editor.innerHTML = note.content || '';
+    editor.style.fontFamily = note.fontFamily;
+    editor.style.fontSize = note.fontSize + 'px';
+    editor.style.fontWeight = note.fontWeight;
+    editor.style.fontStyle = note.fontStyle;
+    editor.style.color = note.color;
+    
+    document.getElementById('notes-editor').classList.add('active');
+    
+
     // إعداد الأدوات المحسنة بعد فتح المحرر
     setTimeout(() => {
         setupEnhancedNotesEditor();
@@ -2579,6 +2595,48 @@ function openNoteEditor(noteId) {
 
 function setupNotesEditorEvents() {
     console.log("📝 إعداد أحداث محرر الملاحظات...");
+    
+    // ✅ إضافة إمكانية تحميل الصور وGIF
+    const imageUploadBtn = document.getElementById('image-upload-btn');
+    const imageFileInput = document.getElementById('image-file-input');
+    
+    if (imageUploadBtn && imageFileInput) {
+        imageUploadBtn.addEventListener('click', () => {
+            imageFileInput.click();
+        });
+        
+        imageFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // السماح بالصور وGIF
+            if (!file.type.startsWith('image/')) {
+                alert('الرجاء اختيار ملف صورة (JPG, PNG, GIF)');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = document.createElement('img');
+                img.src = event.target.result;
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.borderRadius = '8px';
+                img.style.margin = '10px 0';
+                img.style.border = '1px solid var(--theme-border)';
+                
+                const editor = document.getElementById('notes-editor-content');
+                if (editor) {
+                    editor.appendChild(img);
+                    editor.appendChild(document.createElement('br'));
+                }
+            };
+            reader.readAsDataURL(file);
+            
+            // إعادة تعيين الحقل
+            e.target.value = '';
+        });
+    }
     
     // تأكد من وجود العناصر أولاً
     const saveNotesBtn = document.getElementById('save-notes-btn');
@@ -3209,18 +3267,22 @@ function renderDailyCalendar(container) {
                     const isOverdue = isTaskOverdue(task);
                     
                     html += `
-                        <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
-                             data-id="${task.id}"
-                             style="border-left: 4px solid ${category.color}; border-right: 4px solid ${category.color}; cursor: pointer; margin-bottom: 8px;"
-                             title="انقر لتعديل المهمة">
-                            <div class="calendar-task-title" style="font-weight: 500; margin-bottom: 5px;">${task.title}</div>
-                            <div class="calendar-task-meta" style="display: flex; gap: 15px; font-size: 0.85rem; color: var(--gray-color);">
-                                <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</span>
-                                <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
-                                ${isOverdue ? '<span style="color: #f72585;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
-                            </div>
-                        </div>
-                    `;
+    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+         data-id="${task.id}"
+         onclick="openEditTaskModal('${task.id}')"
+         style="border-left: 2px solid ${category.color}; 
+                cursor: pointer; margin-bottom: 4px; padding: 6px 8px; font-size: 0.8rem; min-height: 45px;"
+         title="${task.title}">
+        <div class="calendar-task-title" style="font-weight: 500; margin-bottom: 2px; font-size: 0.8rem;">
+            <span style="color: ${category.color}; margin-left: 3px; font-size: 0.6rem;">•</span>
+            ${task.title.length > 20 ? task.title.substring(0, 20) + '...' : task.title}
+        </div>
+        <div class="calendar-task-meta" style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-color);">
+            <span><i class="fas fa-clock"></i> ${task.time || ''}</span>
+            <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+        </div>
+    </div>
+`;
                 });
             }
             
@@ -3779,6 +3841,7 @@ function checkDOMElements() {
 }
 
 // ========== وظائف حفظ المهام ==========
+// ========== وظائف حفظ المهام ==========
 function saveNewTask() {
     const titleInput = document.getElementById('task-title');
     const categorySelect = document.getElementById('task-category');
@@ -3807,6 +3870,7 @@ function saveNewTask() {
     const prioritySelect = document.getElementById('task-priority');
     const descriptionTextarea = document.getElementById('task-description');
     
+    // إصلاح هنا: استدعاء addTask بدلاً من saveTask
     addTask({
         title: title,
         description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
