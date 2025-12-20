@@ -188,10 +188,12 @@ body {
     --theme-hover: #5a6268;
 }
 
-/* معاينة الثيم المخصص */
-.theme-custom-preview {
-    background: linear-gradient(45deg, var(--custom-color1, #5a6268), var(--custom-color2, #495057));
-}
+/* معاينة الثيمات */
+.theme-gray-preview { background: linear-gradient(45deg, #5a6268, #495057); }
+.theme-black-preview { background: linear-gradient(45deg, #1e1e1e, #2d2d2d); }
+.theme-blue-preview { background: linear-gradient(45deg, #4361ee, #3a56d4); }
+.theme-beige-preview { background: linear-gradient(45deg, #d7ccc8, #bcaaa4); }
+.theme-custom-preview { background: linear-gradient(45deg, var(--custom-color1, #5a6268), var(--custom-color2, #495057)); }
 
 /* ========== الأساسيات ========== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -393,6 +395,18 @@ body {
 input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+}
+/* زر حالة الفئات */
+.btn-info {
+    background: linear-gradient(135deg, #4cc9f0, #3ab5e0);
+    color: white;
+    border: none;
+}
+
+.btn-info:hover {
+    background: linear-gradient(135deg, #3ab5e0, #2a9ec8);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 201, 240, 0.3);
 }
 /* ========== منطقة المحتوى ========== */
 .content-area {
@@ -1271,4 +1285,74 @@ input:disabled {
 .theme-black .category-task-item.completed .category-task-title {
     text-decoration: line-through;
     color: #888888 !important;
+}
+
+/* ========== تنسيق نافذة الإعدادات ========== */
+.settings-popup {
+    position: absolute;
+    bottom: 70px;
+    right: 20px;
+    background: var(--theme-card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--theme-border);
+    display: none;
+    z-index: 1000;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.settings-popup.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.settings-popup h4 {
+    margin-bottom: 15px;
+    color: var(--theme-text);
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    background: var(--theme-bg);
+}
+
+.theme-option:hover {
+    background: var(--theme-border);
+    transform: translateY(-2px);
+}
+
+.theme-option.active {
+    border-color: var(--theme-primary);
+    background: rgba(67, 97, 238, 0.1);
+}
+
+.theme-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--theme-border);
+}
+
+.theme-name {
+    font-size: 0.9rem;
+    color: var(--theme-text);
+    font-weight: 500;
 }
