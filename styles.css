@@ -1906,23 +1906,29 @@ input:disabled {
 .calendar-tooltip:hover {
     display: block !important;
 }
-
-/* تصغير حجم المهام في الجدول */
+/* ========== تصغير حجم المهام في الجدول ========== */
 .calendar-task-card {
-    min-height: 50px !important;
-    max-height: 65px !important;
-    overflow: hidden !important;
+    min-height: 45px !important;
+    max-height: 55px !important;
     padding: 6px 8px !important;
-    margin-bottom: 5px !important;
+    margin-bottom: 4px !important;
+    font-size: 0.8rem !important;
 }
 
 .calendar-task-title {
-    font-size: 0.85rem !important;
+    font-size: 0.8rem !important;
     margin-bottom: 2px !important;
 }
 
 .calendar-task-meta {
-    font-size: 0.75rem !important;
+    font-size: 0.7rem !important;
+}
+
+/* تحسين التلميحات */
+.task-tooltip,
+.calendar-tooltip {
+    font-size: 0.85rem !important;
+    max-width: 250px !important;
 }
 
 /* تحسين المهام في الفئات */
@@ -1945,4 +1951,24 @@ input:disabled {
 .task-title {
     padding-right: 10px !important;
     margin-bottom: 8px !important;
+}
+
+/* ========== إصلاح محرر الملاحظات ========== */
+.notes-editor-container.active {
+    display: flex !important;
+    z-index: 10000 !important;
+}
+
+.notes-content img {
+    max-width: 100% !important;
+    height: auto !important;
+    border-radius: 8px !important;
+    margin: 10px 0 !important;
+    border: 1px solid var(--theme-border) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.image-upload-container {
+    display: flex !important;
+    align-items: center !important;
 }
