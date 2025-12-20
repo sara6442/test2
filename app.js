@@ -939,9 +939,14 @@ function deleteTask(taskId) {
     refreshCurrentView();
 }
 // ========== تعديل رسائل الفئة ==========
+// ========== إصلاح نافذة تعديل رسائل الفئة ==========
 function openEditCategoryMessages(categoryId) {
     const category = AppState.categories.find(c => c.id === categoryId);
     if (!category) return;
+    
+    // إغلاق أي نافذة موجودة
+    const existingModal = document.getElementById('edit-category-messages-modal');
+    if (existingModal) existingModal.remove();
     
     const modalHTML = `
         <div class="modal" id="edit-category-messages-modal">
@@ -954,17 +959,17 @@ function openEditCategoryMessages(categoryId) {
                     <form id="category-messages-form">
                         <div class="form-group">
                             <label for="message-empty">رسالة عند عدم وجود مهام</label>
-                            <textarea id="message-empty" rows="2" placeholder="رسالة تظهر عندما لا توجد مهام في الفئة">${category.messageEmpty || ''}</textarea>
+                            <textarea id="message-empty" rows="3" placeholder="رسالة تظهر عندما لا توجد مهام في الفئة">${category.messageEmpty || ''}</textarea>
                         </div>
                         
                         <div class="form-group">
                             <label for="message-completed">رسالة عند اكتمال جميع المهام</label>
-                            <textarea id="message-completed" rows="2" placeholder="رسالة تظهر عند اكتمال جميع مهام الفئة">${category.messageCompleted || ''}</textarea>
+                            <textarea id="message-completed" rows="3" placeholder="رسالة تظهر عند اكتمال جميع مهام الفئة">${category.messageCompleted || ''}</textarea>
                         </div>
                         
                         <div class="form-group">
                             <label for="message-exceeded">رسالة عند تجاوز الحيز الزمني</label>
-                            <textarea id="message-exceeded" rows="2" placeholder="رسالة تظهر عند تجاوز الحيز الزمني">${category.messageExceeded || ''}</textarea>
+                            <textarea id="message-exceeded" rows="3" placeholder="رسالة تظهر عند تجاوز الحيز الزمني">${category.messageExceeded || ''}</textarea>
                         </div>
                     </form>
                 </div>
@@ -976,14 +981,41 @@ function openEditCategoryMessages(categoryId) {
         </div>
     `;
     
-    // إضافة النافذة
-    const existingModal = document.getElementById('edit-category-messages-modal');
-    if (existingModal) existingModal.remove();
-    
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.getElementById('edit-category-messages-modal').classList.add('active');
 }
 
+// ========== حفظ رسائل الفئة ==========
+function saveCategoryMessages(categoryId) {
+    const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
+    if (categoryIndex === -1) return;
+    
+    // جلب العناصر بشكل صحيح
+    const messageEmpty = document.getElementById('message-empty')?.value.trim() || '';
+    const messageCompleted = document.getElementById('message-completed')?.value.trim() || '';
+    const messageExceeded = document.getElementById('message-exceeded')?.value.trim() || '';
+    
+    AppState.categories[categoryIndex] = {
+        ...AppState.categories[categoryIndex],
+        messageEmpty: messageEmpty,
+        messageCompleted: messageCompleted,
+        messageExceeded: messageExceeded
+    };
+    
+    saveCategories();
+    closeModal('edit-category-messages-modal');
+    
+    // تحديث العرض
+    if (AppState.currentView === 'categories') {
+        renderCategories();
+    }
+    
+    if (typeof renderCategoriesStatus === 'function') {
+        renderCategoriesStatus();
+    }
+    
+    alert('تم حفظ الرسائل بنجاح!');
+}
 function toggleTaskCompletion(taskId) {
     const task = AppState.tasks.find(t => t.id === taskId);
     if (task) {
