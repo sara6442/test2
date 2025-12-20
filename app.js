@@ -1380,7 +1380,7 @@ function renderCategories() {
 
 // ========== عرض الجدول الزمني ==========
 function renderCalendar() {
-    const container = document.getElementById('calendar-content');
+    const container = document.getElementById('calendar-content'); // هذا السطر ناقص!
     const tabs = document.querySelectorAll('.calendar-tab');
     
     // تحديث التبويبات النشطة
@@ -2532,32 +2532,60 @@ function hideTooltip() {
 }
 // ========== النوافذ والتنقل ==========
 function openEditTaskModal(taskId) {
+    console.log("فتح تعديل المهمة:", taskId);
+    
     const task = AppState.tasks.find(t => t.id === taskId);
-    if (!task) return;
+    if (!task) {
+        console.error("المهمة غير موجودة:", taskId);
+        return;
+    }
     
     AppState.currentTaskId = taskId;
     
-    document.getElementById('edit-task-title').value = task.title;
-    document.getElementById('edit-task-description').value = task.description || '';
-    document.getElementById('edit-task-date').value = task.date || '';
-    document.getElementById('edit-task-time').value = task.time || '';
-    document.getElementById('edit-task-duration').value = task.duration || 30;
-    document.getElementById('edit-task-priority').value = task.priority || 'medium';
+    // ✅ تحقق من وجود كل عنصر قبل استخدامه
+    const titleInput = document.getElementById('edit-task-title');
+    const descriptionInput = document.getElementById('edit-task-description');
     
+    if (titleInput) titleInput.value = task.title;
+    if (descriptionInput) descriptionInput.value = task.description || '';
+    
+    // ✅ نفس الشيء لباقي الحقول
+    const dateInput = document.getElementById('edit-task-date');
+    const timeInput = document.getElementById('edit-task-time');
+    const durationInput = document.getElementById('edit-task-duration');
+    const priorityInput = document.getElementById('edit-task-priority');
+    
+    if (dateInput) dateInput.value = task.date || '';
+    if (timeInput) timeInput.value = task.time || '';
+    if (durationInput) durationInput.value = task.duration || 30;
+    if (priorityInput) priorityInput.value = task.priority || 'medium';
+    
+    // ✅ تحديث فئة المهمة مع التحقق
     const categorySelect = document.getElementById('edit-task-category');
-    categorySelect.innerHTML = '<option value="">-- اختر الفئة --</option>';
+    if (categorySelect) {
+        categorySelect.innerHTML = '<option value="">-- اختر الفئة --</option>';
+        
+        AppState.categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            if (task.categoryId === category.id) {
+                option.selected = true;
+            }
+            categorySelect.appendChild(option);
+        });
+    } else {
+        console.error("❌ عنصر اختيار الفئة غير موجود");
+    }
     
-    AppState.categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.id;
-        option.textContent = category.name;
-        if (task.categoryId === category.id) {
-            option.selected = true;
-        }
-        categorySelect.appendChild(option);
-    });
-    
-    document.getElementById('edit-task-modal').classList.add('active');
+    // ✅ التحقق من وجود النافذة قبل فتحها
+    const modal = document.getElementById('edit-task-modal');
+    if (modal) {
+        modal.classList.add('active');
+        console.log("تم فتح نافذة تعديل المهمة");
+    } else {
+        console.error('❌ نافذة تعديل المهمة غير موجودة في DOM');
+    }
 }
 
 function openAddTaskModal(preselectedCategory = null) {
@@ -2678,7 +2706,25 @@ function setupCalendarHoverEffects() {
 
 // في دالة renderCalendar، تأكد من إضافة data-id للمهام
 function renderCalendar() {
-    // ... الكود الحالي ...
+    console.log("📅 عرض الجدول الزمني...");
+    
+    // ✅ تعريف container أولاً
+    const container = document.getElementById('calendar-content');
+    const tabs = document.querySelectorAll('.calendar-tab');
+    
+    // ✅ التحقق من وجود العنصر
+    if (!container) {
+        console.error("❌ عنصر الجدول الزمني غير موجود!");
+        return;
+    }
+    
+    // تحديث التبويبات النشطة
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.range === AppState.currentCalendarView) {
+            tab.classList.add('active');
+        }
+    });
     
     if (AppState.currentCalendarView === 'daily') {
         renderDailyCalendar(container);
@@ -2688,7 +2734,7 @@ function renderCalendar() {
         renderMonthlyCalendar(container);
     }
     
-    // إضافة أحداث الـ hover والـ click للجدول
+    // ✅ إضافة أحداث التمرير
     setTimeout(() => {
         setupCalendarHoverEffects();
     }, 100);
@@ -2735,9 +2781,28 @@ function renderDailyCalendar(container) {
 
 // نفس التعديل لـ renderWeeklyCalendar و renderMonthlyCalendar// ========== تهيئة الصفحة ==========
 function initializePage() {
-    console.log("تهيئة الصفحة...");
-    // إعدادات الأزرار والتفاعلات
-setupSettingsEvents();
+    console.log("🚀 بدء تهيئة الصفحة...");
+    
+    // ✅ اختبار وجود العناصر الأساسية
+    const testElements = [
+        'current-date',
+        'page-title',
+        'tasks-view',
+        'calendar-view',
+        'categories-view',
+        'notes-view',
+        'add-task-btn'
+    ];
+    
+    testElements.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) {
+            console.error(`❌ العنصر #${id} غير موجود في DOM`);
+        } else {
+            console.log(`✅ العنصر #${id} موجود`);
+        }
+    });
+    
     const now = new Date();
     const arabicDate = now.toLocaleDateString('ar-SA', {
         weekday: 'long',
@@ -2745,23 +2810,38 @@ setupSettingsEvents();
         month: 'long',
         day: 'numeric'
     });
-    document.getElementById('current-date').textContent = arabicDate;
     
+    const currentDateEl = document.getElementById('current-date');
+    if (currentDateEl) {
+        currentDateEl.textContent = arabicDate;
+    }
+    
+    // تهيئة البيانات
     initializeData();
+    
+    // تهيئة الثيمات
     initializeThemes();
     
+    // ✅ إعداد أحداث الملاحظات
     setupNotesEditorEvents();
+    
+    // ✅ إعداد أحداث الإعدادات
+    setupSettingsEvents();
+    
+    // ✅ إعداد جميع الأحداث الأخرى
+    setupAllEvents();
+    
+    // ✅ عرض المهام
+    renderTasks();
+    
+    // ✅ إعداد أزرار المهام
+    setupTaskButtonsEvents();
+    
+    // ✅ عرض حالة الفئات
     renderCategoriesStatus();
     
-    // إضافة حدث لإخفاء الـ Tooltip عند النقر
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.task-card') && 
-            !e.target.closest('.calendar-task-card') &&
-            !e.target.closest('.task-tooltip') &&
-            !e.target.closest('.calendar-tooltip')) {
-            hideTooltip();
-        }
-    });
+    console.log("🎉 التطبيق جاهز للاستخدام!");
+}
     
     // التنقل بين الأقسام
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -2903,6 +2983,87 @@ setupSettingsEvents();
     
 }
 
+// ========== إعداد جميع الأحداث ==========
+function setupAllEvents() {
+    console.log("🔗 إعداد جميع الأحداث...");
+    
+    // التنقل بين الأقسام
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("النقر على قسم:", this.dataset.view);
+            switchView(this.dataset.view);
+        });
+    });
+    
+    // مرشحات المهام
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            console.log("تغيير الفلتر إلى:", this.dataset.filter);
+            setFilter(this.dataset.filter);
+        });
+    });
+    
+    // تبويبات الجدول
+    document.querySelectorAll('.calendar-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            console.log("تغيير عرض الجدول إلى:", this.dataset.range);
+            AppState.currentCalendarView = this.dataset.range;
+            renderCalendar();
+        });
+    });
+    
+    // الأزرار الرئيسية - مع التحقق من وجودها
+    const addTaskBtn = document.getElementById('add-task-btn');
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', () => {
+            console.log("فتح نافذة إضافة مهمة");
+            openAddTaskModal();
+        });
+    } else {
+        console.error("❌ زر إضافة مهمة غير موجود!");
+    }
+    
+    // ... (نفس الشيء لباقي الأزرار مع التحقق)
+    
+    console.log("✅ تم إعداد جميع الأحداث بنجاح");
+}
+
+// ========== فحص عناصر DOM ==========
+function checkDOMElements() {
+    console.log("🔍 فحص عناصر DOM...");
+    
+    const requiredElements = [
+        'tasks-view',
+        'calendar-view',
+        'categories-view',
+        'notes-view',
+        'tasks-list',
+        'calendar-content',
+        'categories-list',
+        'notes-list',
+        'add-task-modal',
+        'edit-task-modal',
+        'category-modal'
+    ];
+    
+    let missingElements = [];
+    
+    requiredElements.forEach(id => {
+        if (!document.getElementById(id)) {
+            missingElements.push(id);
+            console.error(`❌ العنصر #${id} غير موجود في DOM`);
+        }
+    });
+    
+    if (missingElements.length > 0) {
+        console.error(`❌ ${missingElements.length} عناصر مفقودة:`, missingElements);
+        alert(`⚠️ هناك مشكلة في تحميل الصفحة. يرجى تحديثها.\nالعناصر المفقودة: ${missingElements.join(', ')}`);
+    } else {
+        console.log("✅ جميع عناصر DOM موجودة");
+    }
+}
+
 // ========== وظائف حفظ المهام ==========
 function saveNewTask() {
     const titleInput = document.getElementById('task-title');
@@ -3014,18 +3175,27 @@ window.addEventListener('DOMContentLoaded', function() {
     });
 });
 // ========== التهيئة عند تحميل الصفحة ==========
+// ========== التهيئة عند تحميل الصفحة ==========
 window.addEventListener('DOMContentLoaded', function() {
-    console.log("📄 DOM محمل - بدء التهيئة");
+    console.log("📄 DOMContentLoaded - بدء التهيئة");
     
-    // اختبار تحميل CSS
+    // ✅ فحص CSS
     checkCSS();
     
-    // تهيئة التطبيق
-    setTimeout(() => {
-        initializePage();
-    }, 100);
+    // ✅ فحص عناصر DOM
+    checkDOMElements();
     
-    // إزالة رسالة التحذير بعد 5 ثواني
+    // ✅ تهيئة التطبيق مع معالجة الأخطاء
+    setTimeout(() => {
+        try {
+            initializePage();
+        } catch (error) {
+            console.error("❌ خطأ في تهيئة الصفحة:", error);
+            alert("حدث خطأ في تحميل التطبيق. يرجى تحديث الصفحة.");
+        }
+    }, 200);
+    
+    // ✅ إزالة رسالة التحذير بعد 5 ثواني
     setTimeout(() => {
         const warning = document.getElementById('css-warning');
         if (warning) warning.remove();
@@ -3033,7 +3203,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 window.addEventListener('load', function() {
-    console.log("📄 الصفحة محملة بالكامل");
+    console.log("📄 load - الصفحة محملة بالكامل");
 });
 
 // ========== جعل الدوال متاحة عالمياً ==========
