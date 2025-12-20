@@ -982,7 +982,34 @@ input:disabled {
     justify-content: flex-end;
     gap: 10px;
 }
+/* ========== تنسيق الـ Tooltips ========== */
+.task-tooltip,
+.calendar-tooltip {
+    animation: fadeIn 0.2s ease;
+    pointer-events: none; /* لا تتفاعل مع المؤشر */
+}
 
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* تحسين قابلية النقر على البطاقات */
+.task-card,
+.calendar-task-card,
+.category-task-item,
+.month-task-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.task-card:hover,
+.calendar-task-card:hover,
+.category-task-item:hover,
+.month-task-item:hover {
+    transform: translateX(-5px) translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
 /* نماذج الإدخال */
 .form-group { margin-bottom: 20px; }
 .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--theme-text); }
