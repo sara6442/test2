@@ -3205,20 +3205,6 @@ function setupCalendarScroll() {
             e.preventDefault();
         });
         
-        // إضافة أزرار التنقل
-        const navHTML = `
-            <div style="position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 100;">
-                <button class="btn btn-secondary btn-sm" id="scroll-up-btn" 
-                        style="width: 40px; height: 40px; border-radius: 50%; padding: 0;">
-                    <i class="fas fa-chevron-up"></i>
-                </button>
-                <button class="btn btn-secondary btn-sm" id="scroll-down-btn" 
-                        style="width: 40px; height: 40px; border-radius: 50%; padding: 0;">
-                    <i class="fas fa-chevron-down"></i>
-                </button>
-            </div>
-        `;
-        
         // إضافة الأزرار إذا لم تكن موجودة
         if (!document.getElementById('scroll-up-btn')) {
             document.body.insertAdjacentHTML('beforeend', navHTML);
