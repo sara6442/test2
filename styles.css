@@ -202,6 +202,37 @@ body {
 .theme-beige-preview { background: linear-gradient(45deg, #d7ccc8, #bcaaa4); }
 .theme-custom-preview { background: linear-gradient(45deg, var(--custom-color1, #5a6268), var(--custom-color2, #495057)); }
 
+/* ========== تحسين خلفية الصفحة الرئيسية حسب الثيم ========== */
+.content-area {
+    background-color: var(--theme-bg) !important;
+}
+
+/* ========== جعل البطاقات بلون الشريط الجانبي ========== */
+.task-card {
+    background: linear-gradient(90deg, 
+        color-mix(in srgb, var(--theme-primary) 10%, var(--theme-card)),
+        var(--theme-card)
+    ) !important;
+    border-right: 5px solid var(--theme-primary) !important;
+}
+
+/* ========== إزالة الخط الأسفل عند Hover ========== */
+.task-card:hover {
+    transform: translateX(-8px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    /* إزالة أي حدود أو خطوط */
+    border-bottom: 1px solid var(--theme-border) !important;
+}
+
+/* ========== تنسيق البطاقات الأخرى ========== */
+.category-card,
+.note-card,
+.calendar-task-card {
+    background: linear-gradient(135deg, 
+        color-mix(in srgb, var(--theme-primary) 5%, var(--theme-card)),
+        var(--theme-card)
+    ) !important;
+}
 /* ========== الأساسيات ========== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
