@@ -2980,8 +2980,7 @@ function initializePage() {
     setupTaskButtonsEvents(); // أضف هذا السطر
      setupSettingsEvents();
     console.log("✅ التطبيق جاهز للاستخدام!");
-    
-}
+
 
 // ========== إعداد جميع الأحداث ==========
 function setupAllEvents() {
