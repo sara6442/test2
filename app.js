@@ -111,6 +111,24 @@ function initializeThemes() {
     // إعدادات الإعدادات
     setupSettingsEvents();
 }
+// ========== إصلاح تحميل الصفحة ==========
+window.addEventListener('DOMContentLoaded', function() {
+    console.log("📄 DOM محمل");
+    initializePage();
+    
+    // إضافة حدث لإغلاق الإعدادات عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        const popup = document.getElementById('settings-popup');
+        const settingsBtn = document.getElementById('settings-btn');
+        
+        if (popup && popup.classList.contains('active') && 
+            !popup.contains(e.target) && 
+            e.target !== settingsBtn && 
+            !settingsBtn.contains(e.target)) {
+            popup.classList.remove('active');
+        }
+    });
+});
 
 // دالة جديدة لتحديث ألوان الملاحظات بناءً على الثيم
 function updateNotesColorsForTheme(theme) {
@@ -523,6 +541,10 @@ function saveNotes() {
     }
 }
 
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
 // ========== وظائف المساعدة ==========
 function getCategoryById(categoryId) {
     return AppState.categories.find(cat => cat.id === categoryId) || 
@@ -633,13 +655,8 @@ function checkCategoryTimeframe(categoryId, newTaskDuration = 0) {
     const categoryTasks = AppState.tasks.filter(task => task.categoryId === categoryId);
     const totalDuration = categoryTasks.reduce((sum, task) => sum + (task.duration || 0), 0) + newTaskDuration;
     
-    // تحويل الحيز الزمني إلى دقائق
-    let categoryTimeframeMinutes = category.timeframeMinutes || 60;
-    if (category.timeframeType === 'hours') {
-        categoryTimeframeMinutes *= 60;
-    } else if (category.timeframeType === 'days') {
-        categoryTimeframeMinutes *= 1440;
-    }
+    // الحيز الزمني بالدقائق فقط
+    const categoryTimeframeMinutes = category.timeframeMinutes || 60;
     
     if (totalDuration <= categoryTimeframeMinutes) {
         return { allowed: true };
@@ -655,6 +672,7 @@ function checkCategoryTimeframe(categoryId, newTaskDuration = 0) {
         categoryTasks: categoryTasks
     };
 }
+
 // ========== عرض تحذير الحيز الزمني ==========
 function showTimeframeWarning(timeframeCheck, taskData) {
     // إنشاء نافذة التحذير
@@ -1355,6 +1373,14 @@ function renderDailyCalendar(container) {
         renderCalendar();
     });
 }
+    // إضافة أحداث أزرار تعديل الرسائل
+    document.querySelectorAll('.edit-messages-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const categoryId = e.target.closest('button').dataset.id;
+            openEditCategoryMessages(categoryId);
+        });
+    });
 
 function renderWeeklyCalendar(container) {
     const today = new Date();
@@ -1588,6 +1614,7 @@ function renderCategories() {
                     <div class="category-name">${category.name}</div>
                     <div class="category-stats">${totalTasks} مهام</div>
                    <div class="category-actions">
+    <div class="category-actions">
     <button class="btn btn-info btn-xs edit-messages-btn" data-id="${category.id}" title="تعديل الرسائل">
         <i class="fas fa-comment-dots"></i>
     </button>
@@ -1708,15 +1735,23 @@ function openEditCategoryModal(categoryId) {
     document.getElementById('category-name').value = category.name;
     document.getElementById('category-color').value = category.color;
     document.getElementById('category-timeframe').value = category.timeframeMinutes || 60;
-    document.getElementById('category-timeframe-type').value = category.timeframeType || 'minutes';
+    
+    // لا نضيف حقل النوع لأنه ثابت الآن
     document.getElementById('category-modal').classList.add('active');
+
+    // تحديث الأزرار بعد فتح النافذة
+    setTimeout(() => {
+        const saveBtn = document.getElementById('save-category');
+        if (saveBtn) {
+            saveBtn.onclick = saveCategory;
+        }
+    }, 100);
 }
 
 function saveCategory() {
     const name = document.getElementById('category-name').value.trim();
     const color = document.getElementById('category-color').value;
     const timeframeMinutes = parseInt(document.getElementById('category-timeframe').value) || 60;
-    const timeframeType = document.getElementById('category-timeframe-type').value;
     
     if (!name) {
         alert('يرجى إدخال اسم الفئة');
@@ -1732,11 +1767,11 @@ function saveCategory() {
                 name: name,
                 color: color,
                 timeframeMinutes: timeframeMinutes,
-                timeframeType: timeframeType
+                timeframeType: 'minutes' // نوع ثابت
             };
             saveCategories();
             renderCategories();
-            renderCategoriesStatus(); // تحديث عرض الحالات
+            renderCategoriesStatus();
         }
     } else {
         // إضافة فئة جديدة
@@ -1745,7 +1780,7 @@ function saveCategory() {
             name: name,
             color: color,
             timeframeMinutes: timeframeMinutes,
-            timeframeType: timeframeType,
+            timeframeType: 'minutes', // نوع ثابت
             messageEmpty: 'لا توجد مهام في هذه الفئة. أضف مهام جديدة لبدء العمل!',
             messageCompleted: 'ممتاز! لقد أكملت جميع المهام في هذه الفئة.',
             messageExceeded: 'لقد تجاوزت الوقت المخصص لهذه الفئة. حاول إدارة وقتك بشكل أفضل!'
@@ -1765,27 +1800,32 @@ function saveCategoryMessages(categoryId) {
     const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
     if (categoryIndex === -1) return;
     
-    const messageEmpty = document.getElementById('message-empty').value.trim();
-    const messageCompleted = document.getElementById('message-completed').value.trim();
-    const messageExceeded = document.getElementById('message-exceeded').value.trim();
+    // جلب العناصر بشكل صحيح
+    const modal = document.getElementById('edit-category-messages-modal');
+    if (!modal) return;
+    
+    const messageEmpty = modal.querySelector('#message-empty')?.value.trim() || '';
+    const messageCompleted = modal.querySelector('#message-completed')?.value.trim() || '';
+    const messageExceeded = modal.querySelector('#message-exceeded')?.value.trim() || '';
     
     AppState.categories[categoryIndex] = {
         ...AppState.categories[categoryIndex],
-        messageEmpty: messageEmpty || 'لا توجد مهام في هذه الفئة',
-        messageCompleted: messageCompleted || 'ممتاز! لقد أكملت جميع المهام في هذه الفئة.',
-        messageExceeded: messageExceeded || 'لقد تجاوزت الوقت المخصص لهذه الفئة. حاول إدارة وقتك بشكل أفضل!'
+        messageEmpty: messageEmpty,
+        messageCompleted: messageCompleted,
+        messageExceeded: messageExceeded
     };
     
     saveCategories();
     closeModal('edit-category-messages-modal');
     
-    // إذا كنا في عرض الفئات، نحدثه
+    // تحديث العرض
     if (AppState.currentView === 'categories') {
         renderCategories();
     }
     
-    // نحدث عرض حالة الفئات
-    renderCategoriesStatus();
+    if (typeof renderCategoriesStatus === 'function') {
+        renderCategoriesStatus();
+    }
 }
 
 function deleteCategory(categoryId) {
@@ -1835,13 +1875,8 @@ function calculateCategoryStatus(categoryId) {
     const totalDuration = categoryTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
     const completedDuration = completedTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
     
-    // تحويل الحيز الزمني إلى دقائق
-    let categoryTimeframeMinutes = category.timeframeMinutes || 60;
-    if (category.timeframeType === 'hours') {
-        categoryTimeframeMinutes *= 60;
-    } else if (category.timeframeType === 'days') {
-        categoryTimeframeMinutes *= 1440;
-    }
+    // الحيز الزمني بالدقائق فقط
+    const categoryTimeframeMinutes = category.timeframeMinutes || 60;
     
     if (completedTasks.length === categoryTasks.length) {
         return {
@@ -1854,6 +1889,29 @@ function calculateCategoryStatus(categoryId) {
             categoryTimeframe: categoryTimeframeMinutes
         };
     }
+    
+    if (totalDuration > categoryTimeframeMinutes) {
+        return {
+            status: 'exceeded',
+            message: category.messageExceeded || 'لقد تجاوزت الوقت المخصص لهذه الفئة',
+            totalTasks: categoryTasks.length,
+            completedTasks: completedTasks.length,
+            totalDuration: totalDuration,
+            completedDuration: completedDuration,
+            categoryTimeframe: categoryTimeframeMinutes
+        };
+    }
+    
+    return {
+        status: 'pending',
+        message: category.messagePending || 'هناك مهام معلقة في هذه الفئة',
+        totalTasks: categoryTasks.length,
+        completedTasks: completedTasks.length,
+        totalDuration: totalDuration,
+        completedDuration: completedDuration,
+        categoryTimeframe: categoryTimeframeMinutes
+    };
+}
     
     if (totalDuration > categoryTimeframeMinutes) {
         return {
@@ -2402,6 +2460,18 @@ function initializePage() {
         day: 'numeric'
     });
     document.getElementById('current-date').textContent = arabicDate;
+    
+    // ========== إعداد زر الإعدادات ==========
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const popup = document.getElementById('settings-popup');
+            if (popup) {
+                popup.classList.toggle('active');
+            }
+        });
+    }
     
     // تحميل البيانات
     initializeData();
