@@ -1799,11 +1799,13 @@ function saveCategory() {
                 name: name,
                 color: color,
                 timeframeMinutes: timeframeMinutes,
-                timeframeType: 'minutes' // نوع ثابت
+                timeframeType: 'minutes' // ثابت دائماً
             };
             saveCategories();
             renderCategories();
-            renderCategoriesStatus();
+            if (typeof renderCategoriesStatus === 'function') {
+                renderCategoriesStatus();
+            }
         }
     } else {
         // إضافة فئة جديدة
@@ -1812,7 +1814,7 @@ function saveCategory() {
             name: name,
             color: color,
             timeframeMinutes: timeframeMinutes,
-            timeframeType: 'minutes', // نوع ثابت
+            timeframeType: 'minutes', // ثابت دائماً
             messageEmpty: 'لا توجد مهام في هذه الفئة. أضف مهام جديدة لبدء العمل!',
             messageCompleted: 'ممتاز! لقد أكملت جميع المهام في هذه الفئة.',
             messageExceeded: 'لقد تجاوزت الوقت المخصص لهذه الفئة. حاول إدارة وقتك بشكل أفضل!'
@@ -1821,10 +1823,13 @@ function saveCategory() {
         AppState.categories.push(newCategory);
         saveCategories();
         renderCategories();
-        renderCategoriesStatus();
+        if (typeof renderCategoriesStatus === 'function') {
+            renderCategoriesStatus();
+        }
     }
     
     closeModal('category-modal');
+    alert('تم حفظ الفئة بنجاح!');
 }
     
 // ========== حفظ رسائل الفئة ==========
