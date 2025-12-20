@@ -381,7 +381,7 @@ function initializeThemes() {
         // تحديث ألوان الملاحظات للثيم الحالي
         updateNotesColorsForTheme(savedTheme);
     } else {
-        // تعيين الثيم الافتراضي
+        // تعيين الثيم الافتراضي إلى بيج
         AppState.currentTheme = 'beige';
         document.body.className = 'theme-beige';
         localStorage.setItem('mytasks_theme', 'beige');
@@ -396,10 +396,9 @@ function initializeThemes() {
     
     // إضافة أحداث تغيير الثيم
     setupThemeEvents();
-    
-    // إعدادات الإعدادات
-    setupSettingsEvents();
-}function applyCustomTheme() {
+}
+
+function applyCustomTheme() {
     const color1 = document.getElementById('custom-color1').value;
     const color2 = document.getElementById('custom-color2').value;
     
@@ -1109,18 +1108,20 @@ function renderTasks() {
         return;
     }
     
-    let html = '';
+   let html = '';
     
     tasksToShow.forEach(task => {
         const category = getCategoryById(task.categoryId);
         const isDeleted = AppState.currentFilter === 'deleted';
         const isOverdue = isTaskOverdue(task) && !task.completed;
         
-        // علامة "متأخرة" للمهام النشطة
+        // علامة "متأخرة" - نقلها إلى أسفل
         const overdueBadge = isOverdue ? `
-            <span class="overdue-badge" style="background: #f72585; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-right: 8px;">
-                <i class="fas fa-exclamation-circle"></i> متأخرة
-            </span>
+            <div class="overdue-badge-container" style="position: absolute; bottom: 10px; right: 10px;">
+                <span class="overdue-badge" style="background: #f72585; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 4px;">
+                    <i class="fas fa-exclamation-circle" style="font-size: 0.6rem;"></i> متأخرة
+                </span>
+            </div>
         ` : '';
         
         if (isDeleted) {
@@ -1154,37 +1155,42 @@ function renderTasks() {
             html += `
                 <div class="task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
                      data-id="${task.id}"
+                     style="position: relative;"
                      title="انقر لتعديل المهمة">
-                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
-                    <div class="task-content">
-                        <div class="task-title">
-                            ${overdueBadge}
-                            ${task.title}
-                        </div>
-                        ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
-                        <div class="task-meta">
-                            <div class="task-meta-item">
-                                <i class="fas fa-tag" style="color: ${category.color}"></i>
-                                <span>${category.name}</span>
+                    <div style="display: flex; align-items: flex-start;">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} style="margin-top: 5px;">
+                        <div class="task-content" style="flex: 1;">
+                            <div class="task-title" style="margin-bottom: 5px;">
+                                ${task.title}
                             </div>
-                            <div class="task-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span>${formatDate(task.date)}</span>
-                            </div>
-                            <div class="task-meta-item">
-                                <i class="fas fa-clock"></i>
-                                <span>${task.duration} دقيقة</span>
-                            </div>
-                            <div class="task-meta-item">
-                                <i class="fas fa-flag" style="color: ${
-                                    task.priority === 'high' ? '#f72585' : 
-                                    task.priority === 'medium' ? '#f8961e' : '#4cc9f0'
-                                }"></i>
-                                <span>${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</span>
+                            ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
+                            <div class="task-meta">
+                                <div class="task-meta-item">
+                                    <i class="fas fa-tag" style="color: ${category.color}"></i>
+                                    <span>${category.name}</span>
+                                </div>
+                                <div class="task-meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>${formatDate(task.date)}</span>
+                                </div>
+                                <div class="task-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${task.duration} دقيقة</span>
+                                </div>
+                                <div class="task-meta-item">
+                                    <i class="fas fa-flag" style="color: ${
+                                        task.priority === 'high' ? '#f72585' : 
+                                        task.priority === 'medium' ? '#f8961e' : '#4cc9f0'
+                                    }"></i>
+                                    <span>${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="task-actions">
+                    
+                    ${overdueBadge}
+                    
+                    <div class="task-actions" style="position: absolute; top: 10px; left: 10px;">
                         <button class="btn btn-secondary btn-sm edit-task-btn" data-id="${task.id}" title="تعديل المهمة">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -1201,51 +1207,57 @@ function renderTasks() {
     
     // إضافة Tooltip عند المرور على المهام
     setupTaskHoverEffects();
-}
     
-    if (AppState.currentFilter === 'deleted') {
-        document.querySelectorAll('.restore-task-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const taskId = e.target.closest('button').dataset.id;
-                restoreTask(taskId);
-            });
+    // إضافة أحداث النقر للأزرار
+    setupTaskButtonsEvents();
+}
+
+// دالة جديدة لإضافة أحداث الأزرار
+function setupTaskButtonsEvents() {
+    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+            const taskId = e.target.closest('.task-card').dataset.id;
+            toggleTaskCompletion(taskId);
         });
-        
-        document.querySelectorAll('.permanent-delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const taskId = e.target.closest('button').dataset.id;
-                if (confirm('هل أنت متأكد من الحذف النهائي؟ لا يمكن استعادة المهمة بعد ذلك.')) {
-                    const index = AppState.deletedTasks.findIndex(t => t.id === taskId);
-                    if (index !== -1) {
-                        AppState.deletedTasks.splice(index, 1);
-                        saveDeletedTasks();
-                        renderTasks();
-                    }
+    });
+    
+    document.querySelectorAll('.delete-task-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const taskId = e.target.closest('button').dataset.id;
+            deleteTask(taskId);
+        });
+    });
+    
+    document.querySelectorAll('.edit-task-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const taskId = e.target.closest('button').dataset.id;
+            openEditTaskModal(taskId);
+        });
+    });
+    
+    document.querySelectorAll('.restore-task-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const taskId = e.target.closest('button').dataset.id;
+            restoreTask(taskId);
+        });
+    });
+    
+    document.querySelectorAll('.permanent-delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const taskId = e.target.closest('button').dataset.id;
+            if (confirm('هل أنت متأكد من الحذف النهائي؟ لا يمكن استعادة المهمة بعد ذلك.')) {
+                const index = AppState.deletedTasks.findIndex(t => t.id === taskId);
+                if (index !== -1) {
+                    AppState.deletedTasks.splice(index, 1);
+                    saveDeletedTasks();
+                    renderTasks();
                 }
-            });
+            }
         });
-    } else {
-        document.querySelectorAll('.task-checkbox').forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const taskId = e.target.closest('.task-card').dataset.id;
-                toggleTaskCompletion(taskId);
-            });
-        });
-        
-        document.querySelectorAll('.delete-task-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const taskId = e.target.closest('button').dataset.id;
-                deleteTask(taskId);
-            });
-        });
-        
-        document.querySelectorAll('.edit-task-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const taskId = e.target.closest('button').dataset.id;
-                openEditTaskModal(taskId);
-            });
-        });
-    }
+    });
+}
 
 
 // ========== إدارة الفئات ==========
@@ -1937,28 +1949,47 @@ function renderCategoriesStatus() {
     if (!container) return;
     
     if (AppState.currentView === 'tasks') {
-        const existingStatusBtn = document.getElementById('categories-status-btn');
-        if (existingStatusBtn) {
-            existingStatusBtn.remove();
-        }
+        // البحث عن مكان الفلاتر
+        const tasksView = document.getElementById('tasks-view');
+        if (!tasksView) return;
         
-        if (AppState.categories.length > 0) {
+        const taskFilters = tasksView.querySelector('.task-filters');
+        const categoriesStatusBtn = document.getElementById('categories-status-btn');
+        
+        // إنشاء زر حالة الفئات إذا لم يكن موجوداً
+        if (!categoriesStatusBtn) {
             const statusBtn = document.createElement('button');
             statusBtn.id = 'categories-status-btn';
             statusBtn.className = 'btn btn-info';
-            statusBtn.style.cssText = 'margin-left: 15px; margin-bottom: 20px;';
+            statusBtn.style.cssText = 'margin-bottom: 20px; margin-left: 10px;';
             statusBtn.innerHTML = '<i class="fas fa-chart-pie"></i> حالة الفئات';
             
             statusBtn.addEventListener('click', showCategoriesStatusModal);
             
-            const tasksList = document.getElementById('tasks-view');
-            if (tasksList) {
-                tasksList.insertBefore(statusBtn, tasksList.firstChild);
+            // إضافة الزر بجانب الفلاتر
+            if (taskFilters) {
+                // إنشاء حاوية للفلاتر وزر الحالة
+                const filtersContainer = document.createElement('div');
+                filtersContainer.style.cssText = 'display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-top: 40px; padding: 25px; background: var(--theme-card); border-radius: var(--border-radius); border: 1px solid var(--theme-border);';
+                
+                // نقل الفلاتر إلى الحاوية الجديدة
+                const filtersContent = document.createElement('div');
+                filtersContent.style.cssText = 'display: flex; gap: 15px; flex-wrap: wrap;';
+                filtersContent.innerHTML = taskFilters.innerHTML;
+                
+                // إضافة محتوى الفلاتر وزر الحالة
+                const statusBtnContainer = document.createElement('div');
+                statusBtnContainer.appendChild(statusBtn);
+                
+                filtersContainer.appendChild(filtersContent);
+                filtersContainer.appendChild(statusBtnContainer);
+                
+                // استبدال الفلاتر القديمة بالحاوية الجديدة
+                taskFilters.parentNode.replaceChild(filtersContainer, taskFilters);
             }
         }
     }
 }
-
 function showCategoriesStatusModal() {
     let modalHTML = `
         <div class="modal" id="categories-status-modal">
@@ -2305,6 +2336,9 @@ function setupSettingsEvents() {
                 
                 popup.classList.toggle('active');
                 console.log("حالة النافذة بعد:", popup.classList.contains('active') ? 'مفتوحة' : 'مغلقة');
+                
+                // منع الإغلاق الفوري
+                e.stopPropagation();
             } else {
                 console.error("❌ نافذة الإعدادات غير موجودة!");
             }
@@ -2313,6 +2347,7 @@ function setupSettingsEvents() {
         console.error("❌ زر الإعدادات غير موجود!");
     }
     
+    // إغلاق نافذة الإعدادات عند النقر خارجها
     document.addEventListener('click', function(e) {
         const popup = document.getElementById('settings-popup');
         const settingsBtn = document.getElementById('settings-btn');
@@ -2326,6 +2361,7 @@ function setupSettingsEvents() {
         }
     });
     
+    // إضافة أحداث لخيارات الثيم
     document.querySelectorAll('.theme-option').forEach(option => {
         option.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -2333,10 +2369,14 @@ function setupSettingsEvents() {
             console.log("تغيير الثيم إلى:", theme);
             changeTheme(theme);
             
-            document.getElementById('settings-popup').classList.remove('active');
+            const popup = document.getElementById('settings-popup');
+            if (popup) {
+                popup.classList.remove('active');
+            }
         });
     });
 }
+
 // ========== إعداد تأثيرات المرور على المهام ==========
 function setupTaskHoverEffects() {
     // إضافة Tooltip للمهام
@@ -2599,8 +2639,101 @@ function setFilter(filterName) {
     renderTasks();
 }
 
-// ========== تهيئة الصفحة ==========
-// ========== تهيئة الصفحة ==========
+// ========== إعداد تأثيرات المرور على المهام والجدول ==========
+function setupCalendarHoverEffects() {
+    document.querySelectorAll('.calendar-task-card').forEach(card => {
+        card.addEventListener('mouseenter', function(e) {
+            const taskTitle = this.querySelector('.calendar-task-title')?.textContent;
+            const taskMeta = this.querySelector('.calendar-task-meta')?.innerHTML;
+            
+            showCalendarTooltip(e, taskTitle, taskMeta);
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            hideTooltip();
+        });
+        
+        // عند النقر على مهمة في الجدول تفتح نافذة التعديل
+        card.addEventListener('click', function(e) {
+            // تجنب فتح التعديل عند النقر على أي عنصر داخل البطاقة
+            if (!e.target.closest('button')) {
+                const taskId = this.dataset.id;
+                if (taskId) {
+                    openEditTaskModal(taskId);
+                }
+            }
+        });
+    });
+    
+    // إضافة أحداث للمهام اليومية
+    document.querySelectorAll('.time-tasks .calendar-task-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            const taskId = this.dataset.id;
+            if (taskId) {
+                openEditTaskModal(taskId);
+            }
+        });
+    });
+}
+
+// في دالة renderCalendar، تأكد من إضافة data-id للمهام
+function renderCalendar() {
+    // ... الكود الحالي ...
+    
+    if (AppState.currentCalendarView === 'daily') {
+        renderDailyCalendar(container);
+    } else if (AppState.currentCalendarView === 'weekly') {
+        renderWeeklyCalendar(container);
+    } else if (AppState.currentCalendarView === 'monthly') {
+        renderMonthlyCalendar(container);
+    }
+    
+    // إضافة أحداث الـ hover والـ click للجدول
+    setTimeout(() => {
+        setupCalendarHoverEffects();
+    }, 100);
+}
+
+// تعديل renderDailyCalendar لإضافة data-id
+function renderDailyCalendar(container) {
+    // ... الكود الحالي ...
+    
+    timeSlots.forEach(slot => {
+        // ... الكود الحالي ...
+        
+        if (slotTasks.length === 0) {
+            // ... الكود الحالي ...
+        } else {
+            slotTasks.forEach(task => {
+                const category = getCategoryById(task.categoryId);
+                const isOverdue = isTaskOverdue(task);
+                
+                html += `
+                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                         data-id="${task.id}"
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="border-left-color: ${category.color}; border-right-color: ${category.color}; cursor: pointer;">
+                        <div class="calendar-task-title">${task.title}</div>
+                        <div class="calendar-task-meta">
+                            <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</span>
+                            <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// نفس التعديل لـ renderWeeklyCalendar و renderMonthlyCalendar// ========== تهيئة الصفحة ==========
 function initializePage() {
     console.log("تهيئة الصفحة...");
     // إعدادات الأزرار والتفاعلات
@@ -2763,7 +2896,11 @@ setupSettingsEvents();
     
     // عرض المهام
     renderTasks();
+    
+    setupTaskButtonsEvents(); // أضف هذا السطر
+     setupSettingsEvents();
     console.log("✅ التطبيق جاهز للاستخدام!");
+    
 }
 
 // ========== وظائف حفظ المهام ==========
