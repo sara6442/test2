@@ -2879,6 +2879,28 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+// ========== التهيئة عند تحميل الصفحة ==========
+window.addEventListener('DOMContentLoaded', function() {
+    console.log("📄 DOM محمل - بدء التهيئة");
+    
+    // اختبار تحميل CSS
+    checkCSS();
+    
+    // تهيئة التطبيق
+    setTimeout(() => {
+        initializePage();
+    }, 100);
+    
+    // إزالة رسالة التحذير بعد 5 ثواني
+    setTimeout(() => {
+        const warning = document.getElementById('css-warning');
+        if (warning) warning.remove();
+    }, 5000);
+});
+
+window.addEventListener('load', function() {
+    console.log("📄 الصفحة محملة بالكامل");
+});
 
 // ========== جعل الدوال متاحة عالمياً ==========
 window.openEditTaskModal = openEditTaskModal;
