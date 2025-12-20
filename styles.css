@@ -1377,3 +1377,15 @@ input:disabled {
     border-color: var(--danger-color) !important;
     background-color: rgba(247, 37, 133, 0.1) !important;
 }
+
+/* ========== تحسين شريط التمرير للفئات ========== */
+.categories-grid {
+    max-height: calc(100vh - 350px);
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+.category-tasks-container {
+    max-height: 200px;
+    overflow-y: auto;
+}
