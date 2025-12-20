@@ -3397,6 +3397,8 @@ function initializePage() {
     
     // ✅ عرض حالة الفئات
     renderCategoriesStatus();
+
+    setupNotesEditorEvents();
     
     console.log("🎉 التطبيق جاهز للاستخدام!");
 }
@@ -4038,8 +4040,7 @@ window.addEventListener('DOMContentLoaded', function() {
 window.addEventListener('load', function() {
     console.log("📄 load - الصفحة محملة بالكامل");
 });
-
-// ========== جعل الدوال متاحة عالمياً ==========
+// تأكد من وجود هذه الدوال العالمية
 window.openEditTaskModal = openEditTaskModal;
 window.openAddTaskModal = openAddTaskModal;
 window.openEditCategoryModal = openEditCategoryModal;
@@ -4056,3 +4057,9 @@ window.applyCustomTheme = applyCustomTheme;
 window.showCategoriesStatusModal = showCategoriesStatusModal;
 window.deleteAndReplaceTask = deleteAndReplaceTask;
 window.addTaskAnyway = addTaskAnyway;
+
+// ✅ أضف هذه الدوال الجديدة
+window.changeCalendarDate = changeCalendarDate;
+window.navigateCalendarWeeks = navigateCalendarWeeks;
+window.changeCalendarMonth = changeCalendarMonth;
+window.changeCalendarWeek = changeCalendarWeek;
