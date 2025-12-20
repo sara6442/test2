@@ -401,6 +401,55 @@ function initializeThemes() {
     setupSettingsEvents();
 }
 
+function applyCustomTheme() {
+    const color1 = document.getElementById('custom-color1').value;
+    const color2 = document.getElementById('custom-color2').value;
+    
+    // إنشاء ألوان فاتحة من الألوان المختارة
+    function lightenColor(color, percent) {
+        const num = parseInt(color.slice(1), 16);
+        const amt = Math.round(2.55 * percent);
+        const R = (num >> 16) + amt;
+        const G = (num >> 8 & 0x00FF) + amt;
+        const B = (num & 0x0000FF) + amt;
+        return `#${(
+            0x1000000 +
+            (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+            (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+            (B < 255 ? B < 1 ? 0 : B : 255)
+        ).toString(16).slice(1)}`;
+    }
+    
+    const lightColor1 = lightenColor(color1, 30);
+    const lightColor2 = lightenColor(color2, 30);
+    
+    // حفظ جميع الألوان
+    localStorage.setItem('mytasks_custom_colors', JSON.stringify({ 
+        color1, color2,
+        lightColor1, lightColor2
+    }));
+    
+    // تطبيق الألوان
+    document.documentElement.style.setProperty('--custom-color1', color1);
+    document.documentElement.style.setProperty('--custom-color2', color2);
+    document.documentElement.style.setProperty('--custom-bg', lightColor1);
+    document.documentElement.style.setProperty('--custom-card', lightColor2);
+    document.documentElement.style.setProperty('--custom-text', '#212529');
+    document.documentElement.style.setProperty('--custom-border', lightenColor(color1, 40));
+    document.documentElement.style.setProperty('--custom-primary', color1);
+    document.documentElement.style.setProperty('--custom-hover', color2);
+    
+    AppState.currentTheme = 'custom';
+    document.body.className = 'theme-custom';
+    localStorage.setItem('mytasks_theme', 'custom');
+    
+    updateThemeButtons();
+    refreshCurrentView();
+    closeModal('custom-theme-modal');
+    
+    alert('تم تطبيق الثيم المخصص بنجاح!');
+}
+
 function updateNotesColorsForTheme(theme) {
     console.log("تحديث ألوان الملاحظات للثيم:", theme);
     
