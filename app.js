@@ -686,7 +686,30 @@ function addTask(taskData) {
     refreshCurrentView();
     
     closeModal('add-task-modal');
-    document.getElementById('task-form').reset();
+    
+    // ✅ إصلاح هنا: إعادة تعيين النموذج بشكل صحيح
+    setTimeout(() => {
+        document.getElementById('task-form').reset();
+        
+        // إعادة تعيين التاريخ لليوم الحالي
+        const today = new Date().toISOString().split('T')[0];
+        const dateInput = document.getElementById('task-date');
+        if (dateInput) {
+            dateInput.value = today;
+        }
+        
+        // إعادة تعيين المدة الافتراضية
+        const durationInput = document.getElementById('task-duration');
+        if (durationInput) {
+            durationInput.value = '30';
+        }
+        
+        // إعادة تعيين الأولوية الافتراضية
+        const prioritySelect = document.getElementById('task-priority');
+        if (prioritySelect) {
+            prioritySelect.value = 'medium';
+        }
+    }, 100);
 }
 
 function updateTask(taskId, taskData) {
@@ -3040,7 +3063,15 @@ function openEditTaskModal(taskId) {
 }
 
 function openAddTaskModal(preselectedCategory = null) {
+    console.log("📝 فتح نافذة إضافة مهمة جديدة");
+    
     const categorySelect = document.getElementById('task-category');
+    if (!categorySelect) {
+        console.error("❌ عنصر اختيار الفئة غير موجود!");
+        return;
+    }
+    
+    // تفريغ وإعادة تعبئة القائمة
     categorySelect.innerHTML = '<option value="">-- اختر الفئة --</option>';
     
     AppState.categories.forEach(category => {
@@ -3053,20 +3084,24 @@ function openAddTaskModal(preselectedCategory = null) {
         categorySelect.appendChild(option);
     });
     
+    // تعيين التاريخ لليوم الحالي
     const today = new Date().toISOString().split('T')[0];
     const dateInput = document.getElementById('task-date');
     if (dateInput) {
         dateInput.value = today;
+        dateInput.min = today; // يمكنك إزالة هذا السطر إذا أردت التواريخ السابقة
     }
     
+    // فتح النافذة
     document.getElementById('add-task-modal').classList.add('active');
     
-    const titleInput = document.getElementById('task-title');
-    if (titleInput) {
-        setTimeout(() => {
+    // التركيز على حقل العنوان بعد فتح النافذة
+    setTimeout(() => {
+        const titleInput = document.getElementById('task-title');
+        if (titleInput) {
             titleInput.focus();
-        }, 100);
-    }
+        }
+    }, 150);
 }
 
 function closeModal(modalId) {
@@ -3842,14 +3877,15 @@ function checkDOMElements() {
     }
 }
 
-// ========== وظائف حفظ المهام ==========
-// ========== وظائف حفظ المهام ==========
 function saveNewTask() {
+    console.log("💾 حفظ مهمة جديدة...");
+    
     const titleInput = document.getElementById('task-title');
     const categorySelect = document.getElementById('task-category');
     
     if (!titleInput || !categorySelect) {
         console.error('عناصر النموذج غير موجودة');
+        alert('خطأ: النموذج غير مكتمل');
         return;
     }
     
@@ -3858,30 +3894,45 @@ function saveNewTask() {
     
     if (!title) {
         alert('يرجى إدخال عنوان المهمة');
+        titleInput.focus();
         return;
     }
     
     if (!category) {
         alert('يرجى اختيار فئة للمهمة');
+        categorySelect.focus();
         return;
     }
     
-    const durationInput = document.getElementById('task-duration');
-    const dateInput = document.getElementById('task-date');
-    const timeInput = document.getElementById('task-time');
-    const prioritySelect = document.getElementById('task-priority');
-    const descriptionTextarea = document.getElementById('task-description');
+    // ✅ استخدام querySelector للحصول على العناصر بشكل موثوق
+    const descriptionTextarea = document.querySelector('#task-description');
+    const durationInput = document.querySelector('#task-duration');
+    const dateInput = document.querySelector('#task-date');
+    const timeInput = document.querySelector('#task-time');
+    const prioritySelect = document.querySelector('#task-priority');
     
-    // إصلاح هنا: استدعاء addTask بدلاً من saveTask
+    console.log("بيانات المهمة:", {
+        title,
+        category,
+        description: descriptionTextarea ? descriptionTextarea.value : '',
+        duration: durationInput ? durationInput.value : '30',
+        date: dateInput ? dateInput.value : '',
+        time: timeInput ? timeInput.value : '',
+        priority: prioritySelect ? prioritySelect.value : 'medium'
+    });
+    
+    // استدعاء دالة addTask
     addTask({
         title: title,
         description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
         categoryId: category,
-        duration: durationInput ? parseInt(durationInput.value) || 30 : 30,
+        duration: parseInt(durationInput ? durationInput.value : 30),
         date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
         time: timeInput ? timeInput.value : '',
         priority: prioritySelect ? prioritySelect.value : 'medium'
     });
+    
+    console.log("✅ تم حفظ المهمة بنجاح");
 }
 
 function saveEditedTask() {
