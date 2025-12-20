@@ -2426,9 +2426,6 @@ function showTaskTooltip(event, task) {
                 </div>
             </div>
             
-            <div style="margin-top: 15px; text-align: center; color: var(--gray-color); font-size: 0.85rem;">
-                <i class="fas fa-mouse-pointer"></i> انقر لفتح التعديل
-            </div>
         </div>
     `;
     
