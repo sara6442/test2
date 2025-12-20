@@ -2620,6 +2620,16 @@ function initializePage() {
     
     setupNotesEditorEvents();
     renderCategoriesStatus();
+
+      // إضافة حدث لإخفاء الـ Tooltip عند النقر
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.task-card') && 
+            !e.target.closest('.calendar-task-card') &&
+            !e.target.closest('.task-tooltip') &&
+            !e.target.closest('.calendar-tooltip')) {
+            hideTooltip();
+        }
+    });
     
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function(e) {
