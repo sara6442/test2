@@ -1837,6 +1837,55 @@ function openEditCategoryModal(categoryId) {
     document.getElementById('edit-category-modal').classList.add('active');
 }
 
+// ========== حفظ الفئة ==========
+function saveCategory() {
+    const name = document.getElementById('category-name').value.trim();
+    const color = document.getElementById('category-color').value;
+    const timeframeMinutes = parseInt(document.getElementById('category-timeframe').value) || 60;
+    
+    if (!name) {
+        alert('يرجى إدخال اسم الفئة');
+        return;
+    }
+    
+    if (AppState.currentCategoryId) {
+        // تعديل فئة موجودة
+        const categoryIndex = AppState.categories.findIndex(c => c.id === AppState.currentCategoryId);
+        if (categoryIndex !== -1) {
+            AppState.categories[categoryIndex] = {
+                ...AppState.categories[categoryIndex],
+                name: name,
+                color: color,
+                timeframeMinutes: timeframeMinutes
+            };
+            saveCategories();
+            renderCategories();
+            alert('تم تعديل الفئة بنجاح!');
+        }
+    } else {
+        // إضافة فئة جديدة
+        const newCategory = {
+            id: generateId(),
+            name: name,
+            color: color,
+            timeframeMinutes: timeframeMinutes,
+            messageEmpty: 'لا توجد مهام في هذه الفئة. أضف مهام جديدة لبدء العمل!',
+            messageCompleted: 'ممتاز! لقد أكملت جميع المهام في هذه الفئة.',
+            messageExceeded: 'لقد تجاوزت الوقت المخصص لهذه الفئة. حاول إدارة وقتك بشكل أفضل!'
+        };
+        
+        AppState.categories.push(newCategory);
+        saveCategories();
+        renderCategories();
+        alert('تم إضافة الفئة بنجاح!');
+    }
+    
+    closeModal('category-modal');
+    document.getElementById('category-name').value = '';
+    document.getElementById('category-color').value = '#5a76e8';
+    document.getElementById('category-timeframe').value = '60';
+}
+
 // ========== حفظ تعديل الفئة ==========
 function saveCategoryEdit(categoryId) {
     const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
@@ -2092,7 +2141,8 @@ function showCategoriesStatusModal() {
     document.getElementById('categories-status-modal').classList.add('active');
 }
 
-// إضافة دالة جديدة للإغلاق العامة
+
+// ========== إغلاق النوافذ ==========
 window.closeModal = function(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
@@ -2104,6 +2154,13 @@ window.closeModal = function(modalId) {
         }, 300);
     }
 };
+
+// جعل الوظائف متاحة عالمياً
+window.openEditCategoryMessages = openEditCategoryMessages;
+window.openEditCategoryModal = openEditCategoryModal;
+window.saveCategoryMessages = saveCategoryMessages;
+window.saveCategoryEdit = saveCategoryEdit;
+
 // ========== إدارة الملاحظات ==========
 function renderNotes() {
     const container = document.getElementById('notes-list');
@@ -2757,6 +2814,25 @@ function closeModal(modalId) {
         modal.classList.remove('active');
     }
 }
+
+// ========== إغلاق النوافذ ==========
+window.closeModal = function(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('active');
+        setTimeout(() => {
+            if (modal.parentNode) {
+                modal.parentNode.removeChild(modal);
+            }
+        }, 300);
+    }
+};
+
+// جعل الوظائف متاحة عالمياً
+window.openEditCategoryMessages = openEditCategoryMessages;
+window.openEditCategoryModal = openEditCategoryModal;
+window.saveCategoryMessages = saveCategoryMessages;
+window.saveCategoryEdit = saveCategoryEdit;
 
 // جعل الوظائف متاحة عالمياً
 window.openEditTaskModal = openEditTaskModal;
