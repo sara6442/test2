@@ -1065,3 +1065,211 @@ input:disabled {
 .theme-black ::-webkit-scrollbar-thumb:hover {
     background: #666666 !important;
 }
+/* ========== إصلاحات الثيم الأسود وتحسينات ========== */
+
+/* تحسين الثيم الأسود */
+.theme-black {
+    --theme-bg: #121212 !important;
+    --theme-sidebar: linear-gradient(180deg, #1a1a1a, #2d2d2d);
+    --theme-text: #ffffff;
+    --theme-card: #1e1e1e;
+    --theme-border: #444444;
+    --theme-primary: #6c757d;
+    --theme-hover: #5a6268;
+}
+
+/* إصلاح النصوص في الثيم الأسود */
+.theme-black .category-name,
+.theme-black .task-title,
+.theme-black .note-title,
+.theme-black .calendar-task-title,
+.theme-black .modal-header h3,
+.theme-black .header-left h1,
+.theme-black .task-description,
+.theme-black .category-progress-info span,
+.theme-black .note-date,
+.theme-black .note-font,
+.theme-black .calendar-task-meta span,
+.theme-black #page-title,
+.theme-black #current-date,
+.theme-black .header,
+.theme-black .content-area,
+.theme-black .task-filters,
+.theme-black .categories-header h2,
+.theme-black .categories-header p {
+    color: #ffffff !important;
+}
+
+/* إزالة الخلفيات البيضاء */
+.theme-black .category-card,
+.theme-black .task-card,
+.theme-black .note-card,
+.theme-black .modal-content,
+.theme-black .content-area,
+.theme-black .header,
+.theme-black .task-filters,
+.theme-black .time-slot,
+.theme-black .day-column,
+.theme-black .month-day,
+.theme-black .calendar-controls,
+.theme-black .calendar-task-card {
+    background-color: #1e1e1e !important;
+    border-color: #444444 !important;
+}
+
+/* تحسين النصوص في الفئات */
+.theme-black .category-task-item,
+.theme-black .category-task-title,
+.theme-black .category-task-meta span {
+    color: #ffffff !important;
+    background-color: #2d2d2d !important;
+    border-color: #555555 !important;
+}
+
+/* تحسين حقول الإدخال */
+.theme-black input,
+.theme-black select,
+.theme-black textarea,
+.theme-black .form-group input,
+.theme-black .form-group select,
+.theme-black .form-group textarea,
+.theme-black .notes-title-input,
+.theme-black .font-select,
+.theme-black .font-size-input,
+.theme-black .font-weight-select,
+.theme-black .font-style-select {
+    background-color: #2d2d2d !important;
+    color: #ffffff !important;
+    border-color: #555555 !important;
+}
+
+.theme-black input::placeholder,
+.theme-black textarea::placeholder,
+.theme-black .notes-title-input::placeholder {
+    color: #aaaaaa !important;
+}
+
+/* إزالة الخلفيات المستطيلة حول النصوص */
+.theme-black .note-title,
+.theme-black .task-title,
+.theme-black .category-name {
+    background: transparent !important;
+}
+
+/* تحسين شريط التمرير */
+.theme-black ::-webkit-scrollbar-track {
+    background: #2d2d2d !important;
+}
+
+.theme-black ::-webkit-scrollbar-thumb {
+    background: #555555 !important;
+}
+
+.theme-black ::-webkit-scrollbar-thumb:hover {
+    background: #666666 !important;
+}
+
+/* ========== تحسين تصميم حقول الحيز الزمني ========== */
+#category-modal .form-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+}
+
+#category-modal .form-group {
+    margin-bottom: 0;
+}
+
+#category-modal .form-group:first-child {
+    flex: 2; /* اللون يأخذ مساحة أكبر */
+}
+
+#category-modal .form-group:last-child {
+    flex: 1; /* الحيز الزمني يأخذ مساحة أقل */
+}
+
+/* ========== تحسين نافذة الإعدادات ========== */
+.settings-popup {
+    position: absolute;
+    bottom: 70px;
+    right: 20px;
+    background: var(--theme-card);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--theme-border);
+    display: none;
+    z-index: 1000;
+    min-width: 200px;
+    max-width: 300px;
+}
+
+.settings-popup.active {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.settings-popup h4 {
+    margin-bottom: 15px;
+    color: var(--theme-text);
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.theme-options {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.theme-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    background: var(--theme-bg);
+}
+
+.theme-option:hover {
+    background: var(--theme-border);
+    transform: translateY(-2px);
+}
+
+.theme-option.active {
+    border-color: var(--theme-primary);
+    background: rgba(67, 97, 238, 0.1);
+}
+
+.theme-preview {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--theme-border);
+}
+
+.theme-name {
+    font-size: 0.9rem;
+    color: var(--theme-text);
+    font-weight: 500;
+}
+
+/* ========== إصلاح طول الصفحة ========== */
+.content-area {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.tasks-list,
+.categories-grid,
+.notes-grid {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
