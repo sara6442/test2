@@ -1010,46 +1010,87 @@ function renderTasks() {
     const container = document.getElementById('tasks-list');
     
     let tasksToShow = [];
+    let completedTasks = [];
+    let pendingTasks = [];
     
     switch(AppState.currentFilter) {
         case 'pending':
-            tasksToShow = AppState.tasks.filter(task => !task.completed);
+            pendingTasks = AppState.tasks.filter(task => !task.completed);
+            // فصل المهام المتأخرة
+            const overdueTasks = pendingTasks.filter(task => isTaskOverdue(task));
+            const normalTasks = pendingTasks.filter(task => !isTaskOverdue(task));
+            
+            // ترتيب المهام المتأخرة (الأكثر تأخراً أولاً)
+            overdueTasks.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateA - dateB; // من الأقدم إلى الأحدث
+            });
+            
+            // ترتيب المهام العادية
+            normalTasks.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateA - dateB;
+            });
+            
+            tasksToShow = [...overdueTasks, ...normalTasks];
             break;
+            
         case 'completed':
             tasksToShow = AppState.tasks.filter(task => task.completed);
+            // ترتيب المهام المكتملة من الأحدث إلى الأقدم
+            tasksToShow.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateB - dateA; // من الأحدث إلى الأقدم
+            });
             break;
+            
         case 'deleted':
             tasksToShow = AppState.deletedTasks;
             break;
+            
         case 'overdue':
-            tasksToShow = AppState.tasks.filter(task => isTaskOverdue(task));
+            tasksToShow = AppState.tasks.filter(task => isTaskOverdue(task) && !task.completed);
+            // ترتيب من الأكثر تأخراً إلى الأقل
+            tasksToShow.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateA - dateB;
+            });
             break;
+            
         case 'all':
-            tasksToShow = AppState.tasks;
+            completedTasks = AppState.tasks.filter(task => task.completed);
+            pendingTasks = AppState.tasks.filter(task => !task.completed);
+            
+            // فصل المهام المتأخرة
+            const allOverdueTasks = pendingTasks.filter(task => isTaskOverdue(task));
+            const allNormalTasks = pendingTasks.filter(task => !isTaskOverdue(task));
+            
+            // ترتيب كل مجموعة
+            allOverdueTasks.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateA - dateB;
+            });
+            
+            allNormalTasks.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateA - dateB;
+            });
+            
+            completedTasks.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateB - dateA;
+            });
+            
+            tasksToShow = [...allOverdueTasks, ...allNormalTasks, ...completedTasks];
             break;
     }
-    
-    tasksToShow.sort((a, b) => {
-        const aOverdue = isTaskOverdue(a);
-        const bOverdue = isTaskOverdue(b);
-        if (aOverdue && !bOverdue) return -1;
-        if (!aOverdue && bOverdue) return 1;
-        
-        if (a.completed && !b.completed) return 1;
-        if (!a.completed && b.completed) return -1;
-        
-        const priorityOrder = { high: 0, medium: 1, low: 2 };
-        if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
-            return priorityOrder[a.priority] - priorityOrder[b.priority];
-        }
-        
-        const dateA = a.date ? new Date(a.date) : new Date(0);
-        const dateB = b.date ? new Date(b.date) : new Date(0);
-        if (dateA < dateB) return -1;
-        if (dateA > dateB) return 1;
-        
-        return 0;
-    });
     
     if (tasksToShow.length === 0) {
         let message = 'لا توجد مهام';
@@ -1073,7 +1114,14 @@ function renderTasks() {
     tasksToShow.forEach(task => {
         const category = getCategoryById(task.categoryId);
         const isDeleted = AppState.currentFilter === 'deleted';
-        const isOverdue = isTaskOverdue(task);
+        const isOverdue = isTaskOverdue(task) && !task.completed;
+        
+        // علامة "متأخرة" للمهام النشطة
+        const overdueBadge = isOverdue ? `
+            <span class="overdue-badge" style="background: #f72585; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.75rem; margin-right: 8px;">
+                <i class="fas fa-exclamation-circle"></i> متأخرة
+            </span>
+        ` : '';
         
         if (isDeleted) {
             html += `
@@ -1105,10 +1153,14 @@ function renderTasks() {
         } else {
             html += `
                 <div class="task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
-                     data-id="${task.id}">
+                     data-id="${task.id}"
+                     title="انقر لتعديل المهمة">
                     <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''}>
                     <div class="task-content">
-                        <div class="task-title">${task.title}</div>
+                        <div class="task-title">
+                            ${overdueBadge}
+                            ${task.title}
+                        </div>
                         ${task.description ? `<div class="task-description">${task.description}</div>` : ''}
                         <div class="task-meta">
                             <div class="task-meta-item">
@@ -1146,6 +1198,10 @@ function renderTasks() {
     });
     
     container.innerHTML = html;
+    
+    // إضافة Tooltip عند المرور على المهام
+    setupTaskHoverEffects();
+}
     
     if (AppState.currentFilter === 'deleted') {
         document.querySelectorAll('.restore-task-btn').forEach(btn => {
