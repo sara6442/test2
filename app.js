@@ -971,48 +971,52 @@ function deleteTask(taskId) {
     
     refreshCurrentView();
 }
-// ========== تعديل رسائل الفئة ==========
-// ========== إصلاح نافذة تعديل رسائل الفئة ==========
+// ========== فتح نافذة تعديل رسائل الفئة ==========
 function openEditCategoryMessages(categoryId) {
+    console.log("فتح تعديل رسائل الفئة:", categoryId);
     const category = AppState.categories.find(c => c.id === categoryId);
-    if (!category) return;
+    if (!category) {
+        alert("الفئة غير موجودة!");
+        return;
+    }
     
-    // إغلاق أي نافذة موجودة
-    const existingModal = document.getElementById('edit-category-messages-modal');
-    if (existingModal) existingModal.remove();
-    
+    // إنشاء نافذة الرسائل
     const modalHTML = `
         <div class="modal" id="edit-category-messages-modal">
             <div class="modal-content" style="max-width: 600px;">
                 <div class="modal-header">
-                    <h3>تعديل رسائل فئة "${category.name}"</h3>
+                    <h3>تعديل رسائل فئة: ${category.name}</h3>
                     <button class="close-btn" onclick="closeModal('edit-category-messages-modal')">&times;</button>
                 </div>
                 <div class="modal-body">
                     <form id="category-messages-form">
                         <div class="form-group">
                             <label for="message-empty">رسالة عند عدم وجود مهام</label>
-                            <textarea id="message-empty" rows="3" placeholder="رسالة تظهر عندما لا توجد مهام في الفئة">${category.messageEmpty || ''}</textarea>
+                            <textarea id="message-empty" rows="3" placeholder="رسالة تظهر عندما لا توجد مهام في الفئة...">${category.messageEmpty || ''}</textarea>
                         </div>
                         
                         <div class="form-group">
                             <label for="message-completed">رسالة عند اكتمال جميع المهام</label>
-                            <textarea id="message-completed" rows="3" placeholder="رسالة تظهر عند اكتمال جميع مهام الفئة">${category.messageCompleted || ''}</textarea>
+                            <textarea id="message-completed" rows="3" placeholder="رسالة تظهر عند اكتمال جميع مهام الفئة...">${category.messageCompleted || ''}</textarea>
                         </div>
                         
                         <div class="form-group">
                             <label for="message-exceeded">رسالة عند تجاوز الحيز الزمني</label>
-                            <textarea id="message-exceeded" rows="3" placeholder="رسالة تظهر عند تجاوز الحيز الزمني">${category.messageExceeded || ''}</textarea>
+                            <textarea id="message-exceeded" rows="3" placeholder="رسالة تظهر عند تجاوز الحيز الزمني...">${category.messageExceeded || ''}</textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
                     <button class="btn btn-secondary" onclick="closeModal('edit-category-messages-modal')">إلغاء</button>
-                    <button class="btn btn-primary" onclick="saveCategoryMessages('${categoryId}')">حفظ التعديلات</button>
+                    <button class="btn btn-primary" onclick="saveCategoryMessages('${categoryId}')">حفظ الرسائل</button>
                 </div>
             </div>
         </div>
     `;
+    
+    // إضافة النافذة
+    const existingModal = document.getElementById('edit-category-messages-modal');
+    if (existingModal) existingModal.remove();
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.getElementById('edit-category-messages-modal').classList.add('active');
@@ -1023,39 +1027,21 @@ function saveCategoryMessages(categoryId) {
     const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
     if (categoryIndex === -1) return;
     
-    // جلب العناصر بشكل صحيح
     const messageEmpty = document.getElementById('message-empty')?.value.trim() || '';
     const messageCompleted = document.getElementById('message-completed')?.value.trim() || '';
     const messageExceeded = document.getElementById('message-exceeded')?.value.trim() || '';
     
     AppState.categories[categoryIndex] = {
         ...AppState.categories[categoryIndex],
-        messageEmpty: messageEmpty,
-        messageCompleted: messageCompleted,
-        messageExceeded: messageExceeded
+        messageEmpty: messageEmpty || 'لا توجد مهام في هذه الفئة',
+        messageCompleted: messageCompleted || 'ممتاز! لقد أكملت جميع المهام',
+        messageExceeded: messageExceeded || 'لقد تجاوزت الوقت المخصص لهذه الفئة'
     };
     
     saveCategories();
+    renderCategories();
     closeModal('edit-category-messages-modal');
-    
-    // تحديث العرض
-    if (AppState.currentView === 'categories') {
-        renderCategories();
-    }
-    
-    if (typeof renderCategoriesStatus === 'function') {
-        renderCategoriesStatus();
-    }
-    
     alert('تم حفظ الرسائل بنجاح!');
-}
-function toggleTaskCompletion(taskId) {
-    const task = AppState.tasks.find(t => t.id === taskId);
-    if (task) {
-        task.completed = !task.completed;
-        saveTasks();
-        refreshCurrentView();
-    }
 }
 
 function restoreTask(taskId) {
@@ -1638,8 +1624,15 @@ Date.prototype.getWeekNumber = function() {
 };
 
 // ========== إدارة الفئات ==========
+// ========== عرض الفئات (مصحح) ==========
 function renderCategories() {
+    console.log("🎯 عرض الفئات...");
     const container = document.getElementById('categories-list');
+    
+    if (!container) {
+        console.error("❌ عنصر الفئات غير موجود!");
+        return;
+    }
     
     if (AppState.categories.length === 0) {
         container.innerHTML = `
@@ -1663,9 +1656,7 @@ function renderCategories() {
         let completedDuration = 0;
         categoryTasks.forEach(task => {
             totalDuration += task.duration || 30;
-            if (task.completed) {
-                completedDuration += task.duration || 30;
-            }
+            if (task.completed) completedDuration += task.duration || 30;
         });
         
         const progressPercent = totalDuration > 0 ? Math.round((completedDuration / totalDuration) * 100) : 0;
@@ -1673,23 +1664,9 @@ function renderCategories() {
         html += `
             <div class="category-card" data-id="${category.id}">
                 <div class="category-header">
-                    <div class="category-color" style="background: ${category.color}" 
-                         onclick="event.stopPropagation(); openEditCategoryModal('${category.id}')"
-                         title="تعديل لون الفئة"></div>
+                    <div class="category-color" style="background: ${category.color}"></div>
                     <div class="category-name">${category.name}</div>
                     <div class="category-stats">${totalTasks} مهام</div>
-                   <div class="category-actions">
-    <div class="category-actions">
-    <button class="btn btn-info btn-xs edit-messages-btn" data-id="${category.id}" title="تعديل الرسائل">
-        <i class="fas fa-comment-dots"></i>
-    </button>
-    <button class="btn btn-warning btn-xs edit-category-btn" data-id="${category.id}" title="تعديل الفئة">
-        <i class="fas fa-edit"></i>
-    </button>
-    <button class="btn btn-danger btn-xs delete-category-btn" data-id="${category.id}" title="حذف الفئة">
-        <i class="fas fa-trash"></i>
-    </button>
-</div>
                 </div>
                 
                 <div class="category-progress-info">
@@ -1709,21 +1686,21 @@ function renderCategories() {
         if (categoryTasks.length === 0) {
             html += `
                 <div style="text-align: center; padding: 20px; color: var(--gray-color);">
-                    <i class="fas fa-tasks" style="opacity: 0.3;"></i>
-                    <p>لا توجد مهام في هذه الفئة</p>
+                    <i class="fas fa-tasks" style="opacity: 0.3; margin-bottom: 10px;"></i>
+                    <p style="margin: 0;">${category.messageEmpty || 'لا توجد مهام في هذه الفئة'}</p>
                 </div>
             `;
         } else {
-            categoryTasks.forEach(task => {
+            categoryTasks.slice(0, 5).forEach(task => {
                 const isOverdue = isTaskOverdue(task);
                 
                 html += `
                     <div class="category-task-item ${task.completed ? 'completed' : ''}" 
-                         data-id="${task.id}"
                          onclick="openEditTaskModal('${task.id}')">
                         <div class="category-task-title">
-                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
-                            ${task.title}
+                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                                   onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
+                            <span>${task.title}</span>
                         </div>
                         <div class="category-task-meta">
                             <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
@@ -1733,12 +1710,28 @@ function renderCategories() {
                     </div>
                 `;
             });
+            
+            if (categoryTasks.length > 5) {
+                html += `<div style="text-align: center; color: var(--gray-color); font-size: 0.9rem; padding: 10px;">+${categoryTasks.length - 5} مهام أخرى</div>`;
+            }
         }
         
         html += `
                 </div>
                 
-                <button class="btn btn-secondary category-add-task-btn" data-category-id="${category.id}">
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="btn btn-info btn-sm" onclick="openEditCategoryMessages('${category.id}')" style="flex: 1;">
+                        <i class="fas fa-comment-dots"></i> الرسائل
+                    </button>
+                    <button class="btn btn-warning btn-sm" onclick="openEditCategoryModal('${category.id}')" style="flex: 1;">
+                        <i class="fas fa-edit"></i> تعديل
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="deleteCategory('${category.id}')" style="flex: 1;">
+                        <i class="fas fa-trash"></i> حذف
+                    </button>
+                </div>
+                
+                <button class="btn btn-secondary category-add-task-btn" onclick="openAddTaskModal('${category.id}')" style="margin-top: 10px;">
                     <i class="fas fa-plus"></i> إضافة مهمة جديدة
                 </button>
             </div>
@@ -1746,7 +1739,9 @@ function renderCategories() {
     });
     
     container.innerHTML = html;
-    
+    console.log("✅ تم عرض الفئات بنجاح");
+}
+
     // إضافة الأحداث
     document.querySelectorAll('.category-add-task-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
@@ -1791,78 +1786,82 @@ function openAddCategoryModal() {
     document.getElementById('category-modal').classList.add('active');
 }
 
+// ========== فتح نافذة تعديل الفئة ==========
 function openEditCategoryModal(categoryId) {
+    console.log("فتح تعديل الفئة:", categoryId);
     const category = AppState.categories.find(c => c.id === categoryId);
-    if (!category) return;
+    if (!category) {
+        alert("الفئة غير موجودة!");
+        return;
+    }
     
     AppState.currentCategoryId = categoryId;
-    document.getElementById('category-modal-title').textContent = 'تعديل الفئة';
-    document.getElementById('category-name').value = category.name;
-    document.getElementById('category-color').value = category.color;
-    document.getElementById('category-timeframe').value = category.timeframeMinutes || 60;
     
-    // لا نضيف حقل النوع لأنه ثابت الآن
-    document.getElementById('category-modal').classList.add('active');
-
-    // تحديث الأزرار بعد فتح النافذة
-    setTimeout(() => {
-        const saveBtn = document.getElementById('save-category');
-        if (saveBtn) {
-            saveBtn.onclick = saveCategory;
-        }
-    }, 100);
+    // إنشاء نافذة التعديل
+    const modalHTML = `
+        <div class="modal" id="edit-category-modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <h3>تعديل الفئة: ${category.name}</h3>
+                    <button class="close-btn" onclick="closeModal('edit-category-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-category-form">
+                        <div class="form-group">
+                            <label for="edit-category-name">اسم الفئة *</label>
+                            <input type="text" id="edit-category-name" value="${category.name}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-category-color">لون الفئة *</label>
+                            <input type="color" id="edit-category-color" value="${category.color}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit-category-timeframe">الحيز الزمني (بالدقائق)</label>
+                            <input type="number" id="edit-category-timeframe" value="${category.timeframeMinutes || 60}" min="1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('edit-category-modal')">إلغاء</button>
+                    <button class="btn btn-primary" onclick="saveCategoryEdit('${categoryId}')">حفظ التعديلات</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // إضافة النافذة
+    const existingModal = document.getElementById('edit-category-modal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('edit-category-modal').classList.add('active');
 }
 
-function saveCategory() {
-    const name = document.getElementById('category-name').value.trim();
-    const color = document.getElementById('category-color').value;
-    const timeframeMinutes = parseInt(document.getElementById('category-timeframe').value) || 60;
+// ========== حفظ تعديل الفئة ==========
+function saveCategoryEdit(categoryId) {
+    const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
+    if (categoryIndex === -1) return;
+    
+    const name = document.getElementById('edit-category-name').value.trim();
+    const color = document.getElementById('edit-category-color').value;
+    const timeframe = parseInt(document.getElementById('edit-category-timeframe').value) || 60;
     
     if (!name) {
         alert('يرجى إدخال اسم الفئة');
         return;
     }
     
-    if (AppState.currentCategoryId) {
-        // تعديل فئة موجودة
-        const categoryIndex = AppState.categories.findIndex(c => c.id === AppState.currentCategoryId);
-        if (categoryIndex !== -1) {
-            AppState.categories[categoryIndex] = {
-                ...AppState.categories[categoryIndex],
-                name: name,
-                color: color,
-                timeframeMinutes: timeframeMinutes,
-                timeframeType: 'minutes' // ثابت دائماً
-            };
-            saveCategories();
-            renderCategories();
-            if (typeof renderCategoriesStatus === 'function') {
-                renderCategoriesStatus();
-            }
-        }
-    } else {
-        // إضافة فئة جديدة
-        const newCategory = {
-            id: generateId(),
-            name: name,
-            color: color,
-            timeframeMinutes: timeframeMinutes,
-            timeframeType: 'minutes', // ثابت دائماً
-            messageEmpty: 'لا توجد مهام في هذه الفئة. أضف مهام جديدة لبدء العمل!',
-            messageCompleted: 'ممتاز! لقد أكملت جميع المهام في هذه الفئة.',
-            messageExceeded: 'لقد تجاوزت الوقت المخصص لهذه الفئة. حاول إدارة وقتك بشكل أفضل!'
-        };
-        
-        AppState.categories.push(newCategory);
-        saveCategories();
-        renderCategories();
-        if (typeof renderCategoriesStatus === 'function') {
-            renderCategoriesStatus();
-        }
-    }
+    AppState.categories[categoryIndex] = {
+        ...AppState.categories[categoryIndex],
+        name: name,
+        color: color,
+        timeframeMinutes: timeframe
+    };
     
-    closeModal('category-modal');
-    alert('تم حفظ الفئة بنجاح!');
+    saveCategories();
+    renderCategories();
+    closeModal('edit-category-modal');
+    alert('تم تعديل الفئة بنجاح!');
 }
     
 // ========== حفظ رسائل الفئة ==========
