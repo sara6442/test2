@@ -41,42 +41,39 @@
                     <span>الملاحظات</span>
                 </a>
             </nav>
-            
             <div class="sidebar-footer">
                 <button class="settings-btn" id="settings-btn">
                     <i class="fas fa-cog"></i>
                     <span>الإعدادات</span>
                 </button>
-            </div>
-            
-            <!-- نافذة الإعدادات (الثيمات فقط) -->
-           <!-- نافذة الإعدادات (مخفية) -->
-<div class="settings-popup" id="settings-popup">
-    <h4>اختر الثيم</h4>
-    <div class="theme-options">
-        <div class="theme-option active" data-theme="gray">
-            <div class="theme-preview theme-gray-preview"></div>
-            <span class="theme-name">رمادي</span>
-        </div>
-        <div class="theme-option" data-theme="black">
-            <div class="theme-preview theme-black-preview"></div>
-            <span class="theme-name">أسود</span>
-        </div>
-        <div class="theme-option" data-theme="blue">
-            <div class="theme-preview theme-blue-preview"></div>
-            <span class="theme-name">أزرق</span>
-        </div>
-        <div class="theme-option" data-theme="beige">
-            <div class="theme-preview theme-beige-preview"></div>
-            <span class="theme-name">بيج</span>
-        </div>
-        <div class="theme-option" data-theme="custom">
-            <div class="theme-preview theme-custom-preview"></div>
-            <span class="theme-name">مخصص</span>
-        </div>
-    </div>
-</div>
-        </aside>
+            </div>       
+                <!-- نافذة الإعدادات (الثيمات فقط) -->
+           <div class="settings-popup" id="settings-popup">
+                <h4>اختر الثيم</h4>
+                <div class="theme-options">
+                    <div class="theme-option active" data-theme="gray">
+                    <div class="theme-preview theme-gray-preview"></div>
+                        <span class="theme-name">رمادي</span>
+                </div>
+                    <div class="theme-option" data-theme="black">
+                    <div class="theme-preview theme-black-preview"></div>
+                        <span class="theme-name">أسود</span>
+                </div>
+                    <div class="theme-option" data-theme="blue">
+                    <div class="theme-preview theme-blue-preview"></div>
+                        <span class="theme-name">أزرق</span>
+                </div>
+                    <div class="theme-option" data-theme="beige">
+                    <div class="theme-preview theme-beige-preview"></div>
+                        <span class="theme-name">بيج</span>
+                </div>
+                    <div class="theme-option" data-theme="custom">
+                    <div class="theme-preview theme-custom-preview"></div>
+                        <span class="theme-name">مخصص</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
 
         <!-- المحتوى الرئيسي -->
         <main class="main-content">
@@ -132,6 +129,9 @@
                             <h2 style="color: var(--theme-text);">إدارة الفئات</h2>
                             <p style="color: var(--gray-color); margin-top: 10px;">إدارة فئات المهام وإضافة مهام جديدة لها</p>
                         </div>
+                        <button class="btn btn-primary" id="add-category-btn">
+                            <i class="fas fa-plus"></i> فئة جديدة
+                        </button>
                         <button class="btn btn-primary" id="add-category-btn">
                             <i class="fas fa-plus"></i> فئة جديدة
                         </button>
