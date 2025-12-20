@@ -505,6 +505,54 @@ input:disabled {
 .category-progress-info { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--gray-color); margin-bottom: 15px; }
 .category-add-task-btn { width: 100%; margin-top: 15px; }
 
+/* ========== إصلاح عرض الفئات ========== */
+.category-tasks-container {
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin: 15px 0;
+    background: var(--theme-card);
+    border-radius: 8px;
+    border: 1px solid var(--theme-border);
+    padding: 15px;
+}
+
+.category-task-item {
+    padding: 12px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-right: 3px solid;
+    transition: var(--transition);
+    cursor: pointer;
+    background: var(--theme-card);
+    border: 1px solid var(--theme-border);
+}
+
+.category-task-item:hover {
+    transform: translateX(-5px);
+    background: var(--theme-border);
+}
+
+.category-task-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.category-task-title input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.category-task-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: var(--gray-color);
+}
+
 /* شريط المهام داخل الفئة */
 .category-tasks-container {
     margin: 15px 0;
