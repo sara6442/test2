@@ -1221,7 +1221,7 @@ function setupTaskButtonsEvents() {
         });
     });
     
-        // إضافة حدث النقر على البطاقة لفتح التعديل
+    // إضافة حدث النقر على البطاقة لفتح التعديل
     document.querySelectorAll('.task-card:not(.deleted)').forEach(card => {
         card.addEventListener('click', (e) => {
             // منع فتح التعديل إذا تم النقر على أي زر أو checkbox
@@ -1265,8 +1265,11 @@ function setupTaskButtonsEvents() {
                     saveDeletedTasks();
                     renderTasks();
                 }
-                
-                // إضافة حدث النقر على البطاقة لفتح التعديل
+            }
+        });
+    });
+    
+    // إضافة حدث النقر على البطاقة لفتح التعديل
     document.querySelectorAll('.task-card:not(.deleted)').forEach(card => {
         card.addEventListener('click', (e) => {
             // منع فتح التعديل إذا تم النقر على أي زر أو checkbox
@@ -1278,7 +1281,8 @@ function setupTaskButtonsEvents() {
             }
         });
     });
-}
+} 
+
 
 
 // ========== إدارة الفئات ==========
