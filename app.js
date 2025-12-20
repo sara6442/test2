@@ -1265,6 +1265,16 @@ function setupTaskButtonsEvents() {
                     saveDeletedTasks();
                     renderTasks();
                 }
+                
+                // إضافة حدث النقر على البطاقة لفتح التعديل
+    document.querySelectorAll('.task-card:not(.deleted)').forEach(card => {
+        card.addEventListener('click', (e) => {
+            // منع فتح التعديل إذا تم النقر على أي زر أو checkbox
+            if (!e.target.closest('.task-actions') && 
+                !e.target.closest('input[type="checkbox"]') &&
+                !e.target.classList.contains('btn')) {
+                const taskId = card.dataset.id;
+                openEditTaskModal(taskId);
             }
         });
     });
@@ -3553,38 +3563,32 @@ function setupAllEvents() {
         });
     });
     
-   // 4. الأزرار الرئيسية
+  // 4. الأزرار الرئيسية
 const addTaskBtn = document.getElementById('add-task-btn');
 if (addTaskBtn) {
     addTaskBtn.addEventListener('click', () => {
         console.log("فتح نافذة إضافة مهمة");
         openAddTaskModal();
     });
-} else {
-    console.error("❌ زر إضافة مهمة غير موجود!");
-}}
-    
-    // 5. زر إضافة فئة
-    const addCategoryBtn = document.getElementById('add-category-btn');
-    if (addCategoryBtn) {
-        addCategoryBtn.addEventListener('click', () => {
-            console.log("فتح نافذة إضافة فئة");
-            openAddCategoryModal();
-        });
-    } else {
-        console.error("❌ زر إضافة فئة غير موجود!");
-    }
-    
-    // 6. زر إضافة ملاحظة
-    const addNoteBtn = document.getElementById('add-note-btn');
-    if (addNoteBtn) {
-        addNoteBtn.addEventListener('click', () => {
-            console.log("إضافة ملاحظة جديدة");
-            addNote();
-        });
-    } else {
-        console.error("❌ زر إضافة ملاحظة غير موجود!");
-    }
+}
+
+// 5. زر إضافة فئة
+const addCategoryBtn = document.getElementById('add-category-btn');
+if (addCategoryBtn) {
+    addCategoryBtn.addEventListener('click', () => {
+        console.log("فتح نافذة إضافة فئة");
+        openAddCategoryModal();
+    });
+}
+
+// 6. زر إضافة ملاحظة
+const addNoteBtn = document.getElementById('add-note-btn');
+if (addNoteBtn) {
+    addNoteBtn.addEventListener('click', () => {
+        console.log("إضافة ملاحظة جديدة");
+        addNote();
+    });
+}
     
     // 7. إغلاق نافذة إضافة مهمة
     const closeTaskModalBtn = document.getElementById('close-task-modal');
