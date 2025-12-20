@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lan
+    g="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +47,8 @@
                     <i class="fas fa-cog"></i>
                     <span>الإعدادات</span>
                 </button>
-            </div>       
+            </div>    
+            
                 <!-- نافذة الإعدادات (الثيمات فقط) -->
            <div class="settings-popup" id="settings-popup">
                 <h4>اختر الثيم</h4>
@@ -85,8 +87,8 @@
                 <div>
                     <!-- زر إضافة مهمة رئيسي فقط هنا -->
                     <button class="btn btn-primary" id="add-task-btn">
-                        <i class="fas fa-plus"></i> إضافة مهمة
-                    </button>
+    <i class="fas fa-plus"></i> إضافة مهمة
+</button>
                 </div>
             </header>
 
@@ -331,6 +333,12 @@
                     <input type="color" id="notes-font-color" class="font-color-input" value="#000000">
                 </div>
             </div>
+            <div class="image-upload-container" style="margin-right: 10px; border-right: 2px solid var(--theme-border); padding-right: 10px;">
+    <button class="btn btn-info btn-sm" id="image-upload-btn" title="إضافة صورة">
+        <i class="fas fa-image"></i> صورة
+    </button>
+    <input type="file" id="image-file-input" accept="image/*,image/gif" style="display: none;">
+</div>
             <div class="image-upload-container" style="margin-right: 10px; border-right: 2px solid var(--theme-border); padding-right: 10px;">
     <button class="btn btn-info btn-sm" id="image-upload-btn" title="إضافة صورة">
         <i class="fas fa-image"></i> صورة
