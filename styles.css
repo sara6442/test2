@@ -1356,3 +1356,24 @@ input:disabled {
     color: var(--theme-text);
     font-weight: 500;
 }
+
+/* ========== إصلاح لون البطاقات حسب الثيم ========== */
+.task-card,
+.category-card,
+.note-card,
+.calendar-task-card {
+    background-color: var(--theme-card) !important;
+    border-color: var(--theme-border) !important;
+    color: var(--theme-text) !important;
+}
+
+/* شفافية حسب حالة البطاقة */
+.task-card.completed {
+    opacity: 0.7;
+    border-color: var(--success-color) !important;
+}
+
+.task-card.overdue {
+    border-color: var(--danger-color) !important;
+    background-color: rgba(247, 37, 133, 0.1) !important;
+}
