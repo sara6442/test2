@@ -177,17 +177,24 @@ body {
     --theme-hover: #3a56d4;
 }
 
+/* ========== الثيم المخصص المتقدم ========== */
 .theme-custom {
-    /* سيتم تعيين هذه المتغيرات ديناميكياً عبر JavaScript */
-    --theme-bg: #ffffff;
-    --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
-    --theme-text: #212529;
-    --theme-card: white;
-    --theme-border: #dee2e6;
-    --theme-primary: #6c757d;
-    --theme-hover: #5a6268;
+    --theme-bg: var(--custom-bg, #ffffff);
+    --theme-sidebar: linear-gradient(180deg, var(--custom-color1, #5a6268), var(--custom-color2, #495057));
+    --theme-text: var(--custom-text, #212529);
+    --theme-card: var(--custom-card, white);
+    --theme-border: var(--custom-border, #dee2e6);
+    --theme-primary: var(--custom-primary, #6c757d);
+    --theme-hover: var(--custom-hover, #5a6268);
 }
 
+/* ألوان فاتحة للثيم المخصص */
+.theme-custom .task-card,
+.theme-custom .category-card,
+.theme-custom .note-card {
+    background-color: color-mix(in srgb, var(--custom-card), black 20%) !important;
+    border-color: color-mix(in srgb, var(--custom-border), white 30%) !important;
+}
 /* معاينة الثيمات */
 .theme-gray-preview { background: linear-gradient(45deg, #5a6268, #495057); }
 .theme-black-preview { background: linear-gradient(45deg, #1e1e1e, #2d2d2d); }
