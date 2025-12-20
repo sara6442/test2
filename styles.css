@@ -657,6 +657,37 @@ input:disabled {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+/* ========== تحسين نافذة الفئة ========== */
+#category-modal .form-group {
+    margin-bottom: 20px;
+}
+
+#category-modal .form-group:last-child {
+    margin-bottom: 0;
+}
+
+#category-timeframe {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--theme-border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--theme-card);
+    color: var(--theme-text);
+}
+
+/* ========== إزالة التكرار في الأزرار ========== */
+.category-actions {
+    display: flex;
+    gap: 8px;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.category-card:hover .category-actions {
+    opacity: 1;
+}
+
 /* ========== عرض الملاحظات ========== */
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 25px; }
 
@@ -1272,4 +1303,27 @@ input:disabled {
     max-height: 400px;
     overflow-y: auto;
     padding-right: 10px;
+}
+/* ========== إصلاح نصوص الفئات في الثيم الأسود ========== */
+.theme-black .category-task-item .category-task-title,
+.theme-black .category-task-item .category-task-meta,
+.theme-black .category-task-item {
+    color: #ffffff !important;
+}
+
+.theme-black .category-task-item .task-checkbox {
+    accent-color: #6c757d !important;
+}
+
+.theme-black .category-task-item:hover {
+    background-color: #333333 !important;
+}
+
+.theme-black .category-task-item.completed {
+    color: #aaaaaa !important;
+}
+
+.theme-black .category-task-item.completed .category-task-title {
+    text-decoration: line-through;
+    color: #888888 !important;
 }
