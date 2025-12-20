@@ -657,25 +657,7 @@ function loadCustomTheme() {
     }
 }
 
-function resetAddTaskForm() {
-    const form = document.getElementById('task-form');
-    if (form) {
-        form.reset();
-        
-        // إعادة تعيين القيم الافتراضية
-        const today = new Date().toISOString().split('T')[0];
-        const dateInput = document.getElementById('task-date');
-        if (dateInput) dateInput.value = today;
-        
-        const durationInput = document.getElementById('task-duration');
-        if (durationInput) durationInput.value = '30';
-        
-        const prioritySelect = document.getElementById('task-priority');
-        if (prioritySelect) prioritySelect.value = 'medium';
-        
-        console.log("🔄 تم إعادة تعيين نموذج إضافة المهمة");
-    }
-}
+
 
 // ========== إدارة المهام ==========
 function addTask(taskData) {
@@ -703,8 +685,6 @@ function addTask(taskData) {
     
     AppState.tasks.push(newTask);
     saveTasks();
-        resetAddTaskForm();
-
     refreshCurrentView();
     
     closeModal('add-task-modal');
