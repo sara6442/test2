@@ -2551,6 +2551,7 @@ function loadCustomTheme() {
 }
 
 // ========== تهيئة الصفحة ==========
+// ========== تهيئة الصفحة ==========
 function initializePage() {
     console.log("تهيئة الصفحة...");
     
@@ -2564,6 +2565,15 @@ function initializePage() {
     });
     document.getElementById('current-date').textContent = arabicDate;
     
+    // تحميل البيانات
+    initializeData();
+    
+    // تهيئة الثيمات
+    initializeThemes();
+    
+    // إعداد أحداث الإعدادات
+    setupSettingsEvents();
+    
     // ========== إعداد زر الإعدادات ==========
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) {
@@ -2575,10 +2585,6 @@ function initializePage() {
             }
         });
     }
-    
-    // تحميل البيانات
-    initializeData();
-    initializeThemes();
     
     // إعداد محرر الملاحظات
     setupNotesEditorEvents();
