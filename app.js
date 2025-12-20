@@ -2603,9 +2603,11 @@ function setFilter(filterName) {
 }
 
 // ========== تهيئة الصفحة ==========
+// ========== تهيئة الصفحة ==========
 function initializePage() {
     console.log("تهيئة الصفحة...");
-    
+    // إعدادات الأزرار والتفاعلات
+setupSettingsEvents();
     const now = new Date();
     const arabicDate = now.toLocaleDateString('ar-SA', {
         weekday: 'long',
@@ -2620,8 +2622,8 @@ function initializePage() {
     
     setupNotesEditorEvents();
     renderCategoriesStatus();
-
-      // إضافة حدث لإخفاء الـ Tooltip عند النقر
+    
+    // إضافة حدث لإخفاء الـ Tooltip عند النقر
     document.addEventListener('click', function(e) {
         if (!e.target.closest('.task-card') && 
             !e.target.closest('.calendar-task-card') &&
@@ -2631,6 +2633,7 @@ function initializePage() {
         }
     });
     
+    // التنقل بين الأقسام
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -2638,12 +2641,14 @@ function initializePage() {
         });
     });
     
+    // مرشحات المهام
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             setFilter(this.dataset.filter);
         });
     });
     
+    // تبويبات الجدول
     document.querySelectorAll('.calendar-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             AppState.currentCalendarView = this.dataset.range;
@@ -2651,87 +2656,63 @@ function initializePage() {
         });
     });
     
+    // زر إضافة مهمة رئيسي
     document.getElementById('add-task-btn').addEventListener('click', () => {
         openAddTaskModal();
     });
     
+    // زر إضافة فئة
     document.getElementById('add-category-btn').addEventListener('click', () => {
         openAddCategoryModal();
     });
     
+    // زر إضافة ملاحظة
     document.getElementById('add-note-btn').addEventListener('click', () => {
         addNote();
     });
     
+    // إغلاق نافذة إضافة مهمة
     const closeTaskModalBtn = document.getElementById('close-task-modal');
-    const cancelTaskBtn = document.getElementById('cancel-task');
-    
     if (closeTaskModalBtn) {
         closeTaskModalBtn.addEventListener('click', () => {
             closeModal('add-task-modal');
         });
     }
     
+    // إلغاء إضافة مهمة
+    const cancelTaskBtn = document.getElementById('cancel-task');
     if (cancelTaskBtn) {
         cancelTaskBtn.addEventListener('click', () => {
             closeModal('add-task-modal');
         });
     }
     
+    // حفظ المهمة الجديدة
     const saveTaskBtn = document.getElementById('save-task');
     if (saveTaskBtn) {
-        saveTaskBtn.addEventListener('click', () => {
-            const titleInput = document.getElementById('task-title');
-            const categorySelect = document.getElementById('task-category');
-            
-            if (!titleInput || !categorySelect) return;
-            
-            const title = titleInput.value.trim();
-            const category = categorySelect.value;
-            
-            if (!title) {
-                alert('يرجى إدخال عنوان المهمة');
-                return;
-            }
-            
-            if (!category) {
-                alert('يرجى اختيار فئة للمهمة');
-                return;
-            }
-            
-            const durationInput = document.getElementById('task-duration');
-            const dateInput = document.getElementById('task-date');
-            const timeInput = document.getElementById('task-time');
-            const prioritySelect = document.getElementById('task-priority');
-            const descriptionTextarea = document.getElementById('task-description');
-            
-            addTask({
-                title: title,
-                description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
-                categoryId: category,
-                duration: durationInput ? durationInput.value : 30,
-                date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
-                time: timeInput ? timeInput.value : '',
-                priority: prioritySelect ? prioritySelect.value : 'medium'
-            });
+        saveTaskBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveNewTask();
         });
     }
     
+    // إغلاق نافذة تعديل مهمة
     const closeEditTaskModalBtn = document.getElementById('close-edit-task-modal');
-    const cancelEditTaskBtn = document.getElementById('cancel-edit-task');
-    
     if (closeEditTaskModalBtn) {
         closeEditTaskModalBtn.addEventListener('click', () => {
             closeModal('edit-task-modal');
         });
     }
     
+    // إلغاء تعديل مهمة
+    const cancelEditTaskBtn = document.getElementById('cancel-edit-task');
     if (cancelEditTaskBtn) {
         cancelEditTaskBtn.addEventListener('click', () => {
             closeModal('edit-task-modal');
         });
     }
     
+    // حذف مهمة من نافذة التعديل
     const deleteEditTaskBtn = document.getElementById('delete-edit-task');
     if (deleteEditTaskBtn) {
         deleteEditTaskBtn.addEventListener('click', () => {
@@ -2742,77 +2723,135 @@ function initializePage() {
         });
     }
     
+    // حفظ التعديلات على المهمة
     const saveEditTaskBtn = document.getElementById('save-edit-task');
     if (saveEditTaskBtn) {
-        saveEditTaskBtn.addEventListener('click', () => {
-            if (!AppState.currentTaskId) return;
-            
-            const titleInput = document.getElementById('edit-task-title');
-            const categorySelect = document.getElementById('edit-task-category');
-            
-            if (!titleInput || !categorySelect) return;
-            
-            const title = titleInput.value.trim();
-            const category = categorySelect.value;
-            
-            if (!title) {
-                alert('يرجى إدخال عنوان المهمة');
-                return;
-            }
-            
-            if (!category) {
-                alert('يرجى اختيار فئة للمهمة');
-                return;
-            }
-            
-            const durationInput = document.getElementById('edit-task-duration');
-            const dateInput = document.getElementById('edit-task-date');
-            const timeInput = document.getElementById('edit-task-time');
-            const prioritySelect = document.getElementById('edit-task-priority');
-            const descriptionTextarea = document.getElementById('edit-task-description');
-            
-            updateTask(AppState.currentTaskId, {
-                title: title,
-                description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
-                categoryId: category,
-                duration: durationInput ? durationInput.value : 30,
-                date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
-                time: timeInput ? timeInput.value : '',
-                priority: prioritySelect ? prioritySelect.value : 'medium'
-            });
+        saveEditTaskBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveEditedTask();
         });
     }
     
+    // إغلاق نافذة الفئة
     const closeCategoryModalBtn = document.getElementById('close-category-modal');
-    const cancelCategoryBtn = document.getElementById('cancel-category');
-    
     if (closeCategoryModalBtn) {
         closeCategoryModalBtn.addEventListener('click', () => {
             closeModal('category-modal');
         });
     }
     
+    // إلغاء نافذة الفئة
+    const cancelCategoryBtn = document.getElementById('cancel-category');
     if (cancelCategoryBtn) {
         cancelCategoryBtn.addEventListener('click', () => {
             closeModal('category-modal');
         });
     }
     
+    // حفظ الفئة
     const saveCategoryBtn = document.getElementById('save-category');
     if (saveCategoryBtn) {
-        saveCategoryBtn.addEventListener('click', saveCategory);
+        saveCategoryBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveCategory();
+        });
     }
     
+    // إغلاق النوافذ المنبثقة بالضغط خارجها
     window.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal')) {
             closeModal(e.target.id);
         }
     });
     
+    // عرض المهام
     renderTasks();
     console.log("✅ التطبيق جاهز للاستخدام!");
 }
 
+// ========== وظائف حفظ المهام ==========
+function saveNewTask() {
+    const titleInput = document.getElementById('task-title');
+    const categorySelect = document.getElementById('task-category');
+    
+    if (!titleInput || !categorySelect) {
+        console.error('عناصر النموذج غير موجودة');
+        return;
+    }
+    
+    const title = titleInput.value.trim();
+    const category = categorySelect.value;
+    
+    if (!title) {
+        alert('يرجى إدخال عنوان المهمة');
+        return;
+    }
+    
+    if (!category) {
+        alert('يرجى اختيار فئة للمهمة');
+        return;
+    }
+    
+    const durationInput = document.getElementById('task-duration');
+    const dateInput = document.getElementById('task-date');
+    const timeInput = document.getElementById('task-time');
+    const prioritySelect = document.getElementById('task-priority');
+    const descriptionTextarea = document.getElementById('task-description');
+    
+    addTask({
+        title: title,
+        description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
+        categoryId: category,
+        duration: durationInput ? parseInt(durationInput.value) || 30 : 30,
+        date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
+        time: timeInput ? timeInput.value : '',
+        priority: prioritySelect ? prioritySelect.value : 'medium'
+    });
+}
+
+function saveEditedTask() {
+    if (!AppState.currentTaskId) {
+        console.error('لا يوجد معرف للمهمة الحالية');
+        return;
+    }
+    
+    const titleInput = document.getElementById('edit-task-title');
+    const categorySelect = document.getElementById('edit-task-category');
+    
+    if (!titleInput || !categorySelect) {
+        console.error('عناصر نموذج التعديل غير موجودة');
+        return;
+    }
+    
+    const title = titleInput.value.trim();
+    const category = categorySelect.value;
+    
+    if (!title) {
+        alert('يرجى إدخال عنوان المهمة');
+        return;
+    }
+    
+    if (!category) {
+        alert('يرجى اختيار فئة للمهمة');
+        return;
+    }
+    
+    const durationInput = document.getElementById('edit-task-duration');
+    const dateInput = document.getElementById('edit-task-date');
+    const timeInput = document.getElementById('edit-task-time');
+    const prioritySelect = document.getElementById('edit-task-priority');
+    const descriptionTextarea = document.getElementById('edit-task-description');
+    
+    updateTask(AppState.currentTaskId, {
+        title: title,
+        description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
+        categoryId: category,
+        duration: durationInput ? parseInt(durationInput.value) || 30 : 30,
+        date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
+        time: timeInput ? timeInput.value : '',
+        priority: prioritySelect ? prioritySelect.value : 'medium'
+    });
+}
 // ========== التهيئة ==========
 window.addEventListener('load', function() {
     console.log("📄 الصفحة محملة");
