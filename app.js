@@ -2358,7 +2358,6 @@ function renderNotes() {
             deleteNote(noteId);
         });
     });
-}
 
 function addNote() {
     const newNote = {
