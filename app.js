@@ -225,25 +225,58 @@ function changeTheme(theme) {
 }
 
 // دالة جديدة للإعدادات
+// ========== إصلاح زر الإعدادات ==========
 function setupSettingsEvents() {
+    console.log("🔧 إعداد أحداث الإعدادات...");
+    
     // زر الإعدادات
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) {
         settingsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
             e.stopPropagation();
+            console.log("تم النقر على زر الإعدادات");
+            
             const popup = document.getElementById('settings-popup');
             if (popup) {
+                const isActive = popup.classList.contains('active');
+                console.log("حالة النافذة قبل:", isActive ? 'مفتوحة' : 'مغلقة');
+                
                 popup.classList.toggle('active');
+                console.log("حالة النافذة بعد:", popup.classList.contains('active') ? 'مفتوحة' : 'مغلقة');
+            } else {
+                console.error("❌ نافذة الإعدادات غير موجودة!");
             }
         });
+    } else {
+        console.error("❌ زر الإعدادات غير موجود!");
     }
     
-    // إغلاق النافذة عند النقر خارجها
+    // إغلاق نافذة الإعدادات عند النقر خارجها
     document.addEventListener('click', function(e) {
         const popup = document.getElementById('settings-popup');
-        if (popup && !popup.contains(e.target) && e.target.id !== 'settings-btn') {
+        const settingsBtn = document.getElementById('settings-btn');
+        
+        if (popup && popup.classList.contains('active') && 
+            !popup.contains(e.target) && 
+            e.target !== settingsBtn && 
+            !settingsBtn.contains(e.target)) {
             popup.classList.remove('active');
+            console.log("تم إغلاق نافذة الإعدادات");
         }
+    });
+    
+    // أحداث تغيير الثيم
+    document.querySelectorAll('.theme-option').forEach(option => {
+        option.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const theme = this.dataset.theme;
+            console.log("تغيير الثيم إلى:", theme);
+            changeTheme(theme);
+            
+            // إغلاق النافذة بعد الاختيار
+            document.getElementById('settings-popup').classList.remove('active');
+        });
     });
 }
 
