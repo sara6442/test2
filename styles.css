@@ -192,7 +192,7 @@ body {
 .theme-custom .task-card,
 .theme-custom .category-card,
 .theme-custom .note-card {
-    background-color: color-mix(in srgb, var(--custom-card), black 20%) !important;
+    background-color: color-mix(in srgb, var(--custom-card), white 20%) !important;
     border-color: color-mix(in srgb, var(--custom-border), white 30%) !important;
 }
 /* معاينة الثيمات */
