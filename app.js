@@ -1241,6 +1241,124 @@ function renderCategories() {
     console.log("✅ تم عرض الفئات بنجاح");
 }
 
+// ========== عرض الجدول الزمني ==========
+function renderCalendar() {
+    const container = document.getElementById('calendar-content');
+    const tabs = document.querySelectorAll('.calendar-tab');
+    
+    // تحديث التبويبات النشطة
+    tabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.dataset.range === AppState.currentCalendarView) {
+            tab.classList.add('active');
+        }
+    });
+    
+    if (AppState.currentCalendarView === 'daily') {
+        renderDailyCalendar(container);
+    } else if (AppState.currentCalendarView === 'weekly') {
+        renderWeeklyCalendar(container);
+    } else if (AppState.currentCalendarView === 'monthly') {
+        renderMonthlyCalendar(container);
+    }
+}
+
+function renderDailyCalendar(container) {
+    const date = AppState.currentCalendarDate;
+    const dateStr = date.toISOString().split('T')[0];
+    const tasksForDay = AppState.tasks.filter(task => task.date === dateStr);
+    
+    let html = `
+        <div class="calendar-nav" style="margin-bottom: 20px;">
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)">
+                <i class="fas fa-chevron-right"></i> أمس
+            </button>
+            <h3 style="margin: 0 15px;">${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(1)">
+                غداً <i class="fas fa-chevron-left"></i>
+            </button>
+        </div>
+        <div class="daily-calendar">
+    `;
+    
+    // تقسيم اليوم إلى فترات زمنية
+    const timeSlots = [
+        { time: '08:00', label: 'صباحاً' },
+        { time: '12:00', label: 'ظهراً' },
+        { time: '16:00', label: 'مساءً' },
+        { time: '20:00', label: 'ليلاً' }
+    ];
+    
+    timeSlots.forEach(slot => {
+        const slotTasks = tasksForDay.filter(task => {
+            if (!task.time) return false;
+            const taskTime = getTaskTimeInMinutes(task);
+            const slotTime = getTaskTimeInMinutes({ time: slot.time });
+            return taskTime >= slotTime && taskTime < slotTime + 240;
+        });
+        
+        html += `
+            <div class="time-slot">
+                <div class="time-header">
+                    <div class="time-title">
+                        <i class="fas fa-clock"></i>
+                        <span>${slot.time} ${slot.label}</span>
+                    </div>
+                    <span class="task-count">${slotTasks.length} مهام</span>
+                </div>
+                <div class="time-tasks">
+        `;
+        
+        if (slotTasks.length === 0) {
+            html += `
+                <div style="text-align: center; padding: 20px; color: var(--gray-color);">
+                    <i class="fas fa-calendar-check" style="opacity: 0.3;"></i>
+                    <p>لا توجد مهام في هذا الوقت</p>
+                </div>
+            `;
+        } else {
+            slotTasks.forEach(task => {
+                const category = getCategoryById(task.categoryId);
+                const isOverdue = isTaskOverdue(task);
+                
+                html += `
+                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="border-left-color: ${category.color}; border-right-color: ${category.color};">
+                        <div class="calendar-task-title">${task.title}</div>
+                        <div class="calendar-task-meta">
+                            <span><i class="fas fa-clock"></i> ${task.time}</span>
+                            <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function changeCalendarDate(days) {
+    AppState.currentCalendarDate.setDate(AppState.currentCalendarDate.getDate() + days);
+    renderCalendar();
+}
+
+// دالة مساعدة لرقم الأسبوع
+Date.prototype.getWeekNumber = function() {
+    const date = new Date(this.getTime());
+    date.setHours(0, 0, 0, 0);
+    date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+    const week1 = new Date(date.getFullYear(), 0, 4);
+    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+};
+
 function openEditCategoryMessages(categoryId) {
     console.log("فتح تعديل رسائل الفئة:", categoryId);
     const category = AppState.categories.find(c => c.id === categoryId);
