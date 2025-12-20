@@ -1246,7 +1246,7 @@ function renderTasks() {
             });
         });
     }
-}
+
 
 // ========== إدارة الفئات ==========
 function renderCategories() {
