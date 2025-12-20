@@ -3284,7 +3284,7 @@ function setupCalendarScroll() {
             }
             e.preventDefault();
         });
-        
+    }
         // إضافة الأزرار إذا لم تكن موجودة
         if (!document.getElementById('scroll-up-btn')) {
             document.body.insertAdjacentHTML('beforeend', navHTML);
