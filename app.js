@@ -1352,26 +1352,15 @@ function renderCategories() {
             }
         }
         
-        html += `
-                </div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 15px;">
-                    <button class="btn btn-info btn-sm" onclick="openEditCategoryMessages('${category.id}')" style="flex: 1;">
-                        <i class="fas fa-comment-dots"></i> الرسائل
-                    </button>
-                    <button class="btn btn-warning btn-sm" onclick="openEditCategoryModal('${category.id}')" style="flex: 1;">
-                        <i class="fas fa-edit"></i> تعديل
-                    </button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteCategory('${category.id}')" style="flex: 1;">
-                        <i class="fas fa-trash"></i> حذف
-                    </button>
-                </div>
-                
-                <button class="btn btn-secondary category-add-task-btn" onclick="openAddTaskModal('${category.id}')" style="margin-top: 10px;">
-                    <i class="fas fa-plus"></i> إضافة مهمة جديدة
-                </button>
-            </div>
+           html += `
+            <button class="btn btn-secondary category-add-task-btn" 
+                    onclick="openAddTaskModal('${category.id}')" 
+                    style="margin-top: 10px; width: 100%;">
+                <i class="fas fa-plus"></i> إضافة مهمة جديدة
+            </button>
         `;
+        
+        html += `</div>`; // إغلاق category-card
     });
     
     container.innerHTML = html;
@@ -1401,86 +1390,117 @@ function renderCalendar() {
 }
 
 function renderDailyCalendar(container) {
+    console.log("📅 عرض الجدول اليومي...");
+    
     const date = AppState.currentCalendarDate;
     const dateStr = date.toISOString().split('T')[0];
     const tasksForDay = AppState.tasks.filter(task => task.date === dateStr);
     
+    // ترتيب المهام حسب الوقت
+    tasksForDay.sort((a, b) => {
+        const timeA = a.time ? getTaskTimeInMinutes(a) : 9999;
+        const timeB = b.time ? getTaskTimeInMinutes(b) : 9999;
+        return timeA - timeB;
+    });
+    
     let html = `
-        <div class="calendar-nav" style="margin-bottom: 20px;">
+        <div class="calendar-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)">
                 <i class="fas fa-chevron-right"></i> أمس
             </button>
-            <h3 style="margin: 0 15px;">${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
+            <h3 style="margin: 0 15px; text-align: center; color: var(--theme-text);">
+                ${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </h3>
             <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(1)">
                 غداً <i class="fas fa-chevron-left"></i>
             </button>
         </div>
-        <div class="daily-calendar">
+        <div class="daily-calendar" id="daily-calendar-container" style="max-height: 600px; overflow-y: auto; padding-right: 10px;">
     `;
     
-    // تقسيم اليوم إلى فترات زمنية
-    const timeSlots = [
-        { time: '08:00', label: 'صباحاً' },
-        { time: '12:00', label: 'ظهراً' },
-        { time: '16:00', label: 'مساءً' },
-        { time: '20:00', label: 'ليلاً' }
-    ];
-    
-    timeSlots.forEach(slot => {
-        const slotTasks = tasksForDay.filter(task => {
-            if (!task.time) return false;
-            const taskTime = getTaskTimeInMinutes(task);
-            const slotTime = getTaskTimeInMinutes({ time: slot.time });
-            return taskTime >= slotTime && taskTime < slotTime + 240;
-        });
-        
+    if (tasksForDay.length === 0) {
         html += `
-            <div class="time-slot">
-                <div class="time-header">
-                    <div class="time-title">
-                        <i class="fas fa-clock"></i>
-                        <span>${slot.time} ${slot.label}</span>
-                    </div>
-                    <span class="task-count">${slotTasks.length} مهام</span>
-                </div>
-                <div class="time-tasks">
-        `;
-        
-        if (slotTasks.length === 0) {
-            html += `
-                <div style="text-align: center; padding: 20px; color: var(--gray-color);">
-                    <i class="fas fa-calendar-check" style="opacity: 0.3;"></i>
-                    <p>لا توجد مهام في هذا الوقت</p>
-                </div>
-            `;
-        } else {
-            slotTasks.forEach(task => {
-                const category = getCategoryById(task.categoryId);
-                const isOverdue = isTaskOverdue(task);
-                
-                html += `
-                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="border-left-color: ${category.color}; border-right-color: ${category.color};">
-                        <div class="calendar-task-title">${task.title}</div>
-                        <div class="calendar-task-meta">
-                            <span><i class="fas fa-clock"></i> ${task.time}</span>
-                            <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
-                        </div>
-                    </div>
-                `;
-            });
-        }
-        
-        html += `
-                </div>
+            <div style="text-align: center; padding: 60px 20px; color: var(--gray-color);">
+                <i class="fas fa-calendar-day" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                <h3 style="color: var(--theme-text); margin-bottom: 10px;">لا توجد مهام لهذا اليوم</h3>
+                <p>اضغط على "إضافة مهمة" لإنشاء مهمة جديدة</p>
             </div>
         `;
-    });
+    } else {
+        // تقسيم اليوم إلى فترات زمنية قصيرة (كل 4 ساعات)
+        const timeSlots = [
+            { start: '00:00', end: '04:00', label: 'فجر' },
+            { start: '04:00', end: '08:00', label: 'صباح مبكر' },
+            { start: '08:00', end: '12:00', label: 'صباح' },
+            { start: '12:00', end: '16:00', label: 'ظهر' },
+            { start: '16:00', end: '20:00', label: 'مساء' },
+            { start: '20:00', end: '24:00', label: 'ليل' }
+        ];
+        
+        timeSlots.forEach(slot => {
+            const slotTasks = tasksForDay.filter(task => {
+                if (!task.time) return false;
+                const taskTime = getTaskTimeInMinutes(task);
+                const slotStart = getTaskTimeInMinutes({ time: slot.start });
+                const slotEnd = getTaskTimeInMinutes({ time: slot.end });
+                return taskTime >= slotStart && taskTime < slotEnd;
+            });
+            
+            html += `
+                <div class="time-slot" data-time="${slot.start}">
+                    <div class="time-header">
+                        <div class="time-title">
+                            <i class="fas fa-clock"></i>
+                            <span>${slot.label} (${slot.start} - ${slot.end})</span>
+                        </div>
+                        <span class="task-count">${slotTasks.length} مهام</span>
+                    </div>
+                    <div class="time-tasks">
+            `;
+            
+            if (slotTasks.length === 0) {
+                html += `
+                    <div style="text-align: center; padding: 15px; color: var(--gray-color); font-size: 0.9rem;">
+                        <i class="fas fa-calendar-check" style="opacity: 0.3;"></i>
+                        <p>لا توجد مهام في هذا الوقت</p>
+                    </div>
+                `;
+            } else {
+                slotTasks.forEach(task => {
+                    const category = getCategoryById(task.categoryId);
+                    const isOverdue = isTaskOverdue(task);
+                    
+                    html += `
+                        <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                             data-id="${task.id}"
+                             onclick="openEditTaskModal('${task.id}')"
+                             style="border-left: 3px solid ${category.color}; 
+                                    border-right: 3px solid ${category.color}; 
+                                    cursor: pointer; margin-bottom: 8px; padding: 10px;"
+                             title="${task.title} - ${task.duration} دقيقة">
+                            <div class="calendar-task-title" style="font-weight: 500; margin-bottom: 3px; font-size: 0.9rem;">
+                                ${task.title.length > 30 ? task.title.substring(0, 30) + '...' : task.title}
+                            </div>
+                            <div class="calendar-task-meta" style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--gray-color);">
+                                <span><i class="fas fa-clock"></i> ${task.time}</span>
+                                <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                    </div>
+                </div>
+            `;
+        });
+    }
     
     html += '</div>';
     container.innerHTML = html;
 }
+
 function renderWeeklyCalendar(container) {
     const today = new Date();
     const startOfWeek = new Date(today);
@@ -1896,6 +1916,64 @@ function openEditCategoryModal(categoryId) {
     document.getElementById('edit-category-modal').classList.add('active');
 }
 
+function setupCalendarTooltips() {
+    document.querySelectorAll('.calendar-task-card').forEach(card => {
+        card.addEventListener('mouseenter', function(e) {
+            const taskId = this.dataset.id;
+            const task = AppState.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const category = getCategoryById(task.categoryId);
+            const tooltipHTML = `
+                <div class="calendar-tooltip" style="
+                    position: fixed;
+                    background: var(--theme-card);
+                    border: 2px solid ${category.color};
+                    border-radius: 8px;
+                    padding: 12px;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    max-width: 300px;
+                    color: var(--theme-text);
+                    font-family: inherit;
+                ">
+                    <div style="margin-bottom: 8px;">
+                        <strong style="color: ${category.color};">${task.title}</strong>
+                    </div>
+                    <div style="color: var(--gray-color); font-size: 0.9rem;">
+                        <div><i class="fas fa-tag"></i> ${category.name}</div>
+                        <div><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</div>
+                        <div><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</div>
+                        ${task.description ? `<div style="margin-top: 8px; border-top: 1px solid var(--theme-border); padding-top: 8px;">${task.description}</div>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            const existingTooltip = document.querySelector('.calendar-tooltip');
+            if (existingTooltip) existingTooltip.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', tooltipHTML);
+            
+            const tooltip = document.querySelector('.calendar-tooltip');
+            const x = e.clientX + 15;
+            const y = e.clientY + 15;
+            
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            const tooltip = document.querySelector('.calendar-tooltip');
+            if (tooltip) tooltip.remove();
+        });
+        
+        // إمكانية التعديل عند النقر
+        card.addEventListener('click', function(e) {
+            const taskId = this.dataset.id;
+            openEditTaskModal(taskId);
+        });
+    });
+}
 function saveCategoryEdit(categoryId) {
     const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
     if (categoryIndex === -1) return;
@@ -2218,27 +2296,28 @@ function renderNotes() {
     AppState.notes.forEach(note => {
         let noteContent = note.content || '';
         
+        // إصلاح ألوان الملاحظات للثيمات
         if (AppState.currentTheme === 'black') {
             noteContent = noteContent.replace(/class="note-checkbox-text"/g, 
                 'class="note-checkbox-text" style="color: #f0f0f0 !important;"');
-        } else {
-            noteContent = noteContent.replace(/class="note-checkbox-text"/g, 
-                'class="note-checkbox-text" style="color: var(--theme-text) !important;"');
         }
         
-        noteContent = noteContent.replace(/<input type="checkbox"/g, '<input type="checkbox" class="note-checkbox"');
+        noteContent = noteContent.replace(/<input type="checkbox"/g, 
+            '<input type="checkbox" class="note-checkbox"');
         
         html += `
-            <div class="note-card" data-id="${note.id}">
+            <div class="note-card" data-id="${note.id}" onclick="openNoteEditor('${note.id}')" style="cursor: pointer;">
                 <div class="note-header">
                     <input type="text" class="note-title" value="${note.title}" 
-                           onchange="updateNoteTitle('${note.id}', this.value)">
+                           onchange="updateNoteTitle('${note.id}', this.value)"
+                           onclick="event.stopPropagation()">
                     <div class="note-date">${formatDate(note.updatedAt)}</div>
                 </div>
                 
                 <div class="note-content" 
-                     style="font-family: ${note.fontFamily}; font-size: ${note.fontSize}px; font-weight: ${note.fontWeight}; font-style: ${note.fontStyle}; color: ${note.color};"
-                     onclick="openNoteEditor('${note.id}')">
+                     style="font-family: ${note.fontFamily}; font-size: ${note.fontSize}px; 
+                     font-weight: ${note.fontWeight}; font-style: ${note.fontStyle}; 
+                     color: ${note.color}; pointer-events: none;">
                     ${noteContent || '<p style="color: var(--theme-text); opacity: 0.7;">انقر لتحرير الملاحظة...</p>'}
                 </div>
                 
@@ -2247,7 +2326,10 @@ function renderNotes() {
                         ${note.fontFamily.split(',')[0].replace(/'/g, '')} - ${note.fontSize}px
                     </div>
                     <div class="note-actions">
-                        <button class="btn btn-danger btn-sm delete-note-btn" data-id="${note.id}" title="حذف">
+                        <button class="btn btn-danger btn-sm delete-note-btn" 
+                                data-id="${note.id}" 
+                                title="حذف"
+                                onclick="event.stopPropagation(); deleteNote('${note.id}')">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -2257,7 +2339,8 @@ function renderNotes() {
     });
     
     container.innerHTML = html;
-    
+}
+
     document.querySelectorAll('.note-checkbox').forEach(checkbox => {
         checkbox.addEventListener('click', function(e) {
             e.stopPropagation();
@@ -3174,11 +3257,9 @@ function renderDailyCalendar(container) {
     container.innerHTML = html;
     
     // إضافة أحداث التمرير والتفاعل
-    setTimeout(() => {
-        setupCalendarHoverEffects();
-        setupCalendarScroll();
-    }, 100);
-}
+setTimeout(() => {
+    setupCalendarTooltips();
+}, 100);
 
 // دالة جديدة للتمرير في الجدول
 function setupCalendarScroll() {
@@ -3223,7 +3304,7 @@ function setupCalendarScroll() {
 function initializePage() {
     console.log("🚀 بدء تهيئة الصفحة...");
     
-    // ✅ اختبار وجود العناصر الأساسية
+    // اختبار وجود العناصر الأساسية
     const testElements = [
         'current-date',
         'page-title',
@@ -3231,7 +3312,9 @@ function initializePage() {
         'calendar-view',
         'categories-view',
         'notes-view',
-        'add-task-btn'
+        'add-task-btn',
+        'add-category-btn',
+        'add-note-btn'
     ];
     
     testElements.forEach(id => {
@@ -3260,14 +3343,11 @@ function initializePage() {
     // تهيئة الثيمات
     initializeThemes();
     
-    // ✅ إعداد أحداث الملاحظات المحسنة
-    setupNotesEditorEvents();
+    // ✅ إعداد جميع الأحداث
+    setupAllEvents();
     
     // ✅ إعداد أحداث الإعدادات
     setupSettingsEvents();
-    
-    // ✅ إعداد جميع الأحداث الأخرى
-    setupAllEvents();
     
     // ✅ عرض المهام
     renderTasks();
@@ -3424,7 +3504,7 @@ function initializePage() {
 function setupAllEvents() {
     console.log("🔗 إعداد جميع الأحداث...");
     
-    // التنقل بين الأقسام
+    // 1. التنقل بين الأقسام
     document.querySelectorAll('.nav-item').forEach(item => {
         item.addEventListener('click', function(e) {
             e.preventDefault();
@@ -3433,7 +3513,7 @@ function setupAllEvents() {
         });
     });
     
-    // مرشحات المهام
+    // 2. مرشحات المهام
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             console.log("تغيير الفلتر إلى:", this.dataset.filter);
@@ -3441,7 +3521,7 @@ function setupAllEvents() {
         });
     });
     
-    // تبويبات الجدول
+    // 3. تبويبات الجدول
     document.querySelectorAll('.calendar-tab').forEach(tab => {
         tab.addEventListener('click', function() {
             console.log("تغيير عرض الجدول إلى:", this.dataset.range);
@@ -3450,7 +3530,7 @@ function setupAllEvents() {
         });
     });
     
-    // الأزرار الرئيسية - مع التحقق من وجودها
+    // 4. الأزرار الرئيسية
     const addTaskBtn = document.getElementById('add-task-btn');
     if (addTaskBtn) {
         addTaskBtn.addEventListener('click', () => {
@@ -3461,7 +3541,173 @@ function setupAllEvents() {
         console.error("❌ زر إضافة مهمة غير موجود!");
     }
     
-    // ... (نفس الشيء لباقي الأزرار مع التحقق)
+    // 5. زر إضافة فئة
+    const addCategoryBtn = document.getElementById('add-category-btn');
+    if (addCategoryBtn) {
+        addCategoryBtn.addEventListener('click', () => {
+            console.log("فتح نافذة إضافة فئة");
+            openAddCategoryModal();
+        });
+    } else {
+        console.error("❌ زر إضافة فئة غير موجود!");
+    }
+    
+    // 6. زر إضافة ملاحظة
+    const addNoteBtn = document.getElementById('add-note-btn');
+    if (addNoteBtn) {
+        addNoteBtn.addEventListener('click', () => {
+            console.log("إضافة ملاحظة جديدة");
+            addNote();
+        });
+    } else {
+        console.error("❌ زر إضافة ملاحظة غير موجود!");
+    }
+    
+    // 7. إغلاق نافذة إضافة مهمة
+    const closeTaskModalBtn = document.getElementById('close-task-modal');
+    if (closeTaskModalBtn) {
+        closeTaskModalBtn.addEventListener('click', () => {
+            closeModal('add-task-modal');
+        });
+    } else {
+        console.error("❌ زر إغلاق نافذة المهمة غير موجود!");
+    }
+    
+    // 8. إلغاء إضافة مهمة
+    const cancelTaskBtn = document.getElementById('cancel-task');
+    if (cancelTaskBtn) {
+        cancelTaskBtn.addEventListener('click', () => {
+            closeModal('add-task-modal');
+        });
+    } else {
+        console.error("❌ زر إلغاء إضافة مهمة غير موجود!");
+    }
+    
+    // 9. حفظ المهمة الجديدة
+    const saveTaskBtn = document.getElementById('save-task');
+    if (saveTaskBtn) {
+        saveTaskBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveNewTask();
+        });
+    } else {
+        console.error("❌ زر حفظ المهمة غير موجود!");
+    }
+    
+    // 10. إغلاق نافذة تعديل مهمة
+    const closeEditTaskModalBtn = document.getElementById('close-edit-task-modal');
+    if (closeEditTaskModalBtn) {
+        closeEditTaskModalBtn.addEventListener('click', () => {
+            closeModal('edit-task-modal');
+        });
+    } else {
+        console.error("❌ زر إغلاق نافذة تعديل المهمة غير موجود!");
+    }
+    
+    // 11. إلغاء تعديل مهمة
+    const cancelEditTaskBtn = document.getElementById('cancel-edit-task');
+    if (cancelEditTaskBtn) {
+        cancelEditTaskBtn.addEventListener('click', () => {
+            closeModal('edit-task-modal');
+        });
+    } else {
+        console.error("❌ زر إلغاء تعديل مهمة غير موجود!");
+    }
+    
+    // 12. حذف مهمة من نافذة التعديل
+    const deleteEditTaskBtn = document.getElementById('delete-edit-task');
+    if (deleteEditTaskBtn) {
+        deleteEditTaskBtn.addEventListener('click', () => {
+            if (AppState.currentTaskId) {
+                deleteTask(AppState.currentTaskId);
+                closeModal('edit-task-modal');
+            }
+        });
+    } else {
+        console.error("❌ زر حذف المهمة من نافذة التعديل غير موجود!");
+    }
+    
+    // 13. حفظ التعديلات على المهمة
+    const saveEditTaskBtn = document.getElementById('save-edit-task');
+    if (saveEditTaskBtn) {
+        saveEditTaskBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveEditedTask();
+        });
+    } else {
+        console.error("❌ زر حفظ تعديل المهمة غير موجود!");
+    }
+    
+    // 14. إغلاق نافذة الفئة
+    const closeCategoryModalBtn = document.getElementById('close-category-modal');
+    if (closeCategoryModalBtn) {
+        closeCategoryModalBtn.addEventListener('click', () => {
+            closeModal('category-modal');
+        });
+    } else {
+        console.error("❌ زر إغلاق نافذة الفئة غير موجود!");
+    }
+    
+    // 15. إلغاء نافذة الفئة
+    const cancelCategoryBtn = document.getElementById('cancel-category');
+    if (cancelCategoryBtn) {
+        cancelCategoryBtn.addEventListener('click', () => {
+            closeModal('category-modal');
+        });
+    } else {
+        console.error("❌ زر إلغاء نافذة الفئة غير موجود!");
+    }
+    
+    // 16. حفظ الفئة
+    const saveCategoryBtn = document.getElementById('save-category');
+    if (saveCategoryBtn) {
+        saveCategoryBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            saveCategory();
+        });
+    } else {
+        console.error("❌ زر حفظ الفئة غير موجود!");
+    }
+    
+    // 17. إغلاق النوافذ المنبثقة بالضغط خارجها
+    window.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal')) {
+            closeModal(e.target.id);
+        }
+    });
+    
+    // 18. أحداث التنقل في الجدول (إذا كانت موجودة)
+    const navButtons = document.querySelectorAll('[onclick*="changeCalendarDate"], [onclick*="changeCalendarWeek"], [onclick*="changeCalendarMonth"]');
+    if (navButtons.length > 0) {
+        console.log("تم العثور على أزرار التنقل في الجدول");
+    }
+    
+    // 19. أحداث أزرار الإعدادات (إذا لم تكن موجودة في setupSettingsEvents)
+    const themeOptions = document.querySelectorAll('.theme-option');
+    if (themeOptions.length > 0) {
+        themeOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                const theme = this.dataset.theme;
+                changeTheme(theme);
+            });
+        });
+    }
+    
+    // 20. حدث لإغلاق نافذة الإعدادات عند النقر خارجها
+    document.addEventListener('click', function(e) {
+        const popup = document.getElementById('settings-popup');
+        const settingsBtn = document.getElementById('settings-btn');
+        
+        if (popup && popup.classList.contains('active') && 
+            !popup.contains(e.target) && 
+            e.target !== settingsBtn && 
+            !settingsBtn.contains(e.target)) {
+            popup.classList.remove('active');
+        }
+    });
+    
+    // 21. أحداث محرر الملاحظات (إذا لم تكن موجودة في setupNotesEditorEvents)
+    setupNotesEditorEvents();
     
     console.log("✅ تم إعداد جميع الأحداث بنجاح");
 }
