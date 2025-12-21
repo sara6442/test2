@@ -1972,3 +1972,62 @@ input:disabled {
     display: flex !important;
     align-items: center !important;
 }
+
+/* ========== تحسين الجدول الأسبوعي المصغر ========== */
+.weekly-calendar .day-column {
+    transition: all 0.3s ease;
+}
+
+.weekly-calendar .day-column:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.weekly-calendar .day-column.today {
+    border: 2px solid var(--theme-primary);
+    box-shadow: 0 0 10px rgba(67, 97, 238, 0.2);
+}
+
+/* ========== تحسين الجدول الشهري ========== */
+.month-day {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.month-day:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.month-day.today {
+    border: 2px solid var(--theme-primary) !important;
+    background: rgba(67, 97, 238, 0.05) !important;
+}
+
+.month-task-item {
+    transition: all 0.2s ease;
+}
+
+.month-task-item:hover {
+    background: var(--theme-border) !important;
+    transform: translateX(-2px);
+}
+
+/* ========== تحسين الـ Tooltips ========== */
+.monthly-task-tooltip {
+    animation: fadeIn 0.2s ease !important;
+    pointer-events: none !important;
+    z-index: 10000 !important;
+}
+
+.month-day-header {
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-hover)) !important;
+    color: white !important;
+    font-weight: 600 !important;
+}
+
+/* ========== إضافة تأثير النقر ========== */
+.calendar-task-card:active,
+.month-task-item:active {
+    transform: scale(0.98) !important;
+}
