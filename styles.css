@@ -1982,17 +1982,6 @@ input:disabled {
     margin-bottom: 8px;
 }
 
-.day-task-count {
-    position: absolute;
-    bottom: 4px;
-    left: 4px;
-    font-size: 0.65rem;
-    color: var(--gray-color);
-    display: flex;
-    align-items: center;
-    gap: 3px;
-}
-
 /* زر العودة للأسبوع الحالي */
 .btn-calendar-today {
     background: var(--theme-primary);
