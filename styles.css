@@ -1586,8 +1586,7 @@ input:disabled {
 
 .main-content::-webkit-scrollbar-thumb:hover {
     background: var(--theme-hover);
-}
-/* ========== تحسين الجدول الزمني ========== */
+}/* ========== تحسين الجدول الزمني ========== */
 .daily-calendar,
 .weekly-calendar,
 .monthly-calendar {
@@ -1920,12 +1919,23 @@ input:disabled {
     margin-bottom: 2px;
 }
 
-.task-preview-item .task-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: inherit;
-    flex-shrink: 0;
+/* إصلاح نهائي للنقاط - استخدام ID مختلف */
+.weekly-calendar-grid .task-preview-item .weekly-task-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    display: block !important;
+    flex-shrink: 0 !important;
+    min-width: 6px !important;
+    min-height: 6px !important;
+}
+
+.monthly-calendar .month-task-item .monthly-task-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+    margin-right: 4px !important;
 }
 
 .task-preview-item span {
@@ -1934,6 +1944,7 @@ input:disabled {
     text-overflow: ellipsis;
     white-space: nowrap;
     flex: 1;
+    font-size: 0.7rem;
 }
 
 .task-preview-item .task-meta {
@@ -1995,15 +2006,6 @@ input:disabled {
     color: var(--theme-text);
     font-family: inherit;
     animation: fadeIn 0.2s ease;
-}
-
-/* ========== إصلاح حجم نقاط المهام في الجدول الأسبوعي ========== */
-.task-preview-item .task-dot {
-    width: 6px !important;
-    height: 6px !important;
-    border-radius: 50% !important;
-    display: block !important;
-    flex-shrink: 0 !important;
 }
 
 /* إصلاح حجم الخلايا */
