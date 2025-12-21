@@ -2855,66 +2855,23 @@ function addLinkToNote() {
     if (!url) return;
     
     const text = prompt('أدخل نص الرابط (اختياري):', '') || url;
-    const linkId = 'link-' + Date.now();
     
     const linkHTML = `
-        <div class="note-link-container" id="link-container-${linkId}" draggable="true">
-            <div class="link-controls">
-                <button class="btn-link-control" onclick="resizeLinkText('${linkId}', 'small')" title="تصغير النص">
-                    <i class="fas fa-text-height"></i> صغير
-                </button>
-                <button class="btn-link-control" onclick="resizeLinkText('${linkId}', 'large')" title="تكبير النص">
-                    <i class="fas fa-text-height"></i> كبير
-                </button>
-                <button class="btn-link-control delete" onclick="removeNoteLink('${linkId}')" title="حذف الرابط">
-                    <i class="fas fa-trash"></i> حذف
-                </button>
-            </div>
+        <div class="simple-link-container">
             <a href="${url}" 
                target="_blank" 
-               id="link-${linkId}"
-               class="note-link"
-               data-size="medium">
+               class="simple-note-link"
+               onclick="event.stopPropagation(); return true;">
                 <i class="fas fa-external-link-alt"></i>
                 ${text}
             </a>
-            <div class="link-url">${url}</div>
+            <div class="link-url-hint">انقر لفتح الرابط</div>
         </div>
     `;
     
     insertHTMLToEditor(linkHTML);
-    makeElementDraggable(`link-container-${linkId}`);
 }
 
-// دوال التحكم بالروابط
-function resizeLinkText(linkId, size) {
-    const link = document.getElementById(`link-${linkId}`);
-    if (!link) return;
-    
-    link.dataset.size = size;
-    
-    switch(size) {
-        case 'small':
-            link.style.fontSize = '12px';
-            link.style.padding = '5px 10px';
-            break;
-        case 'medium':
-            link.style.fontSize = '14px';
-            link.style.padding = '8px 15px';
-            break;
-        case 'large':
-            link.style.fontSize = '16px';
-            link.style.padding = '10px 20px';
-            break;
-    }
-}
-
-function removeNoteLink(linkId) {
-    const container = document.getElementById(`link-container-${linkId}`);
-    if (container && confirm('هل تريد حذف هذا الرابط؟')) {
-        container.remove();
-    }
-}
 
 // دالة لإضافة صورة
 function handleImageUpload(event) {
@@ -2930,15 +2887,15 @@ function handleImageUpload(event) {
     reader.onload = function(e) {
         const imageId = 'img-' + Date.now();
         const imageHTML = `
-            <div class="note-image-container" id="container-${imageId}" draggable="true">
-                <div class="image-controls">
-                    <button class="btn-image-control" onclick="resizeNoteImage('${imageId}', 'small')" title="صغير">
+            <div class="note-image-container" id="container-${imageId}" draggable="false">
+                <div class="image-controls" id="controls-${imageId}">
+                    <button class="btn-image-control small" onclick="resizeNoteImage('${imageId}', 'small')" title="صغير">
                         <i class="fas fa-compress-alt"></i>
                     </button>
-                    <button class="btn-image-control" onclick="resizeNoteImage('${imageId}', 'medium')" title="متوسط">
+                    <button class="btn-image-control medium active" onclick="resizeNoteImage('${imageId}', 'medium')" title="متوسط">
                         <i class="fas fa-expand-alt"></i>
                     </button>
-                    <button class="btn-image-control" onclick="resizeNoteImage('${imageId}', 'large')" title="كبير">
+                    <button class="btn-image-control large" onclick="resizeNoteImage('${imageId}', 'large')" title="كبير">
                         <i class="fas fa-expand"></i>
                     </button>
                     <button class="btn-image-control delete" onclick="removeNoteImage('${imageId}')" title="حذف">
@@ -2947,25 +2904,131 @@ function handleImageUpload(event) {
                 </div>
                 <img id="${imageId}" 
                      src="${e.target.result}" 
-                     alt="${file.name}"
-                     class="note-image"
-                     data-size="medium">
-                <div class="image-info">${file.name}</div>
+                     alt="صورة"
+                     class="note-image draggable-image"
+                     data-size="medium"
+                     draggable="false">
             </div>
         `;
         
         insertHTMLToEditor(imageHTML);
-        makeImageDraggable(imageId);
+        setupImageDragging(imageId);
     };
     reader.readAsDataURL(file);
     event.target.value = '';
 }
 
+// دالة لإعداد السحب للصورة
+function setupImageDragging(imageId) {
+    const img = document.getElementById(imageId);
+    const container = document.getElementById(`container-${imageId}`);
+    const controls = document.getElementById(`controls-${imageId}`);
+    
+    if (!img || !container || !controls) return;
+    
+    let isDragging = false;
+    let startX, startY;
+    let initialLeft, initialTop;
+    
+    // جعل الصورة قابلة للضغط المطول والسحب
+    img.addEventListener('mousedown', startDrag);
+    img.addEventListener('touchstart', startDragTouch);
+    
+    function startDrag(e) {
+        e.preventDefault();
+        isDragging = true;
+        
+        // حفظ الموضع الأولي
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        const rect = container.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        
+        // إضافة تأثير السحب
+        container.style.opacity = '0.8';
+        container.style.zIndex = '1000';
+        
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+    }
+    
+    function startDragTouch(e) {
+        e.preventDefault();
+        if (e.touches.length !== 1) return;
+        
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        
+        const rect = container.getBoundingClientRect();
+        initialLeft = rect.left;
+        initialTop = rect.top;
+        
+        container.style.opacity = '0.8';
+        container.style.zIndex = '1000';
+        
+        document.addEventListener('touchmove', dragTouch);
+        document.addEventListener('touchend', stopDragTouch);
+    }
+    
+    function drag(e) {
+        if (!isDragging) return;
+        
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+        
+        container.style.position = 'relative';
+        container.style.left = deltaX + 'px';
+        container.style.top = deltaY + 'px';
+        
+        // تحريك الأزرار مع الصورة
+        controls.style.position = 'relative';
+        controls.style.left = deltaX + 'px';
+        controls.style.top = deltaY + 'px';
+    }
+    
+    function dragTouch(e) {
+        if (!isDragging || e.touches.length !== 1) return;
+        
+        const deltaX = e.touches[0].clientX - startX;
+        const deltaY = e.touches[0].clientY - startY;
+        
+        container.style.position = 'relative';
+        container.style.left = deltaX + 'px';
+        container.style.top = deltaY + 'px';
+        
+        controls.style.position = 'relative';
+        controls.style.left = deltaX + 'px';
+        controls.style.top = deltaY + 'px';
+    }
+    
+    function stopDrag() {
+        isDragging = false;
+        container.style.opacity = '1';
+        
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+    }
+    
+    function stopDragTouch() {
+        isDragging = false;
+        container.style.opacity = '1';
+        
+        document.removeEventListener('touchmove', dragTouch);
+        document.removeEventListener('touchend', stopDragTouch);
+    }
+}
+
 // دوال التحكم بالصور
 function resizeNoteImage(imageId, size) {
     const img = document.getElementById(imageId);
-    if (!img) return;
+    const controls = document.getElementById(`controls-${imageId}`);
     
+    if (!img || !controls) return;
+    
+    // تحديث حجم الصورة
     img.dataset.size = size;
     
     switch(size) {
@@ -2982,13 +3045,14 @@ function resizeNoteImage(imageId, size) {
             img.style.width = '100%';
             break;
     }
-}
-
-function removeNoteImage(imageId) {
-    const container = document.getElementById(`container-${imageId}`);
-    if (container && confirm('هل تريد حذف هذه الصورة؟')) {
-        container.remove();
-    }
+    
+    // تحديث حالة الأزرار النشطة
+    controls.querySelectorAll('.btn-image-control').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.classList.contains(size)) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 
@@ -3046,11 +3110,31 @@ function openNoteEditor(noteId) {
     
     document.getElementById('notes-editor').classList.add('active');
     
-
-    // إعداد الأدوات المحسنة بعد فتح المحرر
+    // ⚠️ إصلاح: إعادة إعداد الأحداث في كل مرة نفتح المحرر
     setTimeout(() => {
+        // إعادة تعيين المتغير لمنع تكرار الأحداث
+        window.notesEditorEventsSetup = false;
+        
+        // إعداد أحداث الأدوات المحسنة
         setupEnhancedNotesEditor();
+        
+        // إعادة إعداد أحداث المحرر الرئيسية
+        setupNotesEditorEvents();
+        
+        // إعادة إعداد السحب للصور الموجودة
+        reinitializeImageDragging();
     }, 100);
+}
+
+// دالة لإعادة تهيئة سحب الصور
+function reinitializeImageDragging() {
+    const images = document.querySelectorAll('.note-image');
+    images.forEach(img => {
+        const imageId = img.id;
+        if (imageId && imageId.startsWith('img-')) {
+            setupImageDragging(imageId);
+        }
+    });
 }
 
 // دالة مبسطة لإضافة خانة اختيار واحدة فقط
