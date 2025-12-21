@@ -1716,45 +1716,61 @@ input:disabled {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(76, 201, 240, 0.4);
 }
-
 /* ========== تحسين محرر الملاحظات ========== */
 .enhanced-tools {
     border-left: 2px solid var(--theme-border);
     padding-left: 10px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .enhanced-tools button {
-    width: 36px;
+    min-width: 36px;
     height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 8px;
+    padding: 0 10px;
 }
-/* ========== تحسين الصور في الملاحظات ========== */
-.note-content img {
+
+/* ========== تنسيق الصور في الملاحظات ========== */
+.note-content .note-image {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
     margin: 10px 0;
-    border: 1px solid var(--theme-border);
+    border: 2px solid var(--theme-border);
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
 }
 
-.note-content img:hover {
+.note-content .note-image:hover {
     transform: scale(1.02);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
 }
 
-/* ========== تحسين الروابط في الملاحظات ========== */
-.note-content a {
-    color: var(--theme-primary);
-    text-decoration: underline;
-    transition: color 0.3s ease;
+/* ========== تنسيق الروابط في الملاحظات ========== */
+.note-content .note-link {
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-hover));
+    border-radius: 8px;
+    font-weight: 500;
+    border: 2px solid transparent;
 }
 
-.note-content a:hover {
-    color: var(--theme-hover);
+.note-content .note-link:hover {
+    background: var(--theme-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-color: var(--theme-primary);
     text-decoration: none;
 }
 
@@ -1826,6 +1842,33 @@ input:disabled {
     align-items: center;
 }
 
+/* ========== ضبط روابط الصور القديمة والجديدة ========== */
+/* للحفاظ على التوافق مع الروابط القديمة والجديدة */
+.note-content a:not(.note-link) {
+    color: var(--theme-primary);
+    text-decoration: underline;
+    transition: color 0.3s ease;
+}
+
+.note-content a:not(.note-link):hover {
+    color: var(--theme-hover);
+    text-decoration: none;
+}
+
+/* للحفاظ على التوافق مع الصور القديمة والجديدة */
+.note-content img:not(.note-image) {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid var(--theme-border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.note-content img:not(.note-image):hover {
+    transform: scale(1.02);
+}
 /* ========== تحسين الجدول الشهري ========== */
 .month-day {
     transition: all 0.3s ease;
