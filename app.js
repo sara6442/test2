@@ -1613,7 +1613,7 @@ function renderWeeklyCalendar(container) {
                  data-date="${dateStr}">
                 <div class="day-number">
                     ${day.getDate()}
-                    ${isToday ? '<span>(اليوم)</span>' : ''}
+                    ${isToday ? '<span style="font-size: 0.7rem; color: var(--theme-primary); display: block;">(اليوم)</span>' : ''}
                 </div>
                 <div class="tasks-preview">
         `;
@@ -1629,7 +1629,6 @@ function renderWeeklyCalendar(container) {
             // عرض أول 3 مهام فقط
             const tasksToShow = dayTasks.slice(0, 3);
             
-           // استبدل هذا القسم في الجزء الذي يعرض المهام
             tasksToShow.forEach((task, index) => {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
@@ -1637,18 +1636,13 @@ function renderWeeklyCalendar(container) {
                 html += `
                     <div class="task-preview-item" 
                          data-id="${task.id}"
-                         data-task-index="${index}"
-                         data-date="${dateStr}"
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
-                         title="انقر للتعديل">
-                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; display: inline-block;"></span>
-                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
-                            </span>
+                         onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
+                         style="border-right-color: ${category.color};">
+                        <div class="task-content">
+                            <span class="month-task-dot" style="background: ${category.color};"></span>
+                            <span>${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
+                        <div class="task-meta">
                             <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
                             ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
                         </div>
@@ -1668,6 +1662,12 @@ function renderWeeklyCalendar(container) {
         
         html += `
                 </div>
+                ${dayTasks.length > 0 ? 
+                      `<div class="day-task-count">
+                        <i class="fas fa-tasks"></i> ${dayTasks.length}
+                       </div>` 
+                    : ''
+                }
             </div>
         `;
     }
@@ -1681,7 +1681,7 @@ function renderWeeklyCalendar(container) {
         setupWeeklyTooltips();
     }, 100);
 }
-// دالة جديدة للـ Tooltips
+
 function setupWeeklyTooltips() {
     document.querySelectorAll('.task-preview-item').forEach(item => {
         item.addEventListener('mouseenter', function(e) {
