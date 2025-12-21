@@ -2198,3 +2198,36 @@ input:disabled {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
+/* ========== أزرار Undo/Redo ========== */
+.undo-redo-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.undo-redo-container button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 10px;
+    font-size: 0.85rem;
+}
+
+.undo-redo-container button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* ========== إصلاح الروابط ========== */
+.simple-note-link {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+.simple-note-link:hover {
+    text-decoration: none !important;
+}
