@@ -1629,39 +1629,42 @@ function renderWeeklyCalendar(container) {
             `;
         } else {
             // عرض أول 4 مهام فقط
-            const tasksToShow = dayTasks.slice(0, 4);
+            const tasksToShow = dayTasks.slice(0, 3);
             
             tasksToShow.forEach((task, index) => {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
-                
+                const priorityIcon = task.priority === 'high' ? 'fas fa-flag' : 
+                                    task.priority === 'medium' ? 'fas fa-flag' : 'fas fa-flag';
+
                 html += `
                     <div class="task-preview-item" 
                          data-id="${task.id}"
-                         onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
-                         style="padding: 5px 8px; border-radius: 5px; background: var(--theme-bg); border-right: 3px solid ${category.color}; font-size: 0.75rem; cursor: pointer; margin-bottom: 3px;"
-                         title="${task.title}">
-                        <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 2px;">
-                            <div style="width: 8px; height: 8px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></div>
-                            <div style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
-                                ${task.title.length > 12 ? task.title.substring(0, 12) + '...' : task.title}
-                            </div>
-                            ${task.completed ? '<i class="fas fa-check" style="color: var(--success-color); font-size: 0.6rem;"></i>' : ''}
+                          data-task-index="${index}"
+                         data-date="${dateStr}"
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
+                         title="انقر للتعديل">
+                         <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
+                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
+                            </span>
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
-                            <span>${task.time || ''}</span>
-                            <span>${task.duration}د</span>
+                            <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
+                            ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
                         </div>
                     </div>
                 `;
+
             });
             
-            if (dayTasks.length > 4) {
+            if (dayTasks.length > 3) {
                 html += `
-                    <div style="text-align: center; margin-top: 5px;">
-                        <span style="font-size: 0.7rem; color: var(--theme-primary); font-weight: 500;">
-                            +${dayTasks.length - 4} مهام أخرى
-                        </span>
+                       <div style="font-size: 0.7rem; color: var(--theme-primary); cursor: pointer; text-align: center; margin-top: 4px; padding: 2px;"
+                         onclick="showAllTasksForDay('${dateStr}')">
+                            +${dayTasks.length - 3} مهام أخرى
                     </div>
                 `;
             }
@@ -1670,75 +1673,16 @@ function renderWeeklyCalendar(container) {
         html += `
                 </div>
                 ${dayTasks.length > 0 ? 
-                    `<div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 10px; font-size: 0.65rem; color: var(--gray-color);">
-                        <i class="fas fa-tasks" style="margin-left: 3px;"></i> ${dayTasks.length}
-                    </div>` 
+                      `<div style="position: absolute; bottom: 4px; left: 4px; font-size: 0.65rem; color: var(--gray-color);">
+                        <i class="fas fa-tasks"></i> ${dayTasks.length}
+                   </div>` 
                     : ''
                 }
             </div>
         `;
     }
     
-    html += `
-        </div>
-        
-        <style>
-            .weekly-calendar-grid {
-                display: grid;
-                grid-template-columns: repeat(7, 1fr);
-                gap: 10px;
-                margin-top: 10px;
-            }
-            
-            .day-header-cell {
-                text-align: center;
-                font-weight: bold;
-                padding: 12px 5px;
-                background: var(--theme-card);
-                border-radius: 8px;
-                border: 1px solid var(--theme-border);
-                font-size: 0.95rem;
-                color: var(--theme-primary);
-            }
-            
-            .day-cell {
-                background: var(--theme-card);
-                border-radius: 10px;
-                padding: 12px;
-                min-height: 150px;
-                border: 1px solid var(--theme-border);
-                transition: all 0.3s ease;
-                position: relative;
-                cursor: pointer;
-            }
-            
-            .day-cell:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                background: var(--theme-bg);
-            }
-            
-            .today-cell {
-                border: 2px solid var(--theme-primary);
-                background: rgba(67, 97, 238, 0.05);
-            }
-            
-            .today-cell .day-number {
-                color: var(--theme-primary);
-                font-weight: 700;
-            }
-            
-            .task-preview-item {
-                transition: all 0.2s ease;
-            }
-            
-            .task-preview-item:hover {
-                background: var(--theme-border);
-                transform: translateX(-3px);
-            }
-        </style>
-    `;
-    
+    html += '</div>';
     container.innerHTML = html;
     
     // إضافة Tooltips
