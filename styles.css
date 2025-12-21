@@ -1731,14 +1731,14 @@ input:disabled {
     justify-content: center;
     border-radius: 8px;
 }
-
 /* ========== تحسين الصور في الملاحظات ========== */
 .note-content img {
     max-width: 100%;
     height: auto;
     border-radius: 8px;
     margin: 10px 0;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--theme-border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s ease;
 }
 
@@ -1759,10 +1759,15 @@ input:disabled {
 }
 
 /* ========== تحسين Tooltip ========== */
-.calendar-tooltip {
+.calendar-tooltip,
+.monthly-task-tooltip,
+.weekly-task-tooltip,
+.task-tooltip {
     animation: fadeIn 0.2s ease;
     pointer-events: none;
     z-index: 10000;
+    font-size: 0.85rem;
+    max-width: 250px;
 }
 
 @keyframes fadeIn {
@@ -1786,13 +1791,6 @@ input:disabled {
 
 .calendar-task-meta {
     font-size: 0.7rem;
-}
-
-/* تحسين التلميحات */
-.task-tooltip,
-.calendar-tooltip {
-    font-size: 0.85rem;
-    max-width: 250px;
 }
 
 /* تحسين المهام في الفئات */
@@ -1821,15 +1819,6 @@ input:disabled {
 .notes-editor-container.active {
     display: flex;
     z-index: 10000;
-}
-
-.notes-content img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    margin: 10px 0;
-    border: 1px solid var(--theme-border);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .image-upload-container {
@@ -1862,13 +1851,11 @@ input:disabled {
     transform: translateX(-2px);
 }
 
-/* ========== تحسين الـ Tooltips ========== */
-.monthly-task-tooltip {
-    animation: fadeIn 0.2s ease;
-    pointer-events: none;
-    z-index: 10000;
+.month-task-item:active {
+    transform: scale(0.98);
 }
 
+/* ========== تحسين الـ Tooltips ========== */
 .month-day-header {
     background: linear-gradient(135deg, var(--theme-primary), var(--theme-hover));
     color: white;
@@ -1876,8 +1863,7 @@ input:disabled {
 }
 
 /* ========== إضافة تأثير النقر ========== */
-.calendar-task-card:active,
-.month-task-item:active {
+.calendar-task-card:active {
     transform: scale(0.98);
 }
 
@@ -1904,9 +1890,9 @@ input:disabled {
 .day-cell {
     background: var(--theme-card);
     border-radius: 8px;
-    padding: 10px;
-    min-height: 140px;
-    max-height: 160px;
+    padding: 8px;
+    min-height: 120px;
+    max-height: 150px;
     border: 1px solid var(--theme-border);
     overflow-y: auto;
     position: relative;
@@ -1929,11 +1915,11 @@ input:disabled {
 
 .day-number {
     font-weight: 600;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
     color: var(--theme-text);
     font-size: 1rem;
     text-align: center;
-    padding-bottom: 5px;
+    padding-bottom: 4px;
     border-bottom: 1px solid var(--theme-border);
 }
 
@@ -1976,27 +1962,23 @@ input:disabled {
 
 /* إصلاح نهائي للنقاط - استخدام ID مختلف */
 .weekly-calendar-grid .task-preview-item .weekly-task-dot {
-    width: 4px !important; /* تغيير من 6px إلى 4px */
-    height: 4px !important; /* تغيير من 6px إلى 4px */
+    width: 4px !important;
+    height: 4px !important;
     border-radius: 50% !important;
     display: block !important;
     flex-shrink: 0 !important;
-    min-width: 4px !important; /* تغيير من 6px إلى 4px */
-    min-height: 4px !important; /* تغيير من 6px إلى 4px */
+    min-width: 4px !important;
+    min-height: 4px !important;
+    box-shadow: 0 0 0 1px var(--theme-bg);
 }
 
 .monthly-calendar .month-task-item .monthly-task-dot {
-    width: 4px !important; /* تغيير من 6px إلى 4px */
-    height: 4px !important; /* تغيير من 6px إلى 4px */
+    width: 4px !important;
+    height: 4px !important;
     border-radius: 50% !important;
     display: inline-block !important;
     margin-right: 4px !important;
-}
-
-/* إضافة خاصية عريضة للنقاط */
-.weekly-calendar-grid .task-preview-item .weekly-task-dot,
-.monthly-calendar .month-task-item .monthly-task-dot {
-    box-shadow: 0 0 0 1px var(--theme-bg); /* إضافة ظل لجعلها تبدو أكثر وضوحاً */
+    box-shadow: 0 0 0 1px var(--theme-bg);
 }
 
 .task-preview-item span {
@@ -2052,32 +2034,4 @@ input:disabled {
     background: var(--theme-hover);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-/* ========== Tooltip للجدول الأسبوعي ========== */
-.weekly-task-tooltip {
-    position: fixed;
-    background: var(--theme-card);
-    border: 2px solid;
-    border-radius: 8px;
-    padding: 12px;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    z-index: 10000;
-    max-width: 280px;
-    color: var(--theme-text);
-    font-family: inherit;
-    animation: fadeIn 0.2s ease;
-}
-
-/* إصلاح حجم الخلايا */
-.day-cell {
-    min-height: 120px !important;
-    max-height: 150px !important;
-    padding: 8px !important;
-}
-
-.day-number {
-    font-size: 1rem !important;
-    margin-bottom: 6px !important;
-    padding-bottom: 4px !important;
 }
