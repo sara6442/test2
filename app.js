@@ -3260,45 +3260,19 @@ function setupNotesEditorEvents() {
         });
         
         imageFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            // السماح بالصور وGIF
-            if (!file.type.startsWith('image/')) {
-                alert('الرجاء اختيار ملف صورة (JPG, PNG, GIF)');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const img = document.createElement('img');
-                img.src = event.target.result;
-                img.style.maxWidth = '100%';
-                img.style.height = 'auto';
-                img.style.borderRadius = '8px';
-                img.style.margin = '10px 0';
-                img.style.border = '1px solid var(--theme-border)';
-                
-                const editor = document.getElementById('notes-editor-content');
-                if (editor) {
-                    editor.appendChild(img);
-                    editor.appendChild(document.createElement('br'));
-                }
-            };
-            reader.readAsDataURL(file);
-            
-            // إعادة تعيين الحقل
-            e.target.value = '';
+            handleImageUpload(e);
         });
     }
     
     // تأكد من وجود العناصر أولاً
-    const saveNotesBtn = document.getElementById('save-notes-btn');
-    const closeNotesBtn = document.getElementById('close-notes-btn');
+    const saveNotesBtn = document.getElementById('save-notes-btn') || 
+                         document.getElementById('save-and-close-notes-btn');
+    const closeNotesBtn = document.getElementById('close-notes-btn') || 
+                          document.getElementById('close-without-save-notes-btn');
     const addCheckboxBtn = document.getElementById('add-checkbox-btn');
     
     if (saveNotesBtn) {
-        saveNotesBtn.addEventListener('click', saveNote);
+        saveNotesBtn.addEventListener('click', saveNoteAndClose);
     } else {
         console.error("❌ زر حفظ الملاحظات غير موجود!");
     }
@@ -3397,6 +3371,12 @@ function setupNotesEditorEvents() {
             document.execCommand('foreColor', false, this.value);
         });
     }
+}
+
+// دالة لحفظ الملاحظة وإغلاق المحرر
+function saveNoteAndClose() {
+    saveNote();
+    document.getElementById('notes-editor').classList.remove('active');
 }
 
 function saveNote() {
