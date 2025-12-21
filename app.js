@@ -1629,6 +1629,7 @@ function renderWeeklyCalendar(container) {
             // عرض أول 3 مهام فقط
             const tasksToShow = dayTasks.slice(0, 3);
             
+           // استبدل هذا القسم في الجزء الذي يعرض المهام
             tasksToShow.forEach((task, index) => {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
@@ -1637,7 +1638,6 @@ function renderWeeklyCalendar(container) {
                     <div class="task-preview-item" 
                          data-id="${task.id}"
                          onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
-                         style="border-right-color: ${category.color};"
                          title="${task.title}">
                         <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
                             <span class="month-task-dot" style="background: ${category.color};"></span>
