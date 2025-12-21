@@ -2053,18 +2053,11 @@ function renderWeeklyCalendar(container) {
     
     // إضافة Tooltips
     setTimeout(() => {
+         setupCalendarTooltips(); // هذه هي الإضافة المطلوبة
         setupWeeklyTooltips();
     }, 100);
 }
     
-    html += '</div>';
-    container.innerHTML = html;
-    
-    // إضافة أحداث التمرير والتفاعل
-    setTimeout(() => {
-        setupCalendarTooltips(); // هذه هي الإضافة المطلوبة
-    }, 100);
-}
 
 function openEditCategoryMessages(categoryId) {
     console.log("فتح تعديل رسائل الفئة:", categoryId);
