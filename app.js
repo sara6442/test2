@@ -4089,7 +4089,32 @@ window.addEventListener('DOMContentLoaded', function() {
         if (warning) warning.remove();
     }, 5000);
 });
+function testAddTaskForm() {
+    console.log("🔍 اختبار نموذج إضافة المهمة:");
+    
+    // التحقق من وجود جميع العناصر
+    const elements = [
+        'task-title', 'task-category', 'task-date', 
+        'task-time', 'task-duration', 'task-priority', 
+        'task-description', 'save-task'
+    ];
+    
+    elements.forEach(id => {
+        const el = document.getElementById(id);
+        console.log(`${id}:`, el ? 'موجود ✓' : 'مفقود ✗');
+    });
+    
+    // فتح النافذة وملئها ببيانات تجريبية
+    openAddTaskModal();
+    
+    setTimeout(() => {
+        document.getElementById('task-title').value = 'مهمة اختبار';
+        document.getElementById('task-description').value = 'هذه مهمة اختبار';
+        console.log("✅ تم تعيين بيانات الاختبار");
+    }, 200);
+}
 
+// يمكنك استدعاء هذه الدالة من وحدة التحكم للمتصفح
 window.addEventListener('load', function() {
     console.log("📄 load - الصفحة محملة بالكامل");
 });
