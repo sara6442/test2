@@ -3265,14 +3265,12 @@ function setupNotesEditorEvents() {
     }
     
     // تأكد من وجود العناصر أولاً
-    const saveNotesBtn = document.getElementById('save-notes-btn') || 
-                         document.getElementById('save-and-close-notes-btn');
-    const closeNotesBtn = document.getElementById('close-notes-btn') || 
-                          document.getElementById('close-without-save-notes-btn');
+    const saveNotesBtn = document.getElementById('save-notes-btn');
+    const closeNotesBtn = document.getElementById('close-notes-btn');
     const addCheckboxBtn = document.getElementById('add-checkbox-btn');
     
     if (saveNotesBtn) {
-        saveNotesBtn.addEventListener('click', saveNoteAndClose);
+        saveNotesBtn.addEventListener('click', saveNote);
     } else {
         console.error("❌ زر حفظ الملاحظات غير موجود!");
     }
