@@ -1643,7 +1643,7 @@ function renderWeeklyCalendar(container) {
                          style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
                          title="انقر للتعديل">
                         <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
+                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; display: inline-block;"></span>
                             <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
                             </span>
