@@ -1679,6 +1679,7 @@ function renderWeeklyCalendar(container) {
         setupWeeklyCalendarTooltips();
     }, 100);
 }
+
 function renderMonthlyCalendar(container) {
     console.log("📅 عرض الجدول الشهري مع Tooltips...");
     
