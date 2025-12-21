@@ -2812,17 +2812,14 @@ function setupEnhancedNotesEditor() {
     const toolbarLeft = document.querySelector('.notes-toolbar-left');
     if (!toolbarLeft) return;
     
-    // إضافة أزرار جديدة بعد أدوات الخط
+    // إزالة زر الفيديو وإضافة الروابط والصور فقط
     const enhancedToolsHTML = `
         <div class="enhanced-tools" style="display: flex; gap: 5px; margin-left: 10px;">
-            <button class="btn btn-success btn-sm" id="add-link-btn" title="إضافة رابط">
-                <i class="fas fa-link"></i>
+            <button class="btn btn-primary btn-sm" id="add-link-btn" title="إضافة رابط">
+                <i class="fas fa-link"></i> رابط
             </button>
             <button class="btn btn-info btn-sm" id="add-image-btn" title="إضافة صورة">
-                <i class="fas fa-image"></i>
-            </button>
-            <button class="btn btn-warning btn-sm" id="add-video-btn" title="إضافة فيديو">
-                <i class="fas fa-video"></i>
+                <i class="fas fa-image"></i> صورة
             </button>
             <input type="file" id="image-upload-input" accept="image/*" style="display: none;">
         </div>
@@ -2849,12 +2846,6 @@ function setupEnhancedNotesEditor() {
     const imageUploadInput = document.getElementById('image-upload-input');
     if (imageUploadInput) {
         imageUploadInput.addEventListener('change', handleImageUpload);
-    }
-    
-    // إضافة حدث للفيديو
-    const addVideoBtn = document.getElementById('add-video-btn');
-    if (addVideoBtn) {
-        addVideoBtn.addEventListener('click', addVideoToNote);
     }
 }
 
