@@ -303,12 +303,173 @@ function saveCategories() {
     }
 }
 
-function saveNotes() {
-    try {
-        localStorage.setItem('mytasks_notes', JSON.stringify(AppState.notes));
-    } catch (e) {
-        console.error("خطأ في حفظ الملاحظات:", e);
+// ========== إدارة حالة Undo/Redo ==========
+const UndoRedoManager = {
+    undoStack: [],
+    redoStack: [],
+    maxStackSize: 50,
+    
+    // حفظ حالة التطبيق
+    saveState(description) {
+        const state = {
+            tasks: JSON.parse(JSON.stringify(AppState.tasks)),
+            notes: JSON.parse(JSON.stringify(AppState.notes)),
+            categories: JSON.parse(JSON.stringify(AppState.categories)),
+            description: description || 'تغيير',
+            timestamp: new Date().toISOString()
+        };
+        
+        this.undoStack.push(state);
+        
+        // تقليص المكدس إذا تجاوز الحد الأقصى
+        if (this.undoStack.length > this.maxStackSize) {
+            this.undoStack.shift();
+        }
+        
+        // مسح مكدس إعادة عند إجراء تغيير جديد
+        this.redoStack = [];
+        
+        this.updateButtons();
+    },
+    
+    // التراجع
+    undo() {
+        if (this.undoStack.length === 0) return;
+        
+        const currentState = {
+            tasks: JSON.parse(JSON.stringify(AppState.tasks)),
+            notes: JSON.parse(JSON.stringify(AppState.notes)),
+            categories: JSON.parse(JSON.stringify(AppState.categories)),
+            description: 'الحالة الحالية',
+            timestamp: new Date().toISOString()
+        };
+        
+        this.redoStack.push(currentState);
+        
+        const undoState = this.undoStack.pop();
+        
+        AppState.tasks = undoState.tasks;
+        AppState.notes = undoState.notes;
+        AppState.categories = undoState.categories;
+        
+        saveTasks();
+        saveNotes();
+        saveCategories();
+        
+        refreshCurrentView();
+        this.updateButtons();
+        
+        console.log(`🔙 تم التراجع: ${undoState.description}`);
+    },
+    
+    // الإعادة
+    redo() {
+        if (this.redoStack.length === 0) return;
+        
+        const currentState = {
+            tasks: JSON.parse(JSON.stringify(AppState.tasks)),
+            notes: JSON.parse(JSON.stringify(AppState.notes)),
+            categories: JSON.parse(JSON.stringify(AppState.categories)),
+            description: 'الحالة الحالية',
+            timestamp: new Date().toISOString()
+        };
+        
+        this.undoStack.push(currentState);
+        
+        const redoState = this.redoStack.pop();
+        
+        AppState.tasks = redoState.tasks;
+        AppState.notes = redoState.notes;
+        AppState.categories = redoState.categories;
+        
+        saveTasks();
+        saveNotes();
+        saveCategories();
+        
+        refreshCurrentView();
+        this.updateButtons();
+        
+        console.log(`🔁 تم الإعادة: ${redoState.description}`);
+    },
+    
+    // تحديث حالة الأزرار
+    updateButtons() {
+        const undoBtn = document.getElementById('undo-btn');
+        const redoBtn = document.getElementById('redo-btn');
+        
+        if (undoBtn) {
+            undoBtn.disabled = this.undoStack.length === 0;
+        }
+        
+        if (redoBtn) {
+            redoBtn.disabled = this.redoStack.length === 0;
+        }
     }
+};
+
+// ========== إعداد أحداث Undo/Redo ==========
+function setupUndoRedoEvents() {
+    console.log("🔄 إعداد أحداث Undo/Redo...");
+    
+    const undoBtn = document.getElementById('undo-btn');
+    const redoBtn = document.getElementById('redo-btn');
+    
+    if (undoBtn) {
+        undoBtn.addEventListener('click', () => {
+            UndoRedoManager.undo();
+        });
+    }
+    
+    if (redoBtn) {
+        redoBtn.addEventListener('click', () => {
+            UndoRedoManager.redo();
+        });
+    }
+    
+    // إضافة اختصارات لوحة المفاتيح
+    document.addEventListener('keydown', (e) => {
+        // Ctrl+Z للتراجع
+        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+            e.preventDefault();
+            UndoRedoManager.undo();
+        }
+        
+        // Ctrl+Y أو Ctrl+Shift+Z للإعادة
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) {
+            e.preventDefault();
+            UndoRedoManager.redo();
+        }
+    });
+    
+    // تحديث الأزرار أول مرة
+    UndoRedoManager.updateButtons();
+}
+
+function saveNote() {
+    if (!AppState.currentNoteId) return;
+    
+    // حفظ الحالة قبل التعديل
+    UndoRedoManager.saveState('تعديل ملاحظة');
+    
+    const title = document.getElementById('notes-editor-title').value;
+    const content = document.getElementById('notes-editor-content').innerHTML;
+    const fontFamily = document.getElementById('notes-font-family').value;
+    const fontSize = document.getElementById('notes-font-size').value;
+    const fontWeight = document.getElementById('notes-font-weight').value;
+    const fontStyle = document.getElementById('notes-font-style').value;
+    const color = document.getElementById('notes-font-color').value;
+    
+    updateNote(AppState.currentNoteId, {
+        title: title,
+        content: content,
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        color: color
+    });
+    
+    document.getElementById('notes-editor').classList.remove('active');
 }
 
 function generateId() {
@@ -661,8 +822,10 @@ function loadCustomTheme() {
 
 // ========== إدارة المهام ==========
 function addTask(taskData) {
-    console.log("إضافة مهمة:", taskData);
-    
+        console.log("إضافة مهمة:", taskData);
+
+    UndoRedoManager.saveState('إضافة مهمة جديدة');
+        
     const timeframeCheck = checkCategoryTimeframe(taskData.categoryId, parseInt(taskData.duration) || 30);
     
     if (!timeframeCheck.allowed) {
@@ -714,7 +877,9 @@ function addTask(taskData) {
     }, 100);
 }
 
+
 function updateTask(taskId, taskData) {
+        UndoRedoManager.saveState('تعديل مهمة');
     const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
     if (taskIndex === -1) return;
     
@@ -737,6 +902,7 @@ function updateTask(taskId, taskData) {
 }
 
 function toggleTaskCompletion(taskId) {
+    UndoRedoManager.saveState('تغيير حالة المهمة');
     const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
     if (taskIndex === -1) return;
     
@@ -751,6 +917,7 @@ function deleteTask(taskId) {
         const deletedIndex = AppState.deletedTasks.findIndex(task => task.id === taskId);
         if (deletedIndex !== -1) {
             if (confirm('هذه المهمة محذوفة بالفعل. هل تريد حذفها نهائياً؟')) {
+                                UndoRedoManager.saveState('حذف مهمة نهائياً');
                 AppState.deletedTasks.splice(deletedIndex, 1);
                 saveDeletedTasks();
                 renderTasks();
@@ -763,7 +930,7 @@ function deleteTask(taskId) {
     
     const task = AppState.tasks[taskIndex];
     if (!confirm(`هل أنت متأكد من حذف المهمة: "${task.title}"؟`)) return;
-    
+        UndoRedoManager.saveState('حذف مهمة');
     AppState.deletedTasks.push({
         ...task,
         deletedAt: new Date().toISOString()
@@ -2372,6 +2539,7 @@ function openAddCategoryModal() {
 }
 
 function saveCategory() {
+    UndoRedoManager.saveState('تعديل فئة');
     const name = document.getElementById('category-name').value.trim();
     const color = document.getElementById('category-color').value;
     const timeframeMinutes = parseInt(document.getElementById('category-timeframe').value) || 60;
@@ -2380,7 +2548,8 @@ function saveCategory() {
         alert('يرجى إدخال اسم الفئة');
         return;
     }
-    
+        UndoRedoManager.saveState(AppState.currentCategoryId ? 'تعديل فئة' : 'إضافة فئة جديدة');
+
     if (AppState.currentCategoryId) {
         const categoryIndex = AppState.categories.findIndex(c => c.id === AppState.currentCategoryId);
         if (categoryIndex !== -1) {
@@ -2721,6 +2890,8 @@ function renderNotes() {
     });
 
 function addNote() {
+    UndoRedoManager.saveState('إضافة ملاحظة جديدة');
+    
     const newNote = {
         id: generateId(),
         title: 'ملاحظة جديدة',
@@ -2769,6 +2940,8 @@ function updateNote(noteId, noteData) {
 function deleteNote(noteId) {
     const note = AppState.notes.find(n => n.id === noteId);
     if (!note) return;
+    
+    UndoRedoManager.saveState('حذف ملاحظة');
     
     if (confirm(`هل أنت متأكد من حذف الملاحظة: "${note.title}"؟`)) {
         AppState.notes = AppState.notes.filter(n => n.id !== noteId);
@@ -2856,16 +3029,20 @@ function addLinkToNote() {
     
     const text = prompt('أدخل نص الرابط (اختياري):', '') || url;
     
+    // التحقق من أن الرابط يبدأ بـ http:// أو https://
+    let finalUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        finalUrl = 'https://' + url;
+    }
+    
     const linkHTML = `
         <div class="simple-link-container">
-            <a href="${url}" 
+            <a href="${finalUrl}" 
                target="_blank" 
-               class="simple-note-link"
-               onclick="event.stopPropagation(); return true;">
+               class="simple-note-link">
                 <i class="fas fa-external-link-alt"></i>
                 ${text}
             </a>
-            <div class="link-url-hint">انقر لفتح الرابط</div>
         </div>
     `;
     
@@ -2919,105 +3096,65 @@ function handleImageUpload(event) {
 }
 
 // دالة لإعداد السحب للصورة
+// دالة مبسطة وسهلة لسحب الصور
 function setupImageDragging(imageId) {
-    const img = document.getElementById(imageId);
     const container = document.getElementById(`container-${imageId}`);
-    const controls = document.getElementById(`controls-${imageId}`);
+    const img = document.getElementById(imageId);
     
-    if (!img || !container || !controls) return;
+    if (!container || !img) return;
     
     let isDragging = false;
-    let startX, startY;
-    let initialLeft, initialTop;
+    let offsetX = 0;
+    let offsetY = 0;
     
-    // جعل الصورة قابلة للضغط المطول والسحب
+    // جعل الصورة قابلة للسحب
+    img.style.cursor = 'grab';
+    
     img.addEventListener('mousedown', startDrag);
-    img.addEventListener('touchstart', startDragTouch);
     
     function startDrag(e) {
         e.preventDefault();
         isDragging = true;
         
-        // حفظ الموضع الأولي
-        startX = e.clientX;
-        startY = e.clientY;
-        
+        // حساب الإزاحة من موقع الفأرة إلى موقع الصورة
         const rect = container.getBoundingClientRect();
-        initialLeft = rect.left;
-        initialTop = rect.top;
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
         
-        // إضافة تأثير السحب
-        container.style.opacity = '0.8';
-        container.style.zIndex = '1000';
+        img.style.cursor = 'grabbing';
         
         document.addEventListener('mousemove', drag);
         document.addEventListener('mouseup', stopDrag);
     }
     
-    function startDragTouch(e) {
-        e.preventDefault();
-        if (e.touches.length !== 1) return;
-        
-        isDragging = true;
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-        
-        const rect = container.getBoundingClientRect();
-        initialLeft = rect.left;
-        initialTop = rect.top;
-        
-        container.style.opacity = '0.8';
-        container.style.zIndex = '1000';
-        
-        document.addEventListener('touchmove', dragTouch);
-        document.addEventListener('touchend', stopDragTouch);
-    }
-    
     function drag(e) {
         if (!isDragging) return;
         
-        const deltaX = e.clientX - startX;
-        const deltaY = e.clientY - startY;
+        // حساب الموقع الجديد
+        const x = e.clientX - offsetX;
+        const y = e.clientY - offsetY;
         
-        container.style.position = 'relative';
-        container.style.left = deltaX + 'px';
-        container.style.top = deltaY + 'px';
-        
-        // تحريك الأزرار مع الصورة
-        controls.style.position = 'relative';
-        controls.style.left = deltaX + 'px';
-        controls.style.top = deltaY + 'px';
-    }
-    
-    function dragTouch(e) {
-        if (!isDragging || e.touches.length !== 1) return;
-        
-        const deltaX = e.touches[0].clientX - startX;
-        const deltaY = e.touches[0].clientY - startY;
-        
-        container.style.position = 'relative';
-        container.style.left = deltaX + 'px';
-        container.style.top = deltaY + 'px';
-        
-        controls.style.position = 'relative';
-        controls.style.left = deltaX + 'px';
-        controls.style.top = deltaY + 'px';
+        // تطبيق الموقع الجديد
+        container.style.position = 'absolute';
+        container.style.left = x + 'px';
+        container.style.top = y + 'px';
+        container.style.zIndex = '1000';
     }
     
     function stopDrag() {
         isDragging = false;
-        container.style.opacity = '1';
+        img.style.cursor = 'grab';
         
         document.removeEventListener('mousemove', drag);
         document.removeEventListener('mouseup', stopDrag);
     }
-    
-    function stopDragTouch() {
-        isDragging = false;
-        container.style.opacity = '1';
-        
-        document.removeEventListener('touchmove', dragTouch);
-        document.removeEventListener('touchend', stopDragTouch);
+}
+
+// دالة مبسطة لحذف الصورة
+function removeNoteImage(imageId) {
+    const container = document.getElementById(`container-${imageId}`);
+    if (container) {
+        container.remove();
     }
 }
 
@@ -4010,17 +4147,25 @@ function initializePage() {
     // تهيئة الثيمات
     initializeThemes();
     
-    // ✅ إعداد Event Delegation أولاً
+    // إعداد Event Delegation أولاً
     setupEventDelegation();
     
-    // ✅ إعداد الأحداث الأخرى
+    // إعداد أحداث Undo/Redo
+    setupUndoRedoEvents();
+    
+    // إعداد الأحداث الأخرى
     setupAllEvents();
     
-    // ✅ عرض المهام
+    // عرض المهام
     renderTasks();
     
-    // ✅ عرض حالة الفئات
+    // عرض حالة الفئات
     renderCategoriesStatus();
+    
+    // حفظ الحالة الأولية
+    setTimeout(() => {
+        UndoRedoManager.saveState('الحالة الأولية');
+    }, 1000);
     
     console.log("🎉 التطبيق جاهز للاستخدام!");
 }
@@ -4467,7 +4612,7 @@ window.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
-// ========== التهيئة عند تحميل الصفحة ==========
+
 // ========== التهيئة عند تحميل الصفحة ==========
 window.addEventListener('DOMContentLoaded', function() {
     console.log("📄 DOMContentLoaded - بدء التهيئة");
