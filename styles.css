@@ -2031,3 +2031,90 @@ input:disabled {
 .month-task-item:active {
     transform: scale(0.98) !important;
 }
+
+/* ========== تحسين الجدول الأسبوعي الجديد ========== */
+.weekly-calendar {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 8px !important;
+}
+
+.weekly-calendar .month-day {
+    min-height: 120px !important;
+    max-height: 150px !important;
+    padding: 8px !important;
+    border: 1px solid var(--theme-border) !important;
+    border-radius: 8px !important;
+    background: var(--theme-card) !important;
+    position: relative !important;
+    overflow-y: auto !important;
+    transition: all 0.3s ease !important;
+}
+
+.weekly-calendar .month-day:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+}
+
+.weekly-calendar .month-day.today {
+    border: 2px solid var(--theme-primary) !important;
+    background: rgba(67, 97, 238, 0.05) !important;
+}
+
+.weekly-calendar .day-number {
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    position: sticky !important;
+    top: 0 !important;
+    background: var(--theme-card) !important;
+    padding: 4px 0 !important;
+    z-index: 1 !important;
+    font-size: 1rem !important;
+}
+
+.weekly-calendar .today .day-number {
+    color: var(--theme-primary) !important;
+}
+
+.weekly-calendar .month-tasks {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 4px !important;
+}
+
+/* ========== رؤوس الأيام في الجدول الأسبوعي ========== */
+.weekly-calendar .month-day-header {
+    text-align: center !important;
+    font-weight: bold !important;
+    color: var(--theme-primary) !important;
+    padding: 8px 4px !important;
+    background: var(--theme-card) !important;
+    border-radius: 6px !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 5px !important;
+}
+
+/* ========== إصلاح أبعاد المهام ========== */
+.weekly-calendar .month-task-item {
+    cursor: pointer !important;
+    padding: 4px 6px !important;
+    border-radius: 4px !important;
+    background: var(--theme-bg) !important;
+    border-right: 2px solid !important;
+    font-size: 0.7rem !important;
+    transition: all 0.2s ease !important;
+    margin-bottom: 2px !important;
+}
+
+.weekly-calendar .month-task-item:hover {
+    background: var(--theme-border) !important;
+    transform: translateX(-2px) !important;
+}
+
+.weekly-calendar .month-task-dot {
+    width: 6px !important;
+    height: 6px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+}
