@@ -3117,39 +3117,15 @@ function setupNotesEditorEvents() {
     }
     
     if (addCheckboxBtn) {
-    // إزالة جميع الأحداث القديمة
-    const newBtn = addCheckboxBtn.cloneNode(true);
-    addCheckboxBtn.parentNode.replaceChild(newBtn, addCheckboxBtn);
-    
+        // إزالة جميع الأحداث القديمة
+        const newBtn = addCheckboxBtn.cloneNode(true);
+        addCheckboxBtn.parentNode.replaceChild(newBtn, addCheckboxBtn);
+        
         // إضافة حدث جديد
         document.getElementById('add-checkbox-btn').addEventListener('click', function(e) {
             e.preventDefault();
             e.stopImmediatePropagation();
             addSingleCheckbox();
-        });
-    }
-            // حفظ التحديد الحالي
-            const selection = window.getSelection();
-            if (selection.rangeCount > 0) {
-                const range = selection.getRangeAt(0);
-                const div = document.createElement('div');
-                div.innerHTML = checkboxHtml;
-                const frag = document.createDocumentFragment();
-                let node;
-                while ((node = div.firstChild)) {
-                    frag.appendChild(node);
-                }
-                range.insertNode(frag);
-                
-                // نقل التحديد إلى العنصر الجديد
-                range.setStartAfter(frag.lastChild);
-                range.setEndAfter(frag.lastChild);
-                selection.removeAllRanges();
-                selection.addRange(range);
-            } else {
-                // إذا لم يكن هناك تحديد، أضف في النهاية
-                editor.innerHTML += checkboxHtml;
-            }
         });
     }
     
