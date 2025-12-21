@@ -1550,92 +1550,138 @@ const timeSlots = [
 }
 
 function renderWeeklyCalendar(container) {
-    const today = new Date();
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay());
+    console.log("📅 عرض الجدول الأسبوعي المصغر...");
     
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-        const day = new Date(startOfWeek);
-        day.setDate(startOfWeek.getDate() + i);
-        days.push(day);
-    }
+    const today = new Date();
+    const currentDate = AppState.currentCalendarDate;
+    
+    // حساب بداية ونهاية الأسبوع
+    const startOfWeek = new Date(currentDate);
+    startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
     
     let html = `
-        <div class="calendar-nav" style="margin-bottom: 20px;">
-            <button class="btn btn-secondary btn-sm" onclick="changeCalendarWeek(-1)">
-                <i class="fas fa-chevron-right"></i> الأسبوع الماضي
+        <div class="calendar-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateCalendarWeeks(-1)">
+                <i class="fas fa-chevron-right"></i> الأسبوع السابق
             </button>
-            <h3 style="margin: 0 15px;">أسبوع ${today.getWeekNumber()}</h3>
-            <button class="btn btn-secondary btn-sm" onclick="changeCalendarWeek(1)">
-                الأسبوع القادم <i class="fas fa-chevron-left"></i>
+            <h3 style="margin: 0 15px; text-align: center; color: var(--theme-text);">
+                الأسبوع ${currentDate.getWeekNumber()}
+                <br>
+                <small style="font-size: 0.9rem; color: var(--gray-color);">
+                    ${startOfWeek.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })} 
+                    - 
+                    ${endOfWeek.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short', year: 'numeric' })}
+                </small>
+            </h3>
+            <button class="btn btn-secondary btn-sm" onclick="navigateCalendarWeeks(1)">
+                الأسبوع التالي <i class="fas fa-chevron-left"></i>
             </button>
         </div>
+        
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-primary btn-sm" onclick="AppState.currentCalendarDate = new Date(); renderCalendar();">
+                <i class="fas fa-calendar-day"></i> العودة للأسبوع الحالي
+            </button>
+        </div>
+        
+        <div class="weekly-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px;">
     `;
-    
-    html += '<div class="weekly-calendar">';
     
     const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
     
-    days.forEach((day, index) => {
+    for (let i = 0; i < 7; i++) {
+        const day = new Date(startOfWeek);
+        day.setDate(startOfWeek.getDate() + i);
         const dateStr = day.toISOString().split('T')[0];
         const dayTasks = AppState.tasks.filter(task => task.date === dateStr);
         const isToday = dateStr === new Date().toISOString().split('T')[0];
         
         html += `
-            <div class="day-column ${isToday ? 'today' : ''}">
-                <div class="day-header">
-                    <div class="day-name">${dayNames[index]}</div>
-                    <div class="day-date">${day.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })}</div>
+            <div class="day-column ${isToday ? 'today' : ''}" 
+                 style="background: var(--theme-card); border-radius: 8px; padding: 12px; border: 1px solid var(--theme-border); min-height: 350px; max-height: 450px; overflow-y: auto;">
+                <div class="day-header" style="text-align: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--theme-primary); position: sticky; top: 0; background: var(--theme-card); z-index: 1;">
+                    <div class="day-name" style="font-weight: 600; color: var(--theme-primary); font-size: 0.95rem;">${dayNames[i]}</div>
+                    <div class="day-date" style="color: var(--gray-color); font-size: 0.85rem; margin-top: 4px;">
+                        ${day.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })}
+                    </div>
+                    <div class="day-task-count" style="color: var(--theme-primary); font-size: 0.75rem; margin-top: 4px;">
+                        ${dayTasks.length} مهام
+                    </div>
                 </div>
-                <div class="day-tasks">
+                <div class="day-tasks" style="display: flex; flex-direction: column; gap: 5px;">
         `;
         
         if (dayTasks.length === 0) {
             html += `
                 <div style="text-align: center; padding: 20px 10px; color: var(--gray-color);">
-                    <i class="fas fa-calendar-day" style="opacity: 0.3;"></i>
-                    <p style="font-size: 0.9rem;">لا توجد مهام</p>
+                    <i class="fas fa-calendar-day" style="opacity: 0.3; font-size: 1.5rem; margin-bottom: 8px;"></i>
+                    <p style="font-size: 0.8rem;">لا توجد مهام</p>
                 </div>
             `;
         } else {
+            // ترتيب المهام حسب الوقت
+            dayTasks.sort((a, b) => {
+                const timeA = a.time ? getTaskTimeInMinutes(a) : 9999;
+                const timeB = b.time ? getTaskTimeInMinutes(b) : 9999;
+                return timeA - timeB;
+            });
+            
             dayTasks.forEach(task => {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
+                const priorityColor = task.priority === 'high' ? '#f72585' : 
+                                     task.priority === 'medium' ? '#f8961e' : '#4cc9f0';
                 
                 html += `
                     <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}"
+                         data-id="${task.id}"
                          onclick="openEditTaskModal('${task.id}')"
-                         style="border-left-color: ${category.color}; border-right-color: ${category.color};">
-                        <div class="calendar-task-title">${task.title}</div>
-                        <div class="calendar-task-meta">
-                            <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</span>
-                            ${task.completed ? '<span><i class="fas fa-check-circle"></i></span>' : ''}
+                         style="border-left: 3px solid ${category.color}; 
+                                cursor: pointer; 
+                                margin-bottom: 4px; 
+                                padding: 6px 8px; 
+                                font-size: 0.75rem;
+                                min-height: 40px;
+                                background: var(--theme-card);
+                                border-radius: 6px;
+                                border: 1px solid var(--theme-border);"
+                         title="${task.title}">
+                        <div class="calendar-task-title" style="font-weight: 500; margin-bottom: 2px; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
+                            <span style="color: ${category.color}; font-size: 0.6rem;"><i class="fas fa-circle"></i></span>
+                            <span style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" 
+                                  title="${task.title}">
+                                ${task.title.length > 15 ? task.title.substring(0, 15) + '...' : task.title}
+                            </span>
+                        </div>
+                        <div class="calendar-task-meta" style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--gray-color);">
+                            <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
+                            <span><i class="fas fa-stopwatch" style="font-size: 0.6rem;"></i> ${task.duration} د</span>
                         </div>
                     </div>
                 `;
             });
-            
-            if (dayTasks.length > 10) {
-                html += `<div style="text-align: center; color: var(--gray-color); font-size: 0.9rem;">+${dayTasks.length - 10} مهمة أخرى</div>`;
-            }
         }
         
         html += `
                 </div>
             </div>
         `;
-    });
+    }
     
     html += '</div>';
     container.innerHTML = html;
-        // إضافة أحداث التمرير والتفاعل
+    
+    // إضافة Tooltips للمهام
     setTimeout(() => {
-        setupCalendarTooltips();
+        setupWeeklyCalendarTooltips();
     }, 100);
 }
-
 function renderMonthlyCalendar(container) {
+    console.log("📅 عرض الجدول الشهري مع Tooltips...");
+    
     const date = AppState.currentCalendarDate;
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -1657,19 +1703,30 @@ function renderMonthlyCalendar(container) {
                 الشهر القادم <i class="fas fa-chevron-left"></i>
             </button>
         </div>
+        
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-primary btn-sm" onclick="AppState.currentCalendarDate = new Date(); renderCalendar();">
+                <i class="fas fa-calendar-alt"></i> العودة للشهر الحالي
+            </button>
+        </div>
+        
+        <div class="monthly-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
     `;
-    
-    html += '<div class="monthly-calendar">';
     
     // رؤوس الأيام
     const dayHeaders = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
     dayHeaders.forEach(day => {
-        html += `<div class="month-day" style="text-align: center; font-weight: bold; color: var(--theme-primary); min-height: auto; padding: 5px;">${day}</div>`;
+        html += `
+            <div class="month-day-header" 
+                 style="text-align: center; font-weight: bold; color: var(--theme-primary); padding: 8px 4px; background: var(--theme-card); border-radius: 6px; font-size: 0.9rem;">
+                ${day}
+            </div>
+        `;
     });
     
     // أيام فارغة في بداية الشهر
     for (let i = 0; i < startDay; i++) {
-        html += '<div class="month-day" style="background: transparent; border: none; min-height: auto;"></div>';
+        html += '<div class="empty-day" style="background: transparent; border: none; min-height: auto;"></div>';
     }
     
     // أيام الشهر
@@ -1679,33 +1736,72 @@ function renderMonthlyCalendar(container) {
         const isToday = dateStr === today;
         
         html += `
-            <div class="month-day ${isToday ? 'today' : ''}">
-                <div class="day-number">${day}</div>
-                <div class="month-tasks">
+            <div class="month-day ${isToday ? 'today' : ''}" 
+                 style="background: var(--theme-card); border-radius: 8px; padding: 8px; min-height: 120px; max-height: 150px; border: 1px solid var(--theme-border); overflow-y: auto; position: relative;"
+                 data-date="${dateStr}">
+                <div class="day-number" style="font-weight: 600; margin-bottom: 8px; color: ${isToday ? 'var(--theme-primary)' : 'var(--theme-text)'}; font-size: 1rem; text-align: center; position: sticky; top: 0; background: var(--theme-card); padding: 4px 0; z-index: 1;">
+                    ${day}
+                    ${isToday ? '<span style="font-size: 0.7rem; color: var(--theme-primary);">(اليوم)</span>' : ''}
+                </div>
+                <div class="month-tasks" style="display: flex; flex-direction: column; gap: 4px;">
         `;
         
-        if (dayTasks.length > 0) {
-            dayTasks.forEach(task => {
+        if (dayTasks.length === 0) {
+            html += `
+                <div style="text-align: center; padding: 10px; color: var(--gray-color); font-size: 0.8rem;">
+                    <i class="fas fa-calendar-day" style="opacity: 0.3;"></i>
+                </div>
+            `;
+        } else {
+            // عرض أول 3 مهام فقط (بسبب المساحة)
+            const tasksToShow = dayTasks.slice(0, 3);
+            
+            tasksToShow.forEach((task, index) => {
                 const category = getCategoryById(task.categoryId);
+                const isOverdue = isTaskOverdue(task);
+                const priorityIcon = task.priority === 'high' ? 'fas fa-flag' : 
+                                    task.priority === 'medium' ? 'fas fa-flag' : 'fas fa-flag';
                 
                 html += `
                     <div class="month-task-item" 
                          data-id="${task.id}"
+                         data-task-index="${index}"
+                         data-date="${dateStr}"
                          onclick="openEditTaskModal('${task.id}')"
-                         style="cursor: pointer;">
-                        <span class="month-task-dot" style="background: ${category.color};"></span>
-                        <span style="font-size: 0.7rem;">${task.title.length > 15 ? task.title.substring(0, 15) + '...' : task.title}</span>
+                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
+                         title="انقر للتعديل">
+                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
+                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
+                            </span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
+                            <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
+                            ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
+                        </div>
                     </div>
                 `;
             });
             
-            if (dayTasks.length > 5) {
-                html += `<div style="font-size: 0.7rem; color: var(--gray-color); cursor: pointer;" onclick="AppState.currentCalendarDate = new Date('${dateStr}'); AppState.currentCalendarView = 'daily'; renderCalendar();">+${dayTasks.length - 5} أخرى</div>`;
+            if (dayTasks.length > 3) {
+                html += `
+                    <div style="font-size: 0.7rem; color: var(--theme-primary); cursor: pointer; text-align: center; margin-top: 4px; padding: 2px;"
+                         onclick="showAllTasksForDay('${dateStr}')">
+                        <i class="fas fa-plus-circle"></i> +${dayTasks.length - 3} أخرى
+                    </div>
+                `;
             }
         }
         
         html += `
                 </div>
+                ${dayTasks.length > 0 ? 
+                    `<div style="position: absolute; bottom: 4px; left: 4px; font-size: 0.65rem; color: var(--gray-color);">
+                        <i class="fas fa-tasks"></i> ${dayTasks.length}
+                    </div>` 
+                    : ''
+                }
             </div>
         `;
     }
@@ -1713,9 +1809,9 @@ function renderMonthlyCalendar(container) {
     html += '</div>';
     container.innerHTML = html;
     
-    // إضافة أحداث التمرير والتفاعل
+    // إضافة Tooltips للمهام الشهرية
     setTimeout(() => {
-        setupCalendarTooltips(); // هذه هي الإضافة المطلوبة
+        setupMonthlyCalendarTooltips();
     }, 100);
 }
 
@@ -1907,6 +2003,179 @@ function openEditCategoryMessages(categoryId) {
     
     document.body.insertAdjacentHTML('beforeend', modalHTML);
     document.getElementById('edit-category-messages-modal').classList.add('active');
+}
+// ========== إعداد Tooltips للجدول الشهري ==========
+function setupMonthlyCalendarTooltips() {
+    console.log("🔍 إعداد Tooltips للجدول الشهري...");
+    
+    document.querySelectorAll('.month-task-item').forEach(item => {
+        item.addEventListener('mouseenter', function(e) {
+            const taskId = this.dataset.id;
+            const task = AppState.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const category = getCategoryById(task.categoryId);
+            const isOverdue = isTaskOverdue(task);
+            const priorityText = task.priority === 'high' ? 'عالية' : 
+                                task.priority === 'medium' ? 'متوسطة' : 'منخفضة';
+            
+            const tooltipHTML = `
+                <div class="monthly-task-tooltip" style="
+                    position: fixed;
+                    background: var(--theme-card);
+                    border: 2px solid ${category.color};
+                    border-radius: 8px;
+                    padding: 12px;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    max-width: 300px;
+                    color: var(--theme-text);
+                    font-family: inherit;
+                ">
+                    <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                        <span style="width: 12px; height: 12px; border-radius: 50%; background: ${category.color};"></span>
+                        <strong style="color: ${category.color}; font-size: 1rem;">${task.title}</strong>
+                    </div>
+                    
+                    <div style="color: var(--gray-color); font-size: 0.9rem;">
+                        <div><i class="fas fa-tag"></i> الفئة: ${category.name}</div>
+                        <div><i class="fas fa-calendar"></i> التاريخ: ${formatDate(task.date)}</div>
+                        ${task.time ? `<div><i class="fas fa-clock"></i> الوقت: ${task.time}</div>` : ''}
+                        <div><i class="fas fa-stopwatch"></i> المدة: ${task.duration} دقيقة</div>
+                        <div><i class="fas fa-flag"></i> الأولوية: ${priorityText}</div>
+                        ${task.completed ? '<div><i class="fas fa-check-circle" style="color: var(--success-color);"></i> مكتملة</div>' : ''}
+                        ${isOverdue ? '<div><i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i> متأخرة</div>' : ''}
+                    </div>
+                    
+                    ${task.description ? `
+                        <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--theme-border); font-size: 0.85rem;">
+                            <strong>الوصف:</strong> ${task.description}
+                        </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 10px; text-align: center; color: var(--theme-primary); font-size: 0.8rem;">
+                        <i class="fas fa-mouse-pointer"></i> انقر للتعديل
+                    </div>
+                </div>
+            `;
+            
+            // إزالة أي Tooltip سابق
+            const existingTooltip = document.querySelector('.monthly-task-tooltip');
+            if (existingTooltip) existingTooltip.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', tooltipHTML);
+            
+            // وضع الـ Tooltip
+            const tooltip = document.querySelector('.monthly-task-tooltip');
+            const x = e.clientX + 15;
+            const y = e.clientY + 15;
+            
+            // التأكد من أن الـ Tooltip لا يخرج عن الشاشة
+            const screenWidth = window.innerWidth;
+            const screenHeight = window.innerHeight;
+            const tooltipWidth = 300;
+            const tooltipHeight = 200;
+            
+            let finalX = x;
+            let finalY = y;
+            
+            if (x + tooltipWidth > screenWidth) {
+                finalX = screenWidth - tooltipWidth - 10;
+            }
+            
+            if (y + tooltipHeight > screenHeight) {
+                finalY = screenHeight - tooltipHeight - 10;
+            }
+            
+            tooltip.style.left = `${finalX}px`;
+            tooltip.style.top = `${finalY}px`;
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            const tooltip = document.querySelector('.monthly-task-tooltip');
+            if (tooltip) tooltip.remove();
+        });
+    });
+}
+// ========== عرض جميع مهام يوم معين ==========
+function showAllTasksForDay(dateStr) {
+    console.log("📋 عرض جميع مهام اليوم:", dateStr);
+    
+    const dayTasks = AppState.tasks.filter(task => task.date === dateStr);
+    
+    if (dayTasks.length === 0) {
+        alert('لا توجد مهام في هذا اليوم');
+        return;
+    }
+    
+    const date = new Date(dateStr);
+    const formattedDate = date.toLocaleDateString('ar-SA', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    let html = '';
+    
+    dayTasks.forEach(task => {
+        const category = getCategoryById(task.categoryId);
+        const isOverdue = isTaskOverdue(task);
+        
+        html += `
+            <div class="task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                 data-id="${task.id}"
+                 style="cursor: pointer; margin-bottom: 10px;"
+                 onclick="openEditTaskModal('${task.id}')">
+                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                           onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600; margin-bottom: 5px; color: ${category.color};">
+                            ${task.title}
+                        </div>
+                        ${task.description ? `<div style="color: var(--gray-color); font-size: 0.9rem; margin-bottom: 8px;">${task.description}</div>` : ''}
+                        <div style="display: flex; gap: 15px; font-size: 0.85rem; color: var(--gray-color);">
+                            <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</span>
+                            <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                            <span><i class="fas fa-flag" style="color: ${task.priority === 'high' ? '#f72585' : task.priority === 'medium' ? '#f8961e' : '#4cc9f0'}"></i> 
+                                ${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    const modalHTML = `
+        <div class="modal" id="day-tasks-modal">
+            <div class="modal-content" style="max-width: 600px; max-height: 80vh;">
+                <div class="modal-header">
+                    <h3>المهام في ${formattedDate}</h3>
+                    <button class="close-btn" onclick="closeModal('day-tasks-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 20px; text-align: center; padding: 10px; background: var(--theme-card); border-radius: 8px;">
+                        <i class="fas fa-calendar-day" style="color: var(--theme-primary); margin-left: 8px;"></i>
+                        <span>إجمالي المهام: ${dayTasks.length}</span>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+                        ${html}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('day-tasks-modal')">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('day-tasks-modal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('day-tasks-modal').classList.add('active');
 }
 
 function saveCategoryMessages(categoryId) {
