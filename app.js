@@ -1663,12 +1663,6 @@ function renderWeeklyCalendar(container) {
         
         html += `
                 </div>
-                ${dayTasks.length > 0 ? 
-                      `<div class="day-task-count">
-                        <i class="fas fa-tasks"></i> ${dayTasks.length}
-                       </div>` 
-                    : ''
-                }
             </div>
         `;
     }
@@ -1865,12 +1859,6 @@ function renderMonthlyCalendar(container) {
         
         html += `
                 </div>
-                ${dayTasks.length > 0 ? 
-                    `<div style="position: absolute; bottom: 4px; left: 4px; font-size: 0.65rem; color: var(--gray-color);">
-                        <i class="fas fa-tasks"></i> ${dayTasks.length}
-                    </div>` 
-                    : ''
-                }
             </div>
         `;
     }
