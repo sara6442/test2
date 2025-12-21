@@ -517,7 +517,13 @@ input:disabled {
 .filter-btn.active { background: var(--theme-primary); color: white; border-color: var(--theme-primary); }
 
 /* ========== عرض الفئات ========== */
-.categories-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+.categories-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    margin-bottom: 25px; 
+}
+
 .categories-grid { 
     display: flex; 
     flex-direction: column; 
@@ -529,6 +535,7 @@ input:disabled {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
+    animation: fadeIn 0.5s ease;
 }
 
 /* إضافة فئة جديدة تظهر في الصف التالي */
@@ -536,9 +543,22 @@ input:disabled {
     margin-bottom: 0;
 }
 
-@media (max-width: 768px) {
-    .categories-grid { 
-        grid-template-columns: 1fr; 
+/* لتحسين الاستجابة على الشاشات الصغيرة */
+@media (max-width: 992px) {
+    .category-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* لتحسين الاستجابة على الشاشات الصغيرة جداً */
+@media (max-width: 576px) {
+    .category-row {
+        gap: 10px;
+    }
+    
+    .categories-grid {
+        gap: 20px;
     }
 }
 
@@ -552,9 +572,17 @@ input:disabled {
     overflow: hidden;
 }
 
-.category-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); }
+.category-card:hover { 
+    transform: translateY(-5px); 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
+}
 
-.category-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+.category-header { 
+    display: flex; 
+    align-items: center; 
+    gap: 15px; 
+    margin-bottom: 20px; 
+}
 
 .category-color {
     width: 35px;
@@ -565,19 +593,66 @@ input:disabled {
     cursor: pointer;
 }
 
-.category-name { font-weight: 600; flex: 1; font-size: 1.2rem; color: var(--theme-text); }
-.category-stats { font-size: 0.9rem; color: var(--gray-color); }
-.category-actions { display: flex; gap: 8px; opacity: 0; transition: var(--transition); }
-.category-card:hover .category-actions { opacity: 1; }
+.category-name { 
+    font-weight: 600; 
+    flex: 1; 
+    font-size: 1.2rem; 
+    color: var(--theme-text); 
+}
+
+.category-stats { 
+    font-size: 0.9rem; 
+    color: var(--gray-color); 
+}
+
+.category-actions { 
+    display: flex; 
+    gap: 8px; 
+    opacity: 0; 
+    transition: var(--transition); 
+}
+
+.category-card:hover .category-actions { 
+    opacity: 1; 
+}
 
 /* شريط التقدم داخل الفئة */
-.category-progress-container { width: 100%; height: 8px; background: var(--theme-border); border-radius: 4px; margin: 15px 0; overflow: hidden; }
-.category-progress-bar { height: 100%; border-radius: 4px; transition: width 0.5s ease; background: var(--theme-primary); }
-.category-progress-bar.completed { background: var(--success-color); }
-.category-progress-bar.empty { width: 0%; }
+.category-progress-container { 
+    width: 100%; 
+    height: 8px; 
+    background: var(--theme-border); 
+    border-radius: 4px; 
+    margin: 15px 0; 
+    overflow: hidden; 
+}
 
-.category-progress-info { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--gray-color); margin-bottom: 15px; }
-.category-add-task-btn { width: 100%; margin-top: 15px; }
+.category-progress-bar { 
+    height: 100%; 
+    border-radius: 4px; 
+    transition: width 0.5s ease; 
+    background: var(--theme-primary); 
+}
+
+.category-progress-bar.completed { 
+    background: var(--success-color); 
+}
+
+.category-progress-bar.empty { 
+    width: 0%; 
+}
+
+.category-progress-info { 
+    display: flex; 
+    justify-content: space-between; 
+    font-size: 0.85rem; 
+    color: var(--gray-color); 
+    margin-bottom: 15px; 
+}
+
+.category-add-task-btn { 
+    width: 100%; 
+    margin-top: 15px; 
+}
 
 /* ========== إصلاح عرض الفئات ========== */
 .category-tasks-container {
@@ -600,11 +675,23 @@ input:disabled {
     cursor: pointer;
     background: var(--theme-card);
     border: 1px solid var(--theme-border);
+    border-bottom: 1px solid var(--theme-border);
 }
 
-.category-task-item:hover {
-    transform: translateX(-5px);
-    background: var(--theme-border);
+.category-task-item:last-child { 
+    border-bottom: none; 
+    margin-bottom: 0; 
+}
+
+.category-task-item:hover { 
+    transform: translateX(-5px); 
+    box-shadow: 0 3px 8px rgba(0,0,0,0.1); 
+    background: var(--theme-border); 
+}
+
+.category-task-item.completed { 
+    opacity: 0.6; 
+    border-color: var(--success-color); 
 }
 
 .category-task-title {
@@ -612,6 +699,8 @@ input:disabled {
     align-items: center;
     gap: 10px;
     margin-bottom: 5px;
+    font-weight: 500;
+    font-size: 0.95rem;
 }
 
 .category-task-title input[type="checkbox"] {
@@ -626,38 +715,6 @@ input:disabled {
     font-size: 0.85rem;
     color: var(--gray-color);
 }
-
-/* شريط المهام داخل الفئة */
-.category-tasks-container {
-    margin: 15px 0;
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 10px;
-    border: 1px solid var(--theme-border);
-    border-radius: 8px;
-    padding: 15px;
-    background: var(--theme-card);
-}
-
-.category-task-item {
-    padding: 12px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    border-right: 3px solid;
-    transition: var(--transition);
-    cursor: pointer;
-    position: relative;
-    background: var(--theme-card);
-    border: 1px solid var(--theme-border);
-    border-bottom: 1px solid var(--theme-border);
-}
-
-.category-task-item:last-child { border-bottom: none; margin-bottom: 0; }
-.category-task-item:hover { transform: translateX(-5px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); background: var(--theme-border); }
-.category-task-item.completed { opacity: 0.6; border-color: var(--success-color); }
-
-.category-task-title { font-weight: 500; margin-bottom: 5px; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
-.category-task-meta { display: flex; gap: 12px; font-size: 0.85rem; color: var(--gray-color); }
 
 /* ========== نمط نافذة حالة الفئات ========== */
 .categories-status-container {
@@ -694,19 +751,6 @@ input:disabled {
     background: var(--theme-card);
     color: var(--theme-text);
 }
-
-/* ========== إزالة التكرار في الأزرار ========== */
-.category-actions {
-    display: flex;
-    gap: 8px;
-    opacity: 0;
-    transition: var(--transition);
-}
-
-.category-card:hover .category-actions {
-    opacity: 1;
-}
-
 /* ========== عرض الملاحظات ========== */
 .notes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 25px; margin-top: 25px; }
 
