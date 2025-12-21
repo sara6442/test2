@@ -1629,26 +1629,26 @@ function renderWeeklyCalendar(container) {
             // عرض أول 3 مهام فقط
             const tasksToShow = dayTasks.slice(0, 3);
             
-            tasksToShow.forEach((task, index) => {
-                const category = getCategoryById(task.categoryId);
-                const isOverdue = isTaskOverdue(task);
-                
-                html += `
-                    <div class="task-preview-item" 
-                         data-id="${task.id}"
-                         onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
-                         style="border-right-color: ${category.color};">
-                        <div class="task-content">
-                            <span class="month-task-dot" style="background: ${category.color};"></span>
-                            <span>${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}</span>
+            // في دالة renderWeeklyCalendar، عدل هذا القسم:
+                tasksToShow.forEach((task) => {
+                    const category = getCategoryById(task.categoryId);
+                    
+                    html += `
+                        <div class="task-preview-item" 
+                             data-id="${task.id}"
+                             onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
+                             style="border-right-color: ${category.color};">
+                            <div class="task-content">
+                                <div class="weekly-task-dot" style="background: ${category.color};"></div>
+                                <span>${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}</span>
+                            </div>
+                            <div class="task-meta">
+                                <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
+                                ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
+                            </div>
                         </div>
-                        <div class="task-meta">
-                            <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
-                            ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
             
             if (dayTasks.length > 3) {
                 html += `
@@ -1659,22 +1659,11 @@ function renderWeeklyCalendar(container) {
                 `;
             }
         }
-        
-        html += `
-                </div>
-                ${dayTasks.length > 0 ? 
-                      `<div class="day-task-count">
-                        <i class="fas fa-tasks"></i> ${dayTasks.length}
-                       </div>` 
-                    : ''
-                }
-            </div>
-        `;
     }
     
-    html += '</div>';
-    container.innerHTML = html;
-    
+            html += '</div>';
+            container.innerHTML = html;
+            
     // إضافة Tooltips
     setTimeout(() => {
         setupCalendarTooltips();
@@ -1824,33 +1813,34 @@ function renderMonthlyCalendar(container) {
             // عرض أول 3 مهام فقط (بسبب المساحة)
             const tasksToShow = dayTasks.slice(0, 3);
             
-            tasksToShow.forEach((task, index) => {
-                const category = getCategoryById(task.categoryId);
-                const isOverdue = isTaskOverdue(task);
-                const priorityIcon = task.priority === 'high' ? 'fas fa-flag' : 
-                                    task.priority === 'medium' ? 'fas fa-flag' : 'fas fa-flag';
-                
-                html += `
-                    <div class="month-task-item" 
-                         data-id="${task.id}"
-                         data-task-index="${index}"
-                         data-date="${dateStr}"
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
-                         title="انقر للتعديل">
-                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
-                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
-                            </span>
+            // في دالة renderMonthlyCalendar، عدل هذا القسم:
+                tasksToShow.forEach((task, index) => {
+                    const category = getCategoryById(task.categoryId);
+                    const isOverdue = isTaskOverdue(task);
+                    const priorityIcon = task.priority === 'high' ? 'fas fa-flag' : 
+                                        task.priority === 'medium' ? 'fas fa-flag' : 'fas fa-flag';
+                    
+                    html += `
+                        <div class="month-task-item" 
+                             data-id="${task.id}"
+                             data-task-index="${index}"
+                             data-date="${dateStr}"
+                             onclick="openEditTaskModal('${task.id}')"
+                             style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
+                             title="انقر للتعديل">
+                            <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                                <span class="monthly-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
+                                <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                    ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
+                                </span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
+                                <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
+                                ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
+                            </div>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
-                            <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
-                            ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
-                        </div>
-                    </div>
-                `;
-            });
+                    `;
+                });
             
             if (dayTasks.length > 3) {
                 html += `
@@ -1862,10 +1852,6 @@ function renderMonthlyCalendar(container) {
             }
         }
         
-        html += `
-                </div>
-            </div>
-        `;
     }
     
     html += '</div>';
