@@ -2841,12 +2841,164 @@ function setupEnhancedNotesEditor() {
 function addLinkToNote() {
     const url = prompt('أدخل رابط URL:', 'https://');
     if (url) {
-        const text = prompt('أدخل نص الرابط:', 'رابط');
-        if (text) {
-            const linkHTML = `<a href="${url}" target="_blank" style="color: var(--theme-primary); text-decoration: underline;">${text}</a>`;
-            insertHTMLToEditor(linkHTML);
+        const text = prompt('أدخل نص الرابط (اختياري):', '');
+        const linkId = 'link-' + Date.now();
+        
+        // تحقق إذا كان الرابط من مواقع معينة
+        const isYoutube = url.includes('youtube.com') || url.includes('youtu.be');
+        const isTwitter = url.includes('twitter.com') || url.includes('x.com');
+        const isInstagram = url.includes('instagram.com');
+        
+        let linkHTML = '';
+        
+        if (isYoutube || isTwitter || isInstagram) {
+            // تضمين الرابط مع تحكم بالحجم
+            linkHTML = `
+                <div class="embedded-link" data-link-id="${linkId}" style="margin: 15px 0; padding: 15px; background: var(--theme-card); border-radius: 8px; border: 2px solid var(--theme-primary);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-link" style="color: var(--theme-primary);"></i>
+                            <span style="font-weight: 600; color: var(--theme-primary);">
+                                ${isYoutube ? 'فيديو YouTube' : isTwitter ? 'تغريدة' : isInstagram ? 'إنستغرام' : 'رابط'}
+                            </span>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-xs btn-secondary" onclick="resizeEmbed('${linkId}', 'small')" title="صغير">
+                                <i class="fas fa-compress-alt"></i>
+                            </button>
+                            <button class="btn btn-xs btn-secondary" onclick="resizeEmbed('${linkId}', 'medium')" title="متوسط">
+                                <i class="fas fa-expand-alt"></i>
+                            </button>
+                            <button class="btn btn-xs btn-secondary" onclick="resizeEmbed('${linkId}', 'large')" title="كبير">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                            <button class="btn btn-xs btn-danger" onclick="removeEmbed('${linkId}')" title="حذف">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="padding: 10px; background: var(--theme-bg); border-radius: 6px; word-break: break-all;">
+                        <a href="${url}" target="_blank" style="color: var(--theme-primary); text-decoration: none; font-size: 0.9rem;">
+                            ${text || url}
+                        </a>
+                        <div style="font-size: 0.8rem; color: var(--gray-color); margin-top: 5px;">
+                            <i class="fas fa-external-link-alt"></i> انقر للفتح في نافذة جديدة
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; display: flex; gap: 10px; font-size: 0.8rem; color: var(--gray-color);">
+                        <span><i class="fas fa-mouse-pointer"></i> اسحب الرابط لنقله</span>
+                        <span><i class="fas fa-arrows-alt"></i> اضغط الأزرار لتغيير الحجم</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            // رابط عادي مع تحكم
+            linkHTML = `
+                <div class="link-container" data-link-id="${linkId}" style="margin: 10px 0; padding: 10px; background: var(--theme-card); border-radius: 6px; border: 1px solid var(--theme-border);">
+                    <a href="${url}" target="_blank" 
+                       style="color: var(--theme-primary); text-decoration: none; font-weight: 500; display: inline-block; padding: 8px 12px; border-radius: 4px; background: var(--theme-bg); border: 1px solid var(--theme-primary);"
+                       oncontextmenu="return showLinkOptions(event, '${linkId}')">
+                        <i class="fas fa-external-link-alt" style="margin-left: 5px;"></i>
+                        ${text || url}
+                    </a>
+                    <button class="btn btn-xs btn-secondary" onclick="resizeLink('${linkId}', 'small')" style="margin-right: 5px;" title="تصغير">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="btn btn-xs btn-secondary" onclick="resizeLink('${linkId}', 'large')" title="تكبير">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            `;
         }
+        
+        insertHTMLToEditor(linkHTML);
+        
+        // جعل الرابط قابلاً للسحب
+        setTimeout(() => {
+            makeElementDraggable(linkId);
+        }, 100);
     }
+}
+
+// دوال مساعدة
+function resizeEmbed(elementId, size) {
+    const element = document.querySelector(`[data-link-id="${elementId}"]`);
+    if (!element) return;
+    
+    const sizes = {
+        small: '200px',
+        medium: '300px',
+        large: '100%'
+    };
+    
+    element.style.maxWidth = sizes[size];
+    element.style.width = sizes[size];
+}
+
+function resizeLink(elementId, size) {
+    const container = document.querySelector(`[data-link-id="${elementId}"]`);
+    if (!container) return;
+    
+    const link = container.querySelector('a');
+    if (!link) return;
+    
+    const currentSize = parseInt(window.getComputedStyle(link).fontSize) || 14;
+    const newSize = size === 'small' ? Math.max(10, currentSize - 2) : currentSize + 2;
+    
+    link.style.fontSize = newSize + 'px';
+}
+
+function removeEmbed(elementId) {
+    const element = document.querySelector(`[data-link-id="${elementId}"]`);
+    if (element && confirm('هل تريد حذف هذا الرابط؟')) {
+        element.remove();
+    }
+}
+
+function makeElementDraggable(elementId) {
+    const element = document.querySelector(`[data-link-id="${elementId}"]`);
+    if (!element) return;
+    
+    element.style.cursor = 'move';
+    element.setAttribute('draggable', 'true');
+    
+    element.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', elementId);
+        element.style.opacity = '0.7';
+    });
+    
+    element.addEventListener('dragend', () => {
+        element.style.opacity = '1';
+    });
+}
+
+function showLinkOptions(e, linkId) {
+    e.preventDefault();
+    
+    const options = prompt('اختر إجراء للرابط:\n1 - تصغير النص\n2 - تكبير النص\n3 - تغيير اللون\n4 - حذف', '1');
+    
+    const container = document.querySelector(`[data-link-id="${linkId}"]`);
+    const link = container ? container.querySelector('a') : null;
+    
+    if (!link) return false;
+    
+    switch(options) {
+        case '1':
+            resizeLink(linkId, 'small');
+            break;
+        case '2':
+            resizeLink(linkId, 'large');
+            break;
+        case '3':
+            const color = prompt('أدخل لوناً جديداً (مثل: #4361ee):', '#4361ee');
+            if (color) link.style.color = color;
+            break;
+        case '4':
+            removeEmbed(linkId);
+            break;
+    }
+    
+    return false;
 }
 
 // دالة لإضافة صورة
@@ -2861,19 +3013,139 @@ function handleImageUpload(event) {
     
     const reader = new FileReader();
     reader.onload = function(e) {
-        const imageHTML = `<div style="margin: 10px 0;">
-            <img src="${e.target.result}" alt="صورة مرفوعة" style="max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--theme-border);">
-            <div style="font-size: 0.8rem; color: var(--gray-color); text-align: center; margin-top: 5px;">
-                ${file.name}
+        // إضافة عناصر تحكم بالحجم
+        const imageId = 'image-' + Date.now();
+        const imageHTML = `
+            <div class="image-container" style="margin: 15px 0; position: relative;" data-image-id="${imageId}">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 8px; background: var(--theme-card); border-radius: 6px; border: 1px solid var(--theme-border);">
+                    <span style="font-size: 0.8rem; color: var(--gray-color);">
+                        <i class="fas fa-image"></i> ${file.name}
+                    </span>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span style="font-size: 0.8rem; color: var(--gray-color);">الحجم:</span>
+                        <button class="btn btn-xs btn-secondary" onclick="resizeImage('${imageId}', 'small')" title="صغير">
+                            <i class="fas fa-compress-alt"></i>
+                        </button>
+                        <button class="btn btn-xs btn-secondary" onclick="resizeImage('${imageId}', 'medium')" title="متوسط">
+                            <i class="fas fa-expand-alt"></i>
+                        </button>
+                        <button class="btn btn-xs btn-secondary" onclick="resizeImage('${imageId}', 'large')" title="كبير">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button class="btn btn-xs btn-danger" onclick="removeImage('${imageId}')" title="حذف">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <img id="${imageId}" 
+                     src="${e.target.result}" 
+                     alt="صورة مرفوعة" 
+                     style="width: 100%; max-width: 400px; height: auto; border-radius: 8px; border: 2px solid var(--theme-primary); cursor: move;"
+                     draggable="true"
+                     oncontextmenu="return showImageContextMenu(event, '${imageId}')">
             </div>
-        </div>`;
+        `;
         insertHTMLToEditor(imageHTML);
+        
+        // جعل الصورة قابلة للسحب
+        setTimeout(() => {
+            makeImageDraggable(imageId);
+        }, 100);
     };
     reader.readAsDataURL(file);
     
     // إعادة تعيين حقل الرفع
     event.target.value = '';
 }
+
+// دالة لتغيير حجم الصورة
+function resizeImage(imageId, size) {
+    const img = document.getElementById(imageId);
+    if (!img) return;
+    
+    const sizes = {
+        small: '150px',
+        medium: '300px',
+        large: '100%'
+    };
+    
+    img.style.maxWidth = sizes[size];
+    img.style.width = sizes[size];
+}
+
+// دالة لحذف الصورة
+function removeImage(imageId) {
+    const container = document.querySelector(`[data-image-id="${imageId}"]`);
+    if (container && confirm('هل تريد حذف هذه الصورة؟')) {
+        container.remove();
+    }
+}
+
+// دالة لجعل الصورة قابلة للسحب
+function makeImageDraggable(imageId) {
+    const img = document.getElementById(imageId);
+    if (!img) return;
+    
+    let isDragging = false;
+    let offsetX, offsetY;
+    
+    img.addEventListener('mousedown', startDrag);
+    
+    function startDrag(e) {
+        isDragging = true;
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        img.style.position = 'absolute';
+        img.style.zIndex = '1000';
+        img.style.cursor = 'grabbing';
+        
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDrag);
+    }
+    
+    function drag(e) {
+        if (!isDragging) return;
+        
+        const container = img.closest('.image-container');
+        if (container) {
+            const rect = container.getBoundingClientRect();
+            const x = e.clientX - rect.left - offsetX;
+            const y = e.clientY - rect.top - offsetY;
+            
+            img.style.left = x + 'px';
+            img.style.top = y + 'px';
+        }
+    }
+    
+    function stopDrag() {
+        isDragging = false;
+        img.style.cursor = 'move';
+        img.style.position = 'relative';
+        img.style.left = '0';
+        img.style.top = '0';
+        
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+    }
+}
+
+// دالة لعرض قائمة السياق للصورة
+function showImageContextMenu(e, imageId) {
+    e.preventDefault();
+    
+    // يمكن إضافة قائمة سياق هنا
+    const action = prompt('اختر إجراء للصورة:\n1 - صغير\n2 - متوسط\n3 - كبير\n4 - حذف', '2');
+    
+    switch(action) {
+        case '1': resizeImage(imageId, 'small'); break;
+        case '2': resizeImage(imageId, 'medium'); break;
+        case '3': resizeImage(imageId, 'large'); break;
+        case '4': removeImage(imageId); break;
+    }
+    
+    return false;
+}
+
 
 // دالة لإضافة فيديو
 function addVideoToNote() {
