@@ -1333,90 +1333,111 @@ function renderCategories() {
     
     let html = '';
     
-    AppState.categories.forEach(category => {
-        const categoryTasks = AppState.tasks.filter(task => task.categoryId === category.id);
-        const completedTasks = categoryTasks.filter(task => task.completed).length;
-        const totalTasks = categoryTasks.length;
+    // تقسيم الفئات إلى صفوف كل صف يحتوي على فئتين
+    for (let i = 0; i < AppState.categories.length; i += 2) {
+        html += `<div class="category-row">`;
         
-        let totalDuration = 0;
-        let completedDuration = 0;
-        categoryTasks.forEach(task => {
-            totalDuration += task.duration || 30;
-            if (task.completed) completedDuration += task.duration || 30;
-        });
-        
-        const progressPercent = totalDuration > 0 ? Math.round((completedDuration / totalDuration) * 100) : 0;
-        
-        html += `
-            <div class="category-card" data-id="${category.id}">
-                <div class="category-header">
-                    <div class="category-color" style="background: ${category.color}"></div>
-                    <div class="category-name">${category.name}</div>
-                    <div class="category-stats">${totalTasks} مهام</div>
-                </div>
-                
-                <div class="category-progress-info">
-                    <span>الإنجاز: ${progressPercent}%</span>
-                    <span>مكتملة: ${completedTasks}/${totalTasks}</span>
-                </div>
-                
-                <div class="category-progress-container">
-                    <div class="category-progress-bar ${completedDuration === totalDuration && totalTasks > 0 ? 'completed' : completedDuration === 0 ? 'empty' : ''}" 
-                         style="width: ${progressPercent}%; background: ${completedDuration === totalDuration && totalTasks > 0 ? 'var(--success-color)' : category.color};">
-                    </div>
-                </div>
-                
-                <div class="category-tasks-container">
-        `;
-        
-        if (categoryTasks.length === 0) {
-            html += `
-                <div style="text-align: center; padding: 20px; color: var(--gray-color);">
-                    <i class="fas fa-tasks" style="opacity: 0.3; margin-bottom: 10px;"></i>
-                    <p style="margin: 0;">${category.messageEmpty || 'لا توجد مهام في هذه الفئة'}</p>
-                </div>
-            `;
-        } else {
-            categoryTasks.slice(0, 5).forEach(task => {
-                const isOverdue = isTaskOverdue(task);
-                
-                html += `
-                    <div class="category-task-item ${task.completed ? 'completed' : ''}" 
-                         onclick="openEditTaskModal('${task.id}')">
-                        <div class="category-task-title">
-                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
-                                   onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
-                            <span>${task.title}</span>
-                        </div>
-                        <div class="category-task-meta">
-                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
-                            <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
-                            ${isOverdue ? '<span style="color: #f72585;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
-                        </div>
-                    </div>
-                `;
-            });
-            
-            if (categoryTasks.length > 5) {
-                html += `<div style="text-align: center; color: var(--gray-color); font-size: 0.9rem; padding: 10px;">+${categoryTasks.length - 5} مهام أخرى</div>`;
-            }
+        // الفئة الأولى في الصف
+        if (AppState.categories[i]) {
+            const category = AppState.categories[i];
+            html += generateCategoryCard(category);
         }
         
-           html += `
-            <button class="btn btn-secondary category-add-task-btn" 
-                    onclick="openAddTaskModal('${category.id}')" 
-                    style="margin-top: 10px; width: 100%;">
-                <i class="fas fa-plus"></i> إضافة مهمة جديدة
-            </button>
-        `;
+        // الفئة الثانية في الصف (إذا موجودة)
+        if (AppState.categories[i + 1]) {
+            const category = AppState.categories[i + 1];
+            html += generateCategoryCard(category);
+        }
         
-        html += `</div>`; // إغلاق category-card
-    });
+        html += `</div>`;
+    }
     
     container.innerHTML = html;
     console.log("✅ تم عرض الفئات بنجاح");
 }
 
+// دالة مساعدة لإنشاء بطاقة الفئة
+function generateCategoryCard(category) {
+    const categoryTasks = AppState.tasks.filter(task => task.categoryId === category.id);
+    const completedTasks = categoryTasks.filter(task => task.completed).length;
+    const totalTasks = categoryTasks.length;
+    
+    let totalDuration = 0;
+    let completedDuration = 0;
+    categoryTasks.forEach(task => {
+        totalDuration += task.duration || 30;
+        if (task.completed) completedDuration += task.duration || 30;
+    });
+    
+    const progressPercent = totalDuration > 0 ? Math.round((completedDuration / totalDuration) * 100) : 0;
+    
+    let cardHTML = `
+        <div class="category-card" data-id="${category.id}">
+            <div class="category-header">
+                <div class="category-color" style="background: ${category.color}"></div>
+                <div class="category-name">${category.name}</div>
+                <div class="category-stats">${totalTasks} مهام</div>
+            </div>
+            
+            <div class="category-progress-info">
+                <span>الإنجاز: ${progressPercent}%</span>
+                <span>مكتملة: ${completedTasks}/${totalTasks}</span>
+            </div>
+            
+            <div class="category-progress-container">
+                <div class="category-progress-bar ${completedDuration === totalDuration && totalTasks > 0 ? 'completed' : completedDuration === 0 ? 'empty' : ''}" 
+                     style="width: ${progressPercent}%; background: ${completedDuration === totalDuration && totalTasks > 0 ? 'var(--success-color)' : category.color};">
+                </div>
+            </div>
+            
+            <div class="category-tasks-container">
+    `;
+    
+    if (categoryTasks.length === 0) {
+        cardHTML += `
+            <div style="text-align: center; padding: 20px; color: var(--gray-color);">
+                <i class="fas fa-tasks" style="opacity: 0.3; margin-bottom: 10px;"></i>
+                <p style="margin: 0;">${category.messageEmpty || 'لا توجد مهام في هذه الفئة'}</p>
+            </div>
+        `;
+    } else {
+        categoryTasks.slice(0, 5).forEach(task => {
+            const isOverdue = isTaskOverdue(task);
+            
+            cardHTML += `
+                <div class="category-task-item ${task.completed ? 'completed' : ''}" 
+                     onclick="openEditTaskModal('${task.id}')">
+                    <div class="category-task-title">
+                        <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                               onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
+                        <span>${task.title}</span>
+                    </div>
+                    <div class="category-task-meta">
+                        <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
+                        <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
+                        ${isOverdue ? '<span style="color: #f72585;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
+                    </div>
+                </div>
+            `;
+        });
+        
+        if (categoryTasks.length > 5) {
+            cardHTML += `<div style="text-align: center; color: var(--gray-color); font-size: 0.9rem; padding: 10px;">+${categoryTasks.length - 5} مهام أخرى</div>`;
+        }
+    }
+    
+    cardHTML += `
+            <button class="btn btn-secondary category-add-task-btn" 
+                    onclick="openAddTaskModal('${category.id}')" 
+                    style="margin-top: 10px; width: 100%;">
+                <i class="fas fa-plus"></i> إضافة مهمة جديدة
+            </button>
+        </div>
+    </div>
+    `;
+    
+    return cardHTML;
+}
 // ========== عرض الجدول الزمني ==========
 function renderCalendar() {
     const container = document.getElementById('calendar-content'); // هذا السطر ناقص!
