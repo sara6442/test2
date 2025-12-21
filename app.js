@@ -1550,7 +1550,7 @@ const timeSlots = [
 }
 
 function renderWeeklyCalendar(container) {
-    console.log("📅 عرض الجدول الأسبوعي المصغر...");
+    console.log("📅 عرض الجدول الأسبوعي الجديد...");
     
     const today = new Date();
     const currentDate = AppState.currentCalendarDate;
@@ -1587,15 +1587,15 @@ function renderWeeklyCalendar(container) {
             </button>
         </div>
         
-        <div class="weekly-calendar" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+        <div class="weekly-calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
     `;
     
-    // رؤوس الأيام (مختصرة مثل الشهري)
+    // رؤوس الأيام (مختصرة)
     const dayHeaders = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
     dayHeaders.forEach(day => {
         html += `
-            <div class="month-day-header" 
-                 style="text-align: center; font-weight: bold; color: var(--theme-primary); padding: 8px 4px; background: var(--theme-card); border-radius: 6px; font-size: 0.9rem;">
+            <div class="day-header-cell" 
+                 style="text-align: center; font-weight: bold; color: var(--theme-primary); padding: 10px 4px; background: var(--theme-card); border-radius: 6px; font-size: 0.9rem; border: 1px solid var(--theme-border);">
                 ${day}
             </div>
         `;
@@ -1609,59 +1609,59 @@ function renderWeeklyCalendar(container) {
         const isToday = dateStr === new Date().toISOString().split('T')[0];
         
         html += `
-            <div class="month-day ${isToday ? 'today' : ''}" 
-                 style="background: var(--theme-card); border-radius: 8px; padding: 8px; min-height: 120px; border: 1px solid var(--theme-border); overflow-y: auto; position: relative;"
+            <div class="day-cell ${isToday ? 'today-cell' : ''}" 
+                 style="background: var(--theme-card); border-radius: 8px; padding: 10px; min-height: 140px; max-height: 160px; border: 1px solid var(--theme-border); overflow-y: auto; position: relative; cursor: pointer;"
+                 onclick="showAllTasksForDay('${dateStr}')"
                  data-date="${dateStr}">
-                <div class="day-number" style="font-weight: 600; margin-bottom: 8px; color: ${isToday ? 'var(--theme-primary)' : 'var(--theme-text)'}; font-size: 1rem; text-align: center; position: sticky; top: 0; background: var(--theme-card); padding: 4px 0; z-index: 1;">
+                <div class="day-number" style="font-weight: 600; margin-bottom: 10px; color: ${isToday ? 'var(--theme-primary)' : 'var(--theme-text)'}; font-size: 1.1rem; text-align: center; padding-bottom: 5px; border-bottom: 1px solid var(--theme-border);">
                     ${day.getDate()}
                     ${isToday ? '<span style="font-size: 0.7rem; color: var(--theme-primary);">(اليوم)</span>' : ''}
                 </div>
-                <div class="month-tasks" style="display: flex; flex-direction: column; gap: 4px;">
+                <div class="tasks-preview" style="display: flex; flex-direction: column; gap: 6px;">
         `;
         
         if (dayTasks.length === 0) {
             html += `
-                <div style="text-align: center; padding: 10px; color: var(--gray-color); font-size: 0.8rem;">
-                    <i class="fas fa-calendar-day" style="opacity: 0.3;"></i>
+                <div style="text-align: center; padding: 15px; color: var(--gray-color); font-size: 0.8rem;">
+                    <i class="fas fa-calendar-check" style="opacity: 0.3; font-size: 1.2rem; margin-bottom: 5px;"></i>
+                    <div>لا مهام</div>
                 </div>
             `;
         } else {
-            // عرض أول 3 مهام فقط (مثل الشهري)
-            const tasksToShow = dayTasks.slice(0, 3);
+            // عرض أول 4 مهام فقط
+            const tasksToShow = dayTasks.slice(0, 4);
             
             tasksToShow.forEach((task, index) => {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
-                const priorityIcon = task.priority === 'high' ? 'fas fa-flag' : 
-                                    task.priority === 'medium' ? 'fas fa-flag' : 'fas fa-flag';
                 
                 html += `
-                    <div class="month-task-item" 
+                    <div class="task-preview-item" 
                          data-id="${task.id}"
-                         data-task-index="${index}"
-                         data-date="${dateStr}"
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
-                         title="انقر للتعديل">
-                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
-                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
-                            </span>
+                         onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
+                         style="padding: 5px 8px; border-radius: 5px; background: var(--theme-bg); border-right: 3px solid ${category.color}; font-size: 0.75rem; cursor: pointer; margin-bottom: 3px;"
+                         title="${task.title}">
+                        <div style="display: flex; align-items: center; gap: 5px; margin-bottom: 2px;">
+                            <div style="width: 8px; height: 8px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></div>
+                            <div style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;">
+                                ${task.title.length > 12 ? task.title.substring(0, 12) + '...' : task.title}
+                            </div>
+                            ${task.completed ? '<i class="fas fa-check" style="color: var(--success-color); font-size: 0.6rem;"></i>' : ''}
                         </div>
                         <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
-                            <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
-                            ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
+                            <span>${task.time || ''}</span>
+                            <span>${task.duration}د</span>
                         </div>
                     </div>
                 `;
             });
             
-            if (dayTasks.length > 3) {
+            if (dayTasks.length > 4) {
                 html += `
-                    <div style="font-size: 0.7rem; color: var(--theme-primary); cursor: pointer; text-align: center; margin-top: 4px; padding: 2px;"
-                         onclick="showAllTasksForDay('${dateStr}')">
-                        <i class="fas fa-plus-circle"></i> +${dayTasks.length - 3} أخرى
+                    <div style="text-align: center; margin-top: 5px;">
+                        <span style="font-size: 0.7rem; color: var(--theme-primary); font-weight: 500;">
+                            +${dayTasks.length - 4} مهام أخرى
+                        </span>
                     </div>
                 `;
             }
@@ -1670,8 +1670,8 @@ function renderWeeklyCalendar(container) {
         html += `
                 </div>
                 ${dayTasks.length > 0 ? 
-                    `<div style="position: absolute; bottom: 4px; left: 4px; font-size: 0.65rem; color: var(--gray-color);">
-                        <i class="fas fa-tasks"></i> ${dayTasks.length}
+                    `<div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0,0,0,0.1); padding: 2px 6px; border-radius: 10px; font-size: 0.65rem; color: var(--gray-color);">
+                        <i class="fas fa-tasks" style="margin-left: 3px;"></i> ${dayTasks.length}
                     </div>` 
                     : ''
                 }
@@ -1679,13 +1679,130 @@ function renderWeeklyCalendar(container) {
         `;
     }
     
-    html += '</div>';
+    html += `
+        </div>
+        
+        <style>
+            .weekly-calendar-grid {
+                display: grid;
+                grid-template-columns: repeat(7, 1fr);
+                gap: 10px;
+                margin-top: 10px;
+            }
+            
+            .day-header-cell {
+                text-align: center;
+                font-weight: bold;
+                padding: 12px 5px;
+                background: var(--theme-card);
+                border-radius: 8px;
+                border: 1px solid var(--theme-border);
+                font-size: 0.95rem;
+                color: var(--theme-primary);
+            }
+            
+            .day-cell {
+                background: var(--theme-card);
+                border-radius: 10px;
+                padding: 12px;
+                min-height: 150px;
+                border: 1px solid var(--theme-border);
+                transition: all 0.3s ease;
+                position: relative;
+                cursor: pointer;
+            }
+            
+            .day-cell:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+                background: var(--theme-bg);
+            }
+            
+            .today-cell {
+                border: 2px solid var(--theme-primary);
+                background: rgba(67, 97, 238, 0.05);
+            }
+            
+            .today-cell .day-number {
+                color: var(--theme-primary);
+                font-weight: 700;
+            }
+            
+            .task-preview-item {
+                transition: all 0.2s ease;
+            }
+            
+            .task-preview-item:hover {
+                background: var(--theme-border);
+                transform: translateX(-3px);
+            }
+        </style>
+    `;
+    
     container.innerHTML = html;
     
-    // إضافة Tooltips للمهام
+    // إضافة Tooltips
     setTimeout(() => {
-        setupMonthlyCalendarTooltips();
+        setupWeeklyTooltips();
     }, 100);
+}
+
+// دالة جديدة للـ Tooltips
+function setupWeeklyTooltips() {
+    document.querySelectorAll('.task-preview-item').forEach(item => {
+        item.addEventListener('mouseenter', function(e) {
+            const taskId = this.dataset.id;
+            const task = AppState.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            const category = getCategoryById(task.categoryId);
+            
+            const tooltipHTML = `
+                <div class="weekly-task-tooltip" style="
+                    position: fixed;
+                    background: var(--theme-card);
+                    border: 2px solid ${category.color};
+                    border-radius: 8px;
+                    padding: 12px;
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+                    z-index: 10000;
+                    max-width: 280px;
+                    color: var(--theme-text);
+                    font-family: inherit;
+                ">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: ${category.color};"></div>
+                        <strong style="color: ${category.color}; font-size: 1rem;">${task.title}</strong>
+                    </div>
+                    
+                    <div style="color: var(--gray-color); font-size: 0.9rem;">
+                        <div><i class="fas fa-tag"></i> ${category.name}</div>
+                        <div><i class="fas fa-calendar"></i> ${formatDate(task.date)}</div>
+                        ${task.time ? `<div><i class="fas fa-clock"></i> ${task.time}</div>` : ''}
+                        <div><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</div>
+                        ${task.completed ? '<div><i class="fas fa-check-circle" style="color: var(--success-color);"></i> مكتملة</div>' : ''}
+                    </div>
+                </div>
+            `;
+            
+            const existingTooltip = document.querySelector('.weekly-task-tooltip');
+            if (existingTooltip) existingTooltip.remove();
+            
+            document.body.insertAdjacentHTML('beforeend', tooltipHTML);
+            
+            const tooltip = document.querySelector('.weekly-task-tooltip');
+            const x = e.clientX + 15;
+            const y = e.clientY + 15;
+            
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            const tooltip = document.querySelector('.weekly-task-tooltip');
+            if (tooltip) tooltip.remove();
+        });
+    });
 }
 
 function renderMonthlyCalendar(container) {
