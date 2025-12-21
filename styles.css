@@ -1704,27 +1704,6 @@ input:disabled {
     text-decoration: none;
 }
 
-/* ========== تحسين الجدول الأسبوعي (القديم - تعليق أو إزالة) ========== */
-/*
-.weekly-calendar {
-    gap: 15px;
-}
-
-.day-column {
-    transition: all 0.3s ease;
-}
-
-.day-column:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.day-column.today {
-    border: 2px solid var(--theme-primary);
-    box-shadow: 0 0 15px rgba(67, 97, 238, 0.2);
-}
-*/
-
 /* ========== تحسين Tooltip ========== */
 .calendar-tooltip {
     animation: fadeIn 0.2s ease;
@@ -2016,4 +1995,15 @@ input:disabled {
     color: var(--theme-text);
     font-family: inherit;
     animation: fadeIn 0.2s ease;
+}
+.weekly-calendar-grid .month-task-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    margin-right: 5px !important;
+    display: inline-block !important;
+    flex-shrink: unset !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    box-sizing: border-box !important;
 }
