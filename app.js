@@ -2009,12 +2009,6 @@ function renderWeeklyCalendar(container) {
         
         html += `
                 </div>
-                ${dayTasks.length > 0 ? 
-                      `<div class="day-task-count">
-                        <i class="fas fa-tasks"></i> ${dayTasks.length}
-                       </div>` 
-                    : ''
-                }
             </div>
         `;
     }
