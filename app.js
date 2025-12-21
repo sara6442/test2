@@ -1587,15 +1587,14 @@ function renderWeeklyCalendar(container) {
             </button>
         </div>
         
-        <div class="weekly-calendar-grid" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px;">
+        <div class="weekly-calendar-grid">
     `;
     
     // رؤوس الأيام (مختصرة)
     const dayHeaders = ['أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة', 'سبت'];
     dayHeaders.forEach(day => {
         html += `
-            <div class="day-header-cell" 
-                 style="text-align: center; font-weight: bold; color: var(--theme-primary); padding: 10px 4px; background: var(--theme-card); border-radius: 6px; font-size: 0.9rem; border: 1px solid var(--theme-border);">
+            <div class="day-header-cell">
                 ${day}
             </div>
         `;
@@ -1610,61 +1609,53 @@ function renderWeeklyCalendar(container) {
         
         html += `
             <div class="day-cell ${isToday ? 'today-cell' : ''}" 
-                 style="background: var(--theme-card); border-radius: 8px; padding: 10px; min-height: 140px; max-height: 160px; border: 1px solid var(--theme-border); overflow-y: auto; position: relative; cursor: pointer;"
                  onclick="showAllTasksForDay('${dateStr}')"
                  data-date="${dateStr}">
-                <div class="day-number" style="font-weight: 600; margin-bottom: 10px; color: ${isToday ? 'var(--theme-primary)' : 'var(--theme-text)'}; font-size: 1.1rem; text-align: center; padding-bottom: 5px; border-bottom: 1px solid var(--theme-border);">
+                <div class="day-number">
                     ${day.getDate()}
-                    ${isToday ? '<span style="font-size: 0.7rem; color: var(--theme-primary);">(اليوم)</span>' : ''}
+                    ${isToday ? '<span>(اليوم)</span>' : ''}
                 </div>
-                <div class="tasks-preview" style="display: flex; flex-direction: column; gap: 6px;">
+                <div class="tasks-preview">
         `;
         
         if (dayTasks.length === 0) {
             html += `
-                <div style="text-align: center; padding: 15px; color: var(--gray-color); font-size: 0.8rem;">
-                    <i class="fas fa-calendar-check" style="opacity: 0.3; font-size: 1.2rem; margin-bottom: 5px;"></i>
+                <div class="empty-calendar-day">
+                    <i class="fas fa-calendar-check"></i>
                     <div>لا مهام</div>
                 </div>
             `;
         } else {
-            // عرض أول 4 مهام فقط
+            // عرض أول 3 مهام فقط
             const tasksToShow = dayTasks.slice(0, 3);
             
             tasksToShow.forEach((task, index) => {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
-                const priorityIcon = task.priority === 'high' ? 'fas fa-flag' : 
-                                    task.priority === 'medium' ? 'fas fa-flag' : 'fas fa-flag';
-
+                
                 html += `
                     <div class="task-preview-item" 
                          data-id="${task.id}"
-                          data-task-index="${index}"
-                         data-date="${dateStr}"
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
-                         title="انقر للتعديل">
-                         <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
-                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
-                            </span>
+                         onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
+                         style="border-right-color: ${category.color};"
+                         title="${task.title}">
+                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                            <span class="month-task-dot" style="background: ${category.color};"></span>
+                            <span>${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}</span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
+                        <div class="task-meta" style="display: flex; justify-content: space-between;">
                             <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
                             ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
                         </div>
                     </div>
                 `;
-
             });
             
             if (dayTasks.length > 3) {
                 html += `
-                       <div style="font-size: 0.7rem; color: var(--theme-primary); cursor: pointer; text-align: center; margin-top: 4px; padding: 2px;"
-                         onclick="showAllTasksForDay('${dateStr}')">
-                            +${dayTasks.length - 3} مهام أخرى
+                    <div style="font-size: 0.7rem; color: var(--theme-primary); cursor: pointer; text-align: center; margin-top: 4px; padding: 2px;"
+                         onclick="event.stopPropagation(); showAllTasksForDay('${dateStr}')">
+                        +${dayTasks.length - 3} مهام أخرى
                     </div>
                 `;
             }
@@ -1673,9 +1664,9 @@ function renderWeeklyCalendar(container) {
         html += `
                 </div>
                 ${dayTasks.length > 0 ? 
-                      `<div style="position: absolute; bottom: 4px; left: 4px; font-size: 0.65rem; color: var(--gray-color);">
+                      `<div class="day-task-count">
                         <i class="fas fa-tasks"></i> ${dayTasks.length}
-                   </div>` 
+                       </div>` 
                     : ''
                 }
             </div>
@@ -1687,10 +1678,10 @@ function renderWeeklyCalendar(container) {
     
     // إضافة Tooltips
     setTimeout(() => {
+        setupCalendarTooltips();
         setupWeeklyTooltips();
     }, 100);
 }
-
 // دالة جديدة للـ Tooltips
 function setupWeeklyTooltips() {
     document.querySelectorAll('.task-preview-item').forEach(item => {
