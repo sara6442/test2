@@ -279,6 +279,7 @@ function initializeData() {
     }
 }
 
+
 function saveTasks() {
     try {
         localStorage.setItem('mytasks_tasks', JSON.stringify(AppState.tasks));
@@ -303,6 +304,16 @@ function saveCategories() {
     }
 }
 
+// هذه هي الدالة المفقودة التي تسبب الخطأ!
+function saveNotes() {
+    try {
+        localStorage.setItem('mytasks_notes', JSON.stringify(AppState.notes));
+    } catch (e) {
+        console.error("خطأ في حفظ الملاحظات:", e);
+    }
+}
+
+// ========== إدارة حالة Undo/Redo ==========
 // ========== إدارة حالة Undo/Redo ==========
 const UndoRedoManager = {
     undoStack: [],
@@ -476,6 +487,7 @@ function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
+// ========== وظائف المساعدة ==========
 // ========== وظائف المساعدة ==========
 function getCategoryById(categoryId) {
     return AppState.categories.find(cat => cat.id === categoryId) || 
@@ -821,8 +833,9 @@ function loadCustomTheme() {
 
 
 // ========== إدارة المهام ==========
+// ========== إدارة المهام ==========
 function addTask(taskData) {
-        console.log("إضافة مهمة:", taskData);
+    console.log("إضافة مهمة:", taskData);
 
     UndoRedoManager.saveState('إضافة مهمة جديدة');
         
@@ -852,7 +865,6 @@ function addTask(taskData) {
     
     closeModal('add-task-modal');
     
-    // ✅ إصلاح هنا: إعادة تعيين النموذج بشكل صحيح
     setTimeout(() => {
         document.getElementById('task-form').reset();
         
@@ -877,9 +889,8 @@ function addTask(taskData) {
     }, 100);
 }
 
-
 function updateTask(taskId, taskData) {
-        UndoRedoManager.saveState('تعديل مهمة');
+    UndoRedoManager.saveState('تعديل مهمة');
     const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
     if (taskIndex === -1) return;
     
@@ -917,7 +928,7 @@ function deleteTask(taskId) {
         const deletedIndex = AppState.deletedTasks.findIndex(task => task.id === taskId);
         if (deletedIndex !== -1) {
             if (confirm('هذه المهمة محذوفة بالفعل. هل تريد حذفها نهائياً؟')) {
-                                UndoRedoManager.saveState('حذف مهمة نهائياً');
+                UndoRedoManager.saveState('حذف مهمة نهائياً');
                 AppState.deletedTasks.splice(deletedIndex, 1);
                 saveDeletedTasks();
                 renderTasks();
@@ -930,7 +941,8 @@ function deleteTask(taskId) {
     
     const task = AppState.tasks[taskIndex];
     if (!confirm(`هل أنت متأكد من حذف المهمة: "${task.title}"؟`)) return;
-        UndoRedoManager.saveState('حذف مهمة');
+    
+    UndoRedoManager.saveState('حذف مهمة');
     AppState.deletedTasks.push({
         ...task,
         deletedAt: new Date().toISOString()
@@ -1478,6 +1490,7 @@ function setupTaskButtonsEvents() {
 
 
 // ========== إدارة الفئات ==========
+// ========== إدارة الفئات ==========
 function renderCategories() {
     console.log("🎯 عرض الفئات...");
     const container = document.getElementById('categories-list');
@@ -1500,17 +1513,14 @@ function renderCategories() {
     
     let html = '';
     
-    // تقسيم الفئات إلى صفوف كل صف يحتوي على فئتين
     for (let i = 0; i < AppState.categories.length; i += 2) {
         html += `<div class="category-row">`;
         
-        // الفئة الأولى في الصف
         if (AppState.categories[i]) {
             const category = AppState.categories[i];
             html += generateCategoryCard(category);
         }
         
-        // الفئة الثانية في الصف (إذا موجودة)
         if (AppState.categories[i + 1]) {
             const category = AppState.categories[i + 1];
             html += generateCategoryCard(category);
@@ -1605,6 +1615,7 @@ function generateCategoryCard(category) {
     
     return cardHTML;
 }
+
 // ========== عرض الجدول الزمني ==========
 function renderCalendar() {
     const container = document.getElementById('calendar-content'); // هذا السطر ناقص!
@@ -2807,6 +2818,7 @@ function showCategoriesStatusModal() {
 }
 
 // ========== إدارة الملاحظات ==========
+// ========== إدارة الملاحظات ==========
 function renderNotes() {
     const container = document.getElementById('notes-list');
     
@@ -2826,7 +2838,6 @@ function renderNotes() {
     AppState.notes.forEach(note => {
         let noteContent = note.content || '';
         
-        // إصلاح ألوان الملاحظات للثيمات
         if (AppState.currentTheme === 'black') {
             noteContent = noteContent.replace(/class="note-checkbox-text"/g, 
                 'class="note-checkbox-text" style="color: #f0f0f0 !important;"');
@@ -2870,24 +2881,6 @@ function renderNotes() {
     
     container.innerHTML = html;
 }
-
-    document.querySelectorAll('.note-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const item = this.closest('.note-checkbox-item');
-            if (item) {
-                item.classList.toggle('completed');
-            }
-        });
-    });
-    
-    document.querySelectorAll('.delete-note-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const noteId = e.target.closest('button').dataset.id;
-            deleteNote(noteId);
-        });
-    });
 
 function addNote() {
     UndoRedoManager.saveState('إضافة ملاحظة جديدة');
@@ -2975,7 +2968,34 @@ function openNoteEditor(noteId) {
     
     setTimeout(() => {
         editor.focus();
+        setupEnhancedNotesEditor();
+        setupNotesEditorEvents();
+        reinitializeImageDragging();
     }, 100);
+}
+
+function saveNote() {
+    if (!AppState.currentNoteId) return;
+    
+    const title = document.getElementById('notes-editor-title').value;
+    const content = document.getElementById('notes-editor-content').innerHTML;
+    const fontFamily = document.getElementById('notes-font-family').value;
+    const fontSize = document.getElementById('notes-font-size').value;
+    const fontWeight = document.getElementById('notes-font-weight').value;
+    const fontStyle = document.getElementById('notes-font-style').value;
+    const color = document.getElementById('notes-font-color').value;
+    
+    updateNote(AppState.currentNoteId, {
+        title: title,
+        content: content,
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        color: color
+    });
+    
+    document.getElementById('notes-editor').classList.remove('active');
 }
 
 // إضافة أزرار جديدة في محرر الملاحظات
@@ -3408,30 +3428,6 @@ function setupNotesEditorEvents() {
 // دالة لحفظ الملاحظة وإغلاق المحرر
 function saveNoteAndClose() {
     saveNote();
-    document.getElementById('notes-editor').classList.remove('active');
-}
-
-function saveNote() {
-    if (!AppState.currentNoteId) return;
-    
-    const title = document.getElementById('notes-editor-title').value;
-    const content = document.getElementById('notes-editor-content').innerHTML;
-    const fontFamily = document.getElementById('notes-font-family').value;
-    const fontSize = document.getElementById('notes-font-size').value;
-    const fontWeight = document.getElementById('notes-font-weight').value;
-    const fontStyle = document.getElementById('notes-font-style').value;
-    const color = document.getElementById('notes-font-color').value;
-    
-    updateNote(AppState.currentNoteId, {
-        title: title,
-        content: content,
-        fontFamily: fontFamily,
-        fontSize: fontSize,
-        fontWeight: fontWeight,
-        fontStyle: fontStyle,
-        color: color
-    });
-    
     document.getElementById('notes-editor').classList.remove('active');
 }
 
@@ -4614,6 +4610,7 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 // ========== التهيئة عند تحميل الصفحة ==========
+// ========== التهيئة عند تحميل الصفحة ==========
 window.addEventListener('DOMContentLoaded', function() {
     console.log("📄 DOMContentLoaded - بدء التهيئة");
     
@@ -4639,36 +4636,8 @@ window.addEventListener('DOMContentLoaded', function() {
         if (warning) warning.remove();
     }, 5000);
 });
-function testAddTaskForm() {
-    console.log("🔍 اختبار نموذج إضافة المهمة:");
-    
-    // التحقق من وجود جميع العناصر
-    const elements = [
-        'task-title', 'task-category', 'task-date', 
-        'task-time', 'task-duration', 'task-priority', 
-        'task-description', 'save-task'
-    ];
-    
-    elements.forEach(id => {
-        const el = document.getElementById(id);
-        console.log(`${id}:`, el ? 'موجود ✓' : 'مفقود ✗');
-    });
-    
-    // فتح النافذة وملئها ببيانات تجريبية
-    openAddTaskModal();
-    
-    setTimeout(() => {
-        document.getElementById('task-title').value = 'مهمة اختبار';
-        document.getElementById('task-description').value = 'هذه مهمة اختبار';
-        console.log("✅ تم تعيين بيانات الاختبار");
-    }, 200);
-}
 
-// يمكنك استدعاء هذه الدالة من وحدة التحكم للمتصفح
-window.addEventListener('load', function() {
-    console.log("📄 load - الصفحة محملة بالكامل");
-});
-// تأكد من وجود هذه الدوال العالمية
+// ========== تعريف الدوال في النطاق العام ==========
 window.openEditTaskModal = openEditTaskModal;
 window.openAddTaskModal = openAddTaskModal;
 window.openEditCategoryModal = openEditCategoryModal;
@@ -4677,7 +4646,6 @@ window.openNoteEditor = openNoteEditor;
 window.toggleTaskCompletion = toggleTaskCompletion;
 window.closeModal = closeModal;
 window.openEditCategoryMessages = openEditCategoryMessages;
-window.openEditCategoryModal = openEditCategoryModal;
 window.saveCategoryMessages = saveCategoryMessages;
 window.saveCategoryEdit = saveCategoryEdit;
 window.updateCustomPreview = updateCustomPreview;
@@ -4685,9 +4653,10 @@ window.applyCustomTheme = applyCustomTheme;
 window.showCategoriesStatusModal = showCategoriesStatusModal;
 window.deleteAndReplaceTask = deleteAndReplaceTask;
 window.addTaskAnyway = addTaskAnyway;
-
-// ✅ أضف هذه الدوال الجديدة
 window.changeCalendarDate = changeCalendarDate;
 window.navigateCalendarWeeks = navigateCalendarWeeks;
 window.changeCalendarMonth = changeCalendarMonth;
 window.changeCalendarWeek = changeCalendarWeek;
+window.saveNote = saveNote;
+window.addSingleCheckbox = addSingleCheckbox;
+window.showAllTasksForDay = showAllTasksForDay;
