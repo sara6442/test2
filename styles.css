@@ -1996,14 +1996,62 @@ input:disabled {
     font-family: inherit;
     animation: fadeIn 0.2s ease;
 }
+
+/* ========== إصلاح حجم نقاط المهام في الجدول الأسبوعي ========== */
+.weekly-calendar-grid .task-preview-item .month-task-dot {
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+    flex-shrink: 0 !important;
+    min-width: 8px !important;
+    min-height: 8px !important;
+    margin: 0 4px 0 0 !important; /* تعديل الهوامش للعرض العربي */
+}
+
+/* ========== إصلاح تنسيق الجدول الأسبوعي ========== */
+.weekly-calendar-grid .task-preview-item .task-content {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    margin-bottom: 2px !important;
+}
+
 .weekly-calendar-grid .month-task-dot {
     width: 8px !important;
     height: 8px !important;
     border-radius: 50% !important;
-    margin-right: 5px !important;
     display: inline-block !important;
-    flex-shrink: unset !important;
-    min-width: 8px !important;
-    min-height: 8px !important;
-    box-sizing: border-box !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+}
+
+.weekly-calendar-grid .task-preview-item span {
+    font-weight: 500 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+    flex: 1 !important;
+    font-size: 0.75rem !important;
+}
+
+.weekly-calendar-grid .task-meta {
+    display: flex !important;
+    justify-content: space-between !important;
+    font-size: 0.65rem !important;
+    color: var(--gray-color) !important;
+    margin-top: 2px !important;
+}
+
+/* إصلاح حجم الخلايا */
+.day-cell {
+    min-height: 120px !important;
+    max-height: 150px !important;
+    padding: 8px !important;
+}
+
+.day-number {
+    font-size: 1rem !important;
+    margin-bottom: 6px !important;
+    padding-bottom: 4px !important;
 }
