@@ -1605,173 +1605,6 @@ input:disabled {
 .day-column {
     min-height: 500px; /* زيادة ارتفاع الأعمدة الأسبوعية */
 }
-
-/* ========== تحسين علامة "متأخرة" ========== */
-.overdue-badge-container {
-    z-index: 5;
-}
-
-.overdue-badge {
-    background: linear-gradient(135deg, #f72585, #b5179e) !important;
-    color: white !important;
-    padding: 3px 10px !important;
-    border-radius: 15px !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-    box-shadow: 0 2px 5px rgba(247, 37, 133, 0.3);
-    animation: pulseOverdue 2s infinite;
-}
-
-@keyframes pulseOverdue {
-    0% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.4); }
-    70% { box-shadow: 0 0 0 6px rgba(247, 37, 133, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0); }
-}
-
-/* ========== تحسين أزرار المهام ========== */
-.task-actions {
-    opacity: 0.7 !important;
-    transition: all 0.3s ease !important;
-    position: absolute !important;
-    top: 10px !important;
-    left: 10px !important;
-    display: flex !important;
-    gap: 5px !important;
-    z-index: 10 !important;
-}
-
-.task-card:hover .task-actions {
-    opacity: 1 !important;
-}
-
-.task-actions button {
-    width: 32px !important;
-    height: 32px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 0 !important;
-    border-radius: 8px !important;
-}
-
-/* ========== تحسين الفلاتر وزر الحالة ========== */
-.task-filters {
-    display: flex !important;
-    gap: 10px !important;
-    flex-wrap: wrap !important;
-    margin-top: 40px !important;
-    padding: 20px !important;
-    background: var(--theme-card) !important;
-    border-radius: var(--border-radius) !important;
-    border: 1px solid var(--theme-border) !important;
-}
-
-.filter-btn {
-    padding: 8px 20px !important;
-    border: 2px solid var(--theme-border) !important;
-    background: var(--theme-card) !important;
-    border-radius: 20px !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    color: var(--theme-text) !important;
-    font-weight: 500 !important;
-    font-size: 0.9rem !important;
-}
-
-.filter-btn:hover {
-    border-color: var(--theme-primary) !important;
-    color: var(--theme-primary) !important;
-    transform: translateY(-2px) !important;
-}
-
-.filter-btn.active {
-    background: var(--theme-primary) !important;
-    color: white !important;
-    border-color: var(--theme-primary) !important;
-}
-
-/* ========== تحسين نافذة الإعدادات ========== */
-.settings-popup {
-    position: absolute !important;
-    bottom: 70px !important;
-    right: 20px !important;
-    background: var(--theme-card) !important;
-    border-radius: 12px !important;
-    padding: 20px !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
-    border: 1px solid var(--theme-border) !important;
-    display: none !important;
-    z-index: 1000 !important;
-    min-width: 220px !important;
-}
-
-.settings-popup.active {
-    display: block !important;
-    animation: slideUp 0.3s ease !important;
-}
-
-@keyframes slideUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ========== تحسين أزرار الثيم ========== */
-.theme-option {
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    border: 2px solid transparent !important;
-    border-radius: 10px !important;
-    padding: 10px !important;
-    text-align: center !important;
-}
-
-.theme-option:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
-}
-
-.theme-option.active {
-    border-color: var(--theme-primary) !important;
-    background: rgba(67, 97, 238, 0.1) !important;
-}
-
-/* ========== تحسين الجدول الزمني ========== */
-.calendar-task-card {
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    border-left: 4px solid !important;
-    border-right: 4px solid !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-.calendar-task-card:hover {
-    transform: translateX(-5px) !important;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1) !important;
-}
-
-.calendar-task-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(255, 255, 255, 0.1);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.calendar-task-card:hover::after {
-    opacity: 1;
-}
-
 /* ========== تحسين علامة "متأخرة" في الزاوية اليسرى ========== */
 .overdue-badge-container {
     z-index: 5;
@@ -1779,17 +1612,17 @@ input:disabled {
 }
 
 .overdue-badge {
-    background: linear-gradient(135deg, #f72585, #b5179e) !important;
-    color: white !important;
-    padding: 4px 10px !important;
-    border-radius: 15px !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
+    background: linear-gradient(135deg, #f72585, #b5179e);
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.75rem;
+    font-weight: 600;
     box-shadow: 0 2px 8px rgba(247, 37, 133, 0.4);
-    display: inline-flex !important;
-    align-items: center !important;
-    gap: 5px !important;
-    animation: pulse 2s infinite !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    animation: pulse 2s infinite;
 }
 
 /* ========== تحسين الجدول اليومي ========== */
@@ -1871,7 +1704,8 @@ input:disabled {
     text-decoration: none;
 }
 
-/* ========== تحسين الجدول الأسبوعي ========== */
+/* ========== تحسين الجدول الأسبوعي (القديم - تعليق أو إزالة) ========== */
+/*
 .weekly-calendar {
     gap: 15px;
 }
@@ -1889,12 +1723,13 @@ input:disabled {
     border: 2px solid var(--theme-primary);
     box-shadow: 0 0 15px rgba(67, 97, 238, 0.2);
 }
+*/
 
 /* ========== تحسين Tooltip ========== */
 .calendar-tooltip {
-    animation: fadeIn 0.2s ease !important;
-    pointer-events: none !important;
-    z-index: 10000 !important;
+    animation: fadeIn 0.2s ease;
+    pointer-events: none;
+    z-index: 10000;
 }
 
 @keyframes fadeIn {
@@ -1902,90 +1737,71 @@ input:disabled {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* منع اختفاء الـ Tooltip عند المرور عليه */
-.calendar-tooltip:hover {
-    display: block !important;
-}
 /* ========== تصغير حجم المهام في الجدول ========== */
 .calendar-task-card {
-    min-height: 45px !important;
-    max-height: 55px !important;
-    padding: 6px 8px !important;
-    margin-bottom: 4px !important;
-    font-size: 0.8rem !important;
+    min-height: 45px;
+    max-height: 55px;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
 }
 
 .calendar-task-title {
-    font-size: 0.8rem !important;
-    margin-bottom: 2px !important;
+    font-size: 0.8rem;
+    margin-bottom: 2px;
 }
 
 .calendar-task-meta {
-    font-size: 0.7rem !important;
+    font-size: 0.7rem;
 }
 
 /* تحسين التلميحات */
 .task-tooltip,
 .calendar-tooltip {
-    font-size: 0.85rem !important;
-    max-width: 250px !important;
+    font-size: 0.85rem;
+    max-width: 250px;
 }
 
 /* تحسين المهام في الفئات */
 .category-tasks-container {
-    max-height: 200px !important;
+    max-height: 200px;
 }
 
 .category-task-item {
-    padding: 8px 10px !important;
-    margin-bottom: 6px !important;
-    font-size: 0.9rem !important;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    font-size: 0.9rem;
 }
 
 /* تباعد بين العنوان و checkbox */
 .task-card {
-    padding: 15px 20px !important;
-    gap: 15px !important;
+    padding: 15px 20px;
+    gap: 15px;
 }
 
 .task-title {
-    padding-right: 10px !important;
-    margin-bottom: 8px !important;
+    padding-right: 10px;
+    margin-bottom: 8px;
 }
 
 /* ========== إصلاح محرر الملاحظات ========== */
 .notes-editor-container.active {
-    display: flex !important;
-    z-index: 10000 !important;
+    display: flex;
+    z-index: 10000;
 }
 
 .notes-content img {
-    max-width: 100% !important;
-    height: auto !important;
-    border-radius: 8px !important;
-    margin: 10px 0 !important;
-    border: 1px solid var(--theme-border) !important;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 10px 0;
+    border: 1px solid var(--theme-border);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .image-upload-container {
-    display: flex !important;
-    align-items: center !important;
-}
-
-/* ========== تحسين الجدول الأسبوعي المصغر ========== */
-.weekly-calendar .day-column {
-    transition: all 0.3s ease;
-}
-
-.weekly-calendar .day-column:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-
-.weekly-calendar .day-column.today {
-    border: 2px solid var(--theme-primary);
-    box-shadow: 0 0 10px rgba(67, 97, 238, 0.2);
+    display: flex;
+    align-items: center;
 }
 
 /* ========== تحسين الجدول الشهري ========== */
@@ -2000,8 +1816,8 @@ input:disabled {
 }
 
 .month-day.today {
-    border: 2px solid var(--theme-primary) !important;
-    background: rgba(67, 97, 238, 0.05) !important;
+    border: 2px solid var(--theme-primary);
+    background: rgba(67, 97, 238, 0.05);
 }
 
 .month-task-item {
@@ -2009,110 +1825,206 @@ input:disabled {
 }
 
 .month-task-item:hover {
-    background: var(--theme-border) !important;
+    background: var(--theme-border);
     transform: translateX(-2px);
 }
 
 /* ========== تحسين الـ Tooltips ========== */
 .monthly-task-tooltip {
-    animation: fadeIn 0.2s ease !important;
-    pointer-events: none !important;
-    z-index: 10000 !important;
+    animation: fadeIn 0.2s ease;
+    pointer-events: none;
+    z-index: 10000;
 }
 
 .month-day-header {
-    background: linear-gradient(135deg, var(--theme-primary), var(--theme-hover)) !important;
-    color: white !important;
-    font-weight: 600 !important;
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-hover));
+    color: white;
+    font-weight: 600;
 }
 
 /* ========== إضافة تأثير النقر ========== */
 .calendar-task-card:active,
 .month-task-item:active {
-    transform: scale(0.98) !important;
+    transform: scale(0.98);
 }
 
-/* ========== الجدول الأسبوعي الجديد ========== */
+/* ========== الجدول الأسبوعي الجديد (مشابه للشهري) ========== */
 .weekly-calendar-grid {
-    display: grid !important;
-    grid-template-columns: repeat(7, 1fr) !important;
-    gap: 10px !important;
-    margin-top: 15px !important;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+    margin-top: 20px;
 }
 
 .day-header-cell {
-    text-align: center !important;
-    font-weight: bold !important;
-    padding: 12px 5px !important;
-    background: var(--theme-card) !important;
-    border-radius: 8px !important;
-    border: 1px solid var(--theme-border) !important;
-    font-size: 0.95rem !important;
-    color: var(--theme-primary) !important;
+    text-align: center;
+    font-weight: bold;
+    padding: 10px 4px;
+    background: var(--theme-card);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    border: 1px solid var(--theme-border);
+    color: var(--theme-primary);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .day-cell {
-    background: var(--theme-card) !important;
-    border-radius: 10px !important;
-    padding: 12px !important;
-    min-height: 150px !important;
-    max-height: 180px !important;
-    border: 1px solid var(--theme-border) !important;
-    transition: all 0.3s ease !important;
-    position: relative !important;
-    cursor: pointer !important;
-    overflow-y: auto !important;
+    background: var(--theme-card);
+    border-radius: 8px;
+    padding: 10px;
+    min-height: 140px;
+    max-height: 160px;
+    border: 1px solid var(--theme-border);
+    overflow-y: auto;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .day-cell:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
-    background: var(--theme-bg) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background: var(--theme-bg);
 }
 
-.today-cell {
-    border: 2px solid var(--theme-primary) !important;
-    background: rgba(67, 97, 238, 0.05) !important;
-}
-
-.today-cell .day-number {
-    color: var(--theme-primary) !important;
-    font-weight: 700 !important;
+.day-cell.today-cell {
+    border: 2px solid var(--theme-primary);
+    background: rgba(67, 97, 238, 0.05);
+    box-shadow: 0 0 10px rgba(67, 97, 238, 0.1);
 }
 
 .day-number {
-    font-weight: 600 !important;
-    margin-bottom: 10px !important;
-    color: var(--theme-text) !important;
-    font-size: 1.1rem !important;
-    text-align: center !important;
-    padding-bottom: 5px !important;
-    border-bottom: 1px solid var(--theme-border) !important;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--theme-text);
+    font-size: 1rem;
+    text-align: center;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--theme-border);
+}
+
+.day-cell.today-cell .day-number {
+    color: var(--theme-primary);
+}
+
+.day-cell.today-cell .day-number span {
+    font-size: 0.7rem;
+    color: var(--theme-primary);
 }
 
 .tasks-preview {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 6px !important;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .task-preview-item {
-    padding: 5px 8px !important;
-    border-radius: 5px !important;
-    background: var(--theme-bg) !important;
-    border-right: 3px solid !important;
-    font-size: 0.75rem !important;
-    cursor: pointer !important;
-    margin-bottom: 3px !important;
-    transition: all 0.2s ease !important;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 4px;
+    background: var(--theme-bg);
+    border-right: 2px solid;
+    font-size: 0.7rem;
+    transition: all 0.2s ease;
 }
 
 .task-preview-item:hover {
-    background: var(--theme-border) !important;
-    transform: translateX(-3px) !important;
+    background: var(--theme-border);
+    transform: translateX(-2px);
+}
+
+.task-preview-item .task-content {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 2px;
+}
+
+.task-preview-item .month-task-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: inherit;
+    flex-shrink: 0;
+}
+
+.task-preview-item span {
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+}
+
+.task-preview-item .task-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--gray-color);
 }
 
 .task-preview-item .fa-check {
-    color: var(--success-color) !important;
-    font-size: 0.6rem !important;
+    color: var(--success-color);
+    font-size: 0.6rem;
+}
+
+.empty-calendar-day {
+    text-align: center;
+    padding: 20px 10px;
+    color: var(--gray-color);
+    font-size: 0.8rem;
+}
+
+.empty-calendar-day .fas {
+    opacity: 0.3;
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+}
+
+.day-task-count {
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    font-size: 0.65rem;
+    color: var(--gray-color);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+/* زر العودة للأسبوع الحالي */
+.btn-calendar-today {
+    background: var(--theme-primary);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+}
+
+.btn-calendar-today:hover {
+    background: var(--theme-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ========== Tooltip للجدول الأسبوعي ========== */
+.weekly-task-tooltip {
+    position: fixed;
+    background: var(--theme-card);
+    border: 2px solid;
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    z-index: 10000;
+    max-width: 280px;
+    color: var(--theme-text);
+    font-family: inherit;
+    animation: fadeIn 0.2s ease;
 }
