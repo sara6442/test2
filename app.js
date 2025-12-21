@@ -3067,6 +3067,24 @@ function openEditTaskModal(taskId) {
 function openAddTaskModal(preselectedCategory = null) {
     console.log("📝 فتح نافذة إضافة مهمة جديدة");
     
+    // ✅ التأكد من وجود النافذة أولاً
+    let modal = document.getElementById('add-task-modal');
+    
+    if (!modal) {
+        // إنشاء النافذة إذا لم تكن موجودة
+        const modalHTML = `
+            <div class="modal active" id="add-task-modal">
+                <div class="modal-content" style="max-width: 600px;">
+                    <!-- محتوى النافذة هنا -->
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        modal = document.getElementById('add-task-modal');
+    } else {
+        modal.classList.add('active');
+    }
+    
     const categorySelect = document.getElementById('task-category');
     if (!categorySelect) {
         console.error("❌ عنصر اختيار الفئة غير موجود!");
@@ -3110,11 +3128,6 @@ function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('active');
-        setTimeout(() => {
-            if (modal.parentNode) {
-                modal.parentNode.removeChild(modal);
-            }
-        }, 300);
     }
 }
 
@@ -3142,6 +3155,108 @@ function switchView(viewName) {
     document.getElementById(`${viewName}-view`).classList.add('active');
     
     refreshCurrentView();
+}
+
+function setupEventDelegation() {
+    console.log("🔗 إعداد Event Delegation...");
+    
+    // 1. النقر على أي زر في الجسم
+    document.body.addEventListener('click', function(e) {
+        const target = e.target;
+        
+        // أزرار الفلاتر
+        if (target.classList.contains('filter-btn')) {
+            e.preventDefault();
+            const filter = target.dataset.filter;
+            console.log("تطبيق فلتر:", filter);
+            setFilter(filter);
+        }
+        
+        // أزرار التبويبات في الجدول
+        if (target.classList.contains('calendar-tab')) {
+            e.preventDefault();
+            const range = target.dataset.range;
+            console.log("تغيير عرض الجدول:", range);
+            AppState.currentCalendarView = range;
+            renderCalendar();
+        }
+        
+        // أزرار التنقل بين الأقسام
+        if (target.closest('.nav-item')) {
+            e.preventDefault();
+            const navItem = target.closest('.nav-item');
+            const view = navItem.dataset.view;
+            console.log("الانتقال إلى:", view);
+            switchView(view);
+        }
+    });
+    
+    // 2. النقر على النموذجات (Forms)
+    document.body.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (e.target.id === 'task-form') {
+            console.log("حفظ مهمة جديدة");
+            saveNewTask();
+        }
+        
+        if (e.target.id === 'edit-task-form') {
+            console.log("حفظ تعديل المهمة");
+            saveEditedTask();
+        }
+        
+        if (e.target.id === 'category-form') {
+            console.log("حفظ الفئة");
+            saveCategory();
+        }
+    });
+    
+    // 3. أحداث النوافذ المنبثقة
+    document.body.addEventListener('click', function(e) {
+        // إغلاق النافذة عند النقر على X
+        if (e.target.classList.contains('close-btn')) {
+            const modal = e.target.closest('.modal');
+            if (modal) {
+                modal.classList.remove('active');
+            }
+        }
+        
+        // إغلاق النافذة عند النقر خارجها
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.remove('active');
+        }
+        
+        // أزرار النوافذ المنبثقة
+        if (e.target.id === 'save-task' || e.target.closest('#save-task')) {
+            e.preventDefault();
+            saveNewTask();
+        }
+        
+        if (e.target.id === 'save-edit-task' || e.target.closest('#save-edit-task')) {
+            e.preventDefault();
+            saveEditedTask();
+        }
+        
+        if (e.target.id === 'save-category' || e.target.closest('#save-category')) {
+            e.preventDefault();
+            saveCategory();
+        }
+        
+        if (e.target.id === 'add-task-btn' || e.target.closest('#add-task-btn')) {
+            e.preventDefault();
+            openAddTaskModal();
+        }
+        
+        if (e.target.id === 'add-category-btn' || e.target.closest('#add-category-btn')) {
+            e.preventDefault();
+            openAddCategoryModal();
+        }
+        
+        if (e.target.id === 'add-note-btn' || e.target.closest('#add-note-btn')) {
+            e.preventDefault();
+            addNote();
+        }
+    });
 }
 
 function setFilter(filterName) {
@@ -3378,41 +3493,12 @@ function setupCalendarScroll() {
     }
 }
 // نفس التعديل لـ renderWeeklyCalendar و renderMonthlyCalendar// ========== تهيئة الصفحة ==========
+// ========== تهيئة الصفحة ==========
 function initializePage() {
     console.log("🚀 بدء تهيئة الصفحة...");
     
     // اختبار وجود العناصر الأساسية
-    const testElements = [
-        'current-date',
-        'page-title',
-        'tasks-view',
-        'calendar-view',
-        'categories-view',
-        'notes-view',
-        'add-task-btn',
-        'add-category-btn',
-        'add-note-btn'
-    ];
-    
-    testElements.forEach(id => {
-        const el = document.getElementById(id);
-        if (!el) {
-            console.error(`❌ العنصر #${id} غير موجود في DOM`);
-        }
-    });
-    
-    const now = new Date();
-    const arabicDate = now.toLocaleDateString('ar-SA', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-    });
-    
-    const currentDateEl = document.getElementById('current-date');
-    if (currentDateEl) {
-        currentDateEl.textContent = arabicDate;
-    }
+    checkDOMElements();
     
     // تهيئة البيانات
     initializeData();
@@ -3420,22 +3506,17 @@ function initializePage() {
     // تهيئة الثيمات
     initializeThemes();
     
-    // ✅ إعداد جميع الأحداث
-    setupAllEvents();
+    // ✅ إعداد Event Delegation أولاً
+    setupEventDelegation();
     
-    // ✅ إعداد أحداث الإعدادات
-    setupSettingsEvents();
+    // ✅ إعداد الأحداث الأخرى
+    setupAllEvents();
     
     // ✅ عرض المهام
     renderTasks();
     
-    // ✅ إعداد أزرار المهام
-    setupTaskButtonsEvents();
-    
     // ✅ عرض حالة الفئات
     renderCategoriesStatus();
-
-    setupNotesEditorEvents();
     
     console.log("🎉 التطبيق جاهز للاستخدام!");
 }
@@ -3563,6 +3644,7 @@ function initializePage() {
             saveCategory();
         });
     }
+
 // ========== إعداد Tooltips للجدول ==========
 function setupCalendarTooltips() {
     document.querySelectorAll('.calendar-task-card, .month-task-item').forEach(card => {
@@ -3642,203 +3724,22 @@ function setupCalendarTooltips() {
 function setupAllEvents() {
     console.log("🔗 إعداد جميع الأحداث...");
     
-    // 1. التنقل بين الأقسام
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            console.log("النقر على قسم:", this.dataset.view);
-            switchView(this.dataset.view);
-        });
-    });
+    // استخدام Event Delegation بدلاً من ربط أحداث مباشرة
+    setupEventDelegation();
     
-    // 2. مرشحات المهام
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            console.log("تغيير الفلتر إلى:", this.dataset.filter);
-            setFilter(this.dataset.filter);
-        });
-    });
-    
-    // 3. تبويبات الجدول
-    document.querySelectorAll('.calendar-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
-            console.log("تغيير عرض الجدول إلى:", this.dataset.range);
-            AppState.currentCalendarView = this.dataset.range;
-            renderCalendar();
-        });
-    });
-    
-  // 4. الأزرار الرئيسية
-const addTaskBtn = document.getElementById('add-task-btn');
-if (addTaskBtn) {
-    addTaskBtn.addEventListener('click', () => {
-        console.log("فتح نافذة إضافة مهمة");
-        openAddTaskModal();
-    });
-}
-
-// 5. زر إضافة فئة
-const addCategoryBtn = document.getElementById('add-category-btn');
-if (addCategoryBtn) {
-    addCategoryBtn.addEventListener('click', () => {
-        console.log("فتح نافذة إضافة فئة");
-        openAddCategoryModal();
-    });
-}
-
-// 6. زر إضافة ملاحظة
-const addNoteBtn = document.getElementById('add-note-btn');
-if (addNoteBtn) {
-    addNoteBtn.addEventListener('click', () => {
-        console.log("إضافة ملاحظة جديدة");
-        addNote();
-    });
-}
-    
-    // 7. إغلاق نافذة إضافة مهمة
-    const closeTaskModalBtn = document.getElementById('close-task-modal');
-    if (closeTaskModalBtn) {
-        closeTaskModalBtn.addEventListener('click', () => {
-            closeModal('add-task-modal');
-        });
-    } else {
-        console.error("❌ زر إغلاق نافذة المهمة غير موجود!");
-    }
-    
-    // 8. إلغاء إضافة مهمة
-    const cancelTaskBtn = document.getElementById('cancel-task');
-    if (cancelTaskBtn) {
-        cancelTaskBtn.addEventListener('click', () => {
-            closeModal('add-task-modal');
-        });
-    } else {
-        console.error("❌ زر إلغاء إضافة مهمة غير موجود!");
-    }
-    
-    // 9. حفظ المهمة الجديدة
-    const saveTaskBtn = document.getElementById('save-task');
-    if (saveTaskBtn) {
-        saveTaskBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            saveNewTask();
-        });
-    } else {
-        console.error("❌ زر حفظ المهمة غير موجود!");
-    }
-    
-    // 10. إغلاق نافذة تعديل مهمة
-    const closeEditTaskModalBtn = document.getElementById('close-edit-task-modal');
-    if (closeEditTaskModalBtn) {
-        closeEditTaskModalBtn.addEventListener('click', () => {
-            closeModal('edit-task-modal');
-        });
-    } else {
-        console.error("❌ زر إغلاق نافذة تعديل المهمة غير موجود!");
-    }
-    
-    // 11. إلغاء تعديل مهمة
-    const cancelEditTaskBtn = document.getElementById('cancel-edit-task');
-    if (cancelEditTaskBtn) {
-        cancelEditTaskBtn.addEventListener('click', () => {
-            closeModal('edit-task-modal');
-        });
-    } else {
-        console.error("❌ زر إلغاء تعديل مهمة غير موجود!");
-    }
-    
-    // 12. حذف مهمة من نافذة التعديل
-    const deleteEditTaskBtn = document.getElementById('delete-edit-task');
-    if (deleteEditTaskBtn) {
-        deleteEditTaskBtn.addEventListener('click', () => {
-            if (AppState.currentTaskId) {
-                deleteTask(AppState.currentTaskId);
-                closeModal('edit-task-modal');
-            }
-        });
-    } else {
-        console.error("❌ زر حذف المهمة من نافذة التعديل غير موجود!");
-    }
-    
-    // 13. حفظ التعديلات على المهمة
-    const saveEditTaskBtn = document.getElementById('save-edit-task');
-    if (saveEditTaskBtn) {
-        saveEditTaskBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            saveEditedTask();
-        });
-    } else {
-        console.error("❌ زر حفظ تعديل المهمة غير موجود!");
-    }
-    
-    // 14. إغلاق نافذة الفئة
-    const closeCategoryModalBtn = document.getElementById('close-category-modal');
-    if (closeCategoryModalBtn) {
-        closeCategoryModalBtn.addEventListener('click', () => {
-            closeModal('category-modal');
-        });
-    } else {
-        console.error("❌ زر إغلاق نافذة الفئة غير موجود!");
-    }
-    
-    // 15. إلغاء نافذة الفئة
-    const cancelCategoryBtn = document.getElementById('cancel-category');
-    if (cancelCategoryBtn) {
-        cancelCategoryBtn.addEventListener('click', () => {
-            closeModal('category-modal');
-        });
-    } else {
-        console.error("❌ زر إلغاء نافذة الفئة غير موجود!");
-    }
-    
-    // 16. حفظ الفئة
-    const saveCategoryBtn = document.getElementById('save-category');
-    if (saveCategoryBtn) {
-        saveCategoryBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            saveCategory();
-        });
-    } else {
-        console.error("❌ زر حفظ الفئة غير موجود!");
-    }
-    
-    // 17. إغلاق النوافذ المنبثقة بالضغط خارجها
-    window.addEventListener('click', (e) => {
-        if (e.target.classList.contains('modal')) {
-            closeModal(e.target.id);
-        }
-    });
-    
-    // 18. أحداث التنقل في الجدول (إذا كانت موجودة)
-    const navButtons = document.querySelectorAll('[onclick*="changeCalendarDate"], [onclick*="changeCalendarWeek"], [onclick*="changeCalendarMonth"]');
-    if (navButtons.length > 0) {
-        console.log("تم العثور على أزرار التنقل في الجدول");
-    }
-    
-    // 19. أحداث أزرار الإعدادات (إذا لم تكن موجودة في setupSettingsEvents)
-    const themeOptions = document.querySelectorAll('.theme-option');
-    if (themeOptions.length > 0) {
-        themeOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                const theme = this.dataset.theme;
-                changeTheme(theme);
-            });
+    // أحداث خاصة لا تعمل مع Event Delegation
+    const addTaskBtn = document.getElementById('add-task-btn');
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', () => {
+            console.log("فتح نافذة إضافة مهمة");
+            openAddTaskModal();
         });
     }
     
-    // 20. حدث لإغلاق نافذة الإعدادات عند النقر خارجها
-    document.addEventListener('click', function(e) {
-        const popup = document.getElementById('settings-popup');
-        const settingsBtn = document.getElementById('settings-btn');
-        
-        if (popup && popup.classList.contains('active') && 
-            !popup.contains(e.target) && 
-            e.target !== settingsBtn && 
-            !settingsBtn.contains(e.target)) {
-            popup.classList.remove('active');
-        }
-    });
+    // إعداد أحداث الإعدادات
+    setupSettingsEvents();
     
-    // 21. أحداث محرر الملاحظات (إذا لم تكن موجودة في setupNotesEditorEvents)
+    // إعداد أحداث محرر الملاحظات
     setupNotesEditorEvents();
     
     console.log("✅ تم إعداد جميع الأحداث بنجاح");
