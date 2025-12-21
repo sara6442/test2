@@ -519,10 +519,21 @@ input:disabled {
 /* ========== عرض الفئات ========== */
 .categories-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
 .categories-grid { 
-    display: grid; 
-    grid-template-columns: repeat(2, 1fr); 
-    gap: 20px; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 25px; 
     margin-top: 25px; 
+}
+
+.category-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* إضافة فئة جديدة تظهر في الصف التالي */
+.category-row:last-child {
+    margin-bottom: 0;
 }
 
 @media (max-width: 768px) {
