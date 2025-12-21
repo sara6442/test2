@@ -1637,13 +1637,18 @@ function renderWeeklyCalendar(container) {
                 html += `
                     <div class="task-preview-item" 
                          data-id="${task.id}"
-                         onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
-                         title="${task.title}">
+                         data-task-index="${index}"
+                         data-date="${dateStr}"
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
+                         title="انقر للتعديل">
                         <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                            <span class="month-task-dot" style="background: ${category.color};"></span>
-                            <span>${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}</span>
+                            <span class="month-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
+                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
+                            </span>
                         </div>
-                        <div class="task-meta" style="display: flex; justify-content: space-between;">
+                        <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
                             <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
                             ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
                         </div>
