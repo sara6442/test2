@@ -1921,21 +1921,27 @@ input:disabled {
 
 /* إصلاح نهائي للنقاط - استخدام ID مختلف */
 .weekly-calendar-grid .task-preview-item .weekly-task-dot {
-    width: 6px !important;
-    height: 6px !important;
+    width: 4px !important; /* تغيير من 6px إلى 4px */
+    height: 4px !important; /* تغيير من 6px إلى 4px */
     border-radius: 50% !important;
     display: block !important;
     flex-shrink: 0 !important;
-    min-width: 6px !important;
-    min-height: 6px !important;
+    min-width: 4px !important; /* تغيير من 6px إلى 4px */
+    min-height: 4px !important; /* تغيير من 6px إلى 4px */
 }
 
 .monthly-calendar .month-task-item .monthly-task-dot {
-    width: 6px !important;
-    height: 6px !important;
+    width: 4px !important; /* تغيير من 6px إلى 4px */
+    height: 4px !important; /* تغيير من 6px إلى 4px */
     border-radius: 50% !important;
     display: inline-block !important;
     margin-right: 4px !important;
+}
+
+/* إضافة خاصية عريضة للنقاط */
+.weekly-calendar-grid .task-preview-item .weekly-task-dot,
+.monthly-calendar .month-task-item .monthly-task-dot {
+    box-shadow: 0 0 0 1px var(--theme-bg); /* إضافة ظل لجعلها تبدو أكثر وضوحاً */
 }
 
 .task-preview-item span {
