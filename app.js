@@ -1748,7 +1748,7 @@ function renderMonthlyCalendar(container) {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay.getDate();
     
-    const startDay = firstDay.getDay();
+    const startDay = firstDay.getDay(); // 0 = الأحد
     
     let html = `
         <div class="calendar-nav" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
@@ -1781,7 +1781,7 @@ function renderMonthlyCalendar(container) {
         `;
     });
     
-    // أيام فارغة في بداية الشهر
+    // أيام فارغة في بداية الشهر (للأحد = 0)
     for (let i = 0; i < startDay; i++) {
         html += '<div class="empty-day" style="background: transparent; border: none; min-height: auto;"></div>';
     }
@@ -1810,37 +1810,33 @@ function renderMonthlyCalendar(container) {
                 </div>
             `;
         } else {
-            // عرض أول 3 مهام فقط (بسبب المساحة)
             const tasksToShow = dayTasks.slice(0, 3);
             
-            // في دالة renderMonthlyCalendar، عدل هذا القسم:
-                tasksToShow.forEach((task, index) => {
-                    const category = getCategoryById(task.categoryId);
-                    const isOverdue = isTaskOverdue(task);
-                    const priorityIcon = task.priority === 'high' ? 'fas fa-flag' : 
-                                        task.priority === 'medium' ? 'fas fa-flag' : 'fas fa-flag';
-                    
-                    html += `
-                        <div class="month-task-item" 
-                             data-id="${task.id}"
-                             data-task-index="${index}"
-                             data-date="${dateStr}"
-                             onclick="openEditTaskModal('${task.id}')"
-                             style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
-                             title="انقر للتعديل">
-                            <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
-                                <span class="monthly-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
-                                <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                    ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
-                                </span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
-                                <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
-                                ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
-                            </div>
+            tasksToShow.forEach((task, index) => {
+                const category = getCategoryById(task.categoryId);
+                const isOverdue = isTaskOverdue(task);
+                
+                html += `
+                    <div class="month-task-item" 
+                         data-id="${task.id}"
+                         data-task-index="${index}"
+                         data-date="${dateStr}"
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="cursor: pointer; padding: 4px 6px; border-radius: 4px; background: var(--theme-bg); border-right: 2px solid ${category.color}; font-size: 0.7rem;"
+                         title="انقر للتعديل">
+                        <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 2px;">
+                            <span class="monthly-task-dot" style="width: 6px; height: 6px; border-radius: 50%; background: ${category.color}; flex-shrink: 0;"></span>
+                            <span style="font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                ${task.title.length > 10 ? task.title.substring(0, 10) + '...' : task.title}
+                            </span>
                         </div>
-                    `;
-                });
+                        <div style="display: flex; justify-content: space-between; font-size: 0.65rem; color: var(--gray-color);">
+                            <span><i class="fas fa-clock" style="font-size: 0.6rem;"></i> ${task.time || ''}</span>
+                            ${task.completed ? '<span style="color: var(--success-color);"><i class="fas fa-check"></i></span>' : ''}
+                        </div>
+                    </div>
+                `;
+            });
             
             if (dayTasks.length > 3) {
                 html += `
@@ -1852,8 +1848,13 @@ function renderMonthlyCalendar(container) {
             }
         }
         
+        html += `
+                </div>
+            </div>
+        `; // إغلاق div للمهمة
     }
     
+    // إغلاق الحاوية الرئيسية
     html += '</div>';
     container.innerHTML = html;
     
