@@ -3399,11 +3399,23 @@ function checkDOMElements() {
     }
 }
 
+// إظهار/إخفاء خيارات التكرار المخصص
+document.getElementById('task-repetition').addEventListener('change', function() {
+    const customOptions = document.getElementById('custom-repetition-options');
+    if (this.value === 'custom') {
+        customOptions.style.display = 'block';
+    } else {
+        customOptions.style.display = 'none';
+    }
+});
+
+// تعديل وظيفة حفظ المهمة الجديدة
 function saveNewTask() {
     console.log("💾 حفظ مهمة جديدة...");
     
     const titleInput = document.getElementById('task-title');
     const categorySelect = document.getElementById('task-category');
+    const repetitionSelect = document.getElementById('task-repetition');
     
     if (!titleInput || !categorySelect) {
         console.error('عناصر النموذج غير موجودة');
@@ -3413,6 +3425,7 @@ function saveNewTask() {
     
     const title = titleInput.value.trim();
     const category = categorySelect.value;
+    const repetitionType = repetitionSelect.value;
     
     if (!title) {
         alert('يرجى إدخال عنوان المهمة');
@@ -3432,6 +3445,20 @@ function saveNewTask() {
     const timeInput = document.querySelector('#task-time');
     const prioritySelect = document.querySelector('#task-priority');
     
+    // جمع بيانات التكرار
+    let repetition = null;
+    if (repetitionType !== 'none') {
+        repetition = { type: repetitionType };
+        
+        if (repetitionType === 'custom') {
+            const checkedDays = Array.from(document.querySelectorAll('input[name="repeat-days"]:checked'))
+                .map(cb => parseInt(cb.value));
+            if (checkedDays.length > 0) {
+                repetition.days = checkedDays;
+            }
+        }
+    }
+    
     addTask({
         title: title,
         description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
@@ -3439,11 +3466,13 @@ function saveNewTask() {
         duration: parseInt(durationInput ? durationInput.value : 30),
         date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
         time: timeInput ? timeInput.value : '',
-        priority: prioritySelect ? prioritySelect.value : 'medium'
+        priority: prioritySelect ? prioritySelect.value : 'medium',
+        repetition: repetition
     });
     
     console.log("✅ تم حفظ المهمة بنجاح");
 }
+
 
 function saveEditedTask() {
     if (!AppState.currentTaskId) {
