@@ -333,56 +333,79 @@ function saveCategory() {
     
     if (!nameInput || !colorInput || !timeframeInput) {
         console.error("❌ عناصر النموذج غير موجودة");
-        return;
+        return false;
     }
     
     const name = nameInput.value.trim();
     const color = colorInput.value;
     const timeframeMinutes = parseInt(timeframeInput.value) || 60;
     
-    if (!name) {
+    // التحقق من الاسم مع إزالة المسافات
+    if (!name || name.length === 0) {
         alert('يرجى إدخال اسم الفئة');
         nameInput.focus();
-        return;
+        nameInput.select();
+        return false;
     }
     
-    if (AppState.currentCategoryId) {
-        // تحديث فئة موجودة
-        const index = AppState.categories.findIndex(c => c.id === AppState.currentCategoryId);
-        if (index !== -1) {
-            AppState.categories[index] = {
-                ...AppState.categories[index],
+    // التحقق من عدم تكرار الاسم
+    const existingCategory = AppState.categories.find(c => 
+        c.name.toLowerCase() === name.toLowerCase() && 
+        c.id !== AppState.currentCategoryId
+    );
+    
+    if (existingCategory) {
+        alert('فئة بهذا الاسم موجودة بالفعل');
+        nameInput.focus();
+        return false;
+    }
+    
+    try {
+        if (AppState.currentCategoryId) {
+            // تحديث فئة موجودة
+            const index = AppState.categories.findIndex(c => c.id === AppState.currentCategoryId);
+            if (index !== -1) {
+                AppState.categories[index] = {
+                    ...AppState.categories[index],
+                    name: name,
+                    color: color,
+                    timeframeMinutes: timeframeMinutes
+                };
+            }
+        } else {
+            // إضافة فئة جديدة
+            const newCategory = {
+                id: generateId(),
                 name: name,
                 color: color,
-                timeframeMinutes: timeframeMinutes
+                timeframeMinutes: timeframeMinutes,
+                timeframeType: 'minutes',
+                messagePending: 'هناك مهام معلقة. واصل العمل لإنجازها!',
+                messageCompleted: 'ممتاز! لقد أكملت جميع المهام لهذا اليوم.',
+                messageExceeded: 'لقد تجاوزت الوقت المخصص. حاول إدارة وقتك بشكل أفضل!'
             };
+            
+            AppState.categories.push(newCategory);
         }
-    } else {
-        // إضافة فئة جديدة
-        const newCategory = {
-            id: generateId(),
-            name: name,
-            color: color,
-            timeframeMinutes: timeframeMinutes,
-            timeframeType: 'minutes',
-            messagePending: 'هناك مهام معلقة. واصل العمل لإنجازها!',
-            messageCompleted: 'ممتاز! لقد أكملت جميع المهام لهذا اليوم.',
-            messageExceeded: 'لقد تجاوزت الوقت المخصص. حاول إدارة وقتك بشكل أفضل!'
-        };
         
-        AppState.categories.push(newCategory);
+        saveCategories();
+        renderCategories();
+        refreshCurrentView();
+        closeModal('category-modal');
+        
+        // إعادة تعيين النموذج
+        if (nameInput) nameInput.value = '';
+        if (colorInput) colorInput.value = '#5a76e8';
+        if (timeframeInput) timeframeInput.value = '60';
+        AppState.currentCategoryId = null;
+        
+        return true;
+        
+    } catch (error) {
+        console.error("خطأ في حفظ الفئة:", error);
+        alert('حدث خطأ أثناء حفظ الفئة');
+        return false;
     }
-    
-    saveCategories();
-    renderCategories();
-    refreshCurrentView();
-    closeModal('category-modal');
-    
-    // إعادة تعيين النموذج
-    if (nameInput) nameInput.value = '';
-    if (colorInput) colorInput.value = '#5a76e8';
-    if (timeframeInput) timeframeInput.value = '60';
-    AppState.currentCategoryId = null;
 }
 
 function saveCategories() {
@@ -871,6 +894,132 @@ function updateCustomPreview() {
     }
 }
 
+// نظام تراجع شامل
+const GlobalUndoManager = {
+    stacks: {
+        tasks: { undo: [], redo: [] },
+        categories: { undo: [], redo: [] },
+        notes: { undo: redo: [] }
+    },
+    
+    maxStackSize: 50,
+    
+    pushAction(type, action, data) {
+        if (!this.stacks[type]) return;
+        
+        this.stacks[type].undo.push({
+            action: action,
+            data: data,
+            timestamp: Date.now()
+        });
+        
+        // حد الحد الأقصى للمكدس
+        if (this.stacks[type].undo.length > this.maxStackSize) {
+            this.stacks[type].undo.shift();
+        }
+        
+        // مسح مكدس الإعادة عند إجراء عملية جديدة
+        this.stacks[type].redo = [];
+    },
+    
+    undo(type) {
+        if (!this.stacks[type] || this.stacks[type].undo.length === 0) return false;
+        
+        const action = this.stacks[type].undo.pop();
+        this.stacks[type].redo.push(action);
+        
+        this.executeUndo(type, action);
+        return true;
+    },
+    
+    redo(type) {
+        if (!this.stacks[type] || this.stacks[type].redo.length === 0) return false;
+        
+        const action = this.stacks[type].redo.pop();
+        this.stacks[type].undo.push(action);
+        
+        this.executeRedo(type, action);
+        return true;
+    },
+    
+    executeUndo(type, action) {
+        switch(type) {
+            case 'tasks':
+                this.undoTaskAction(action);
+                break;
+            case 'categories':
+                this.undoCategoryAction(action);
+                break;
+            case 'notes':
+                this.undoNoteAction(action);
+                break;
+        }
+    },
+    
+    executeRedo(type, action) {
+        // تنفيذ العملية المعاكسة
+        switch(type) {
+            case 'tasks':
+                this.redoTaskAction(action);
+                break;
+            case 'categories':
+                this.redoCategoryAction(action);
+                break;
+            case 'notes':
+                this.redoNoteAction(action);
+                break;
+        }
+    },
+    
+    undoTaskAction(action) {
+        switch(action.action) {
+            case 'add':
+                // حذف المهمة التي أُضيفت
+                AppState.tasks = AppState.tasks.filter(task => task.id !== action.data.id);
+                saveTasks();
+                break;
+            case 'delete':
+                // استعادة المهمة المحذوفة
+                AppState.tasks.push(action.data);
+                saveTasks();
+                break;
+            case 'update':
+                // استعادة المهمة القديمة
+                const taskIndex = AppState.tasks.findIndex(t => t.id === action.data.id);
+                if (taskIndex !== -1) {
+                    AppState.tasks[taskIndex] = action.data.oldData;
+                    saveTasks();
+                }
+                break;
+        }
+        refreshCurrentView();
+    },
+    
+    redoTaskAction(action) {
+        switch(action.action) {
+            case 'add':
+                // إعادة إضافة المهمة
+                AppState.tasks.push(action.data);
+                saveTasks();
+                break;
+            case 'delete':
+                // حذف المهمة مرة أخرى
+                AppState.tasks = AppState.tasks.filter(task => task.id !== action.data.id);
+                saveTasks();
+                break;
+            case 'update':
+                // تطبيق التحديث مرة أخرى
+                const taskIndex = AppState.tasks.findIndex(t => t.id === action.data.id);
+                if (taskIndex !== -1) {
+                    AppState.tasks[taskIndex] = action.data.newData;
+                    saveTasks();
+                }
+                break;
+        }
+        refreshCurrentView();
+    }
+};
+
 // ========== إدارة المهام ==========
 // متغير لتتبع حالة الإضافة
 let isAddingTask = false;
@@ -952,6 +1101,10 @@ function addTask(taskData) {
         
         isAddingTask = false;
     }, 100);
+    
+     // تسجيل العملية للتراجع
+    GlobalUndoManager.pushAction('tasks', 'add', newTask);
+}
 }
 
 // إصلاح زر الإلغاء
@@ -1100,9 +1253,17 @@ function toggleTaskCompletion(taskId) {
     refreshCurrentView();
 }
 
+
 function updateTask(taskId, taskData) {
-    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
-    if (taskIndex === -1) return;
+    const oldTask = AppState.tasks.find(t => t.id === taskId);
+    if (!oldTask) return;
+    
+    // تسجيل العملية للتراجع
+    GlobalUndoManager.pushAction('tasks', 'update', {
+        id: taskId,
+        oldData: oldTask,
+        newData: taskData
+    });
     
     AppState.tasks[taskIndex] = {
         ...AppState.tasks[taskIndex],
@@ -1121,10 +1282,13 @@ function updateTask(taskId, taskData) {
     
     closeModal('edit-task-modal');
 }
-
+    
 function deleteTask(taskId) {
-    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
-    if (taskIndex === -1) {
+    const task = AppState.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+        GlobalUndoManager.pushAction('tasks', 'delete', task);
+
         const deletedIndex = AppState.deletedTasks.findIndex(task => task.id === taskId);
         if (deletedIndex !== -1) {
             if (confirm('هذه المهمة محذوفة بالفعل. هل تريد حذفها نهائياً؟')) {
@@ -1136,7 +1300,7 @@ function deleteTask(taskId) {
             alert('هذه المهمة غير موجودة.');
         }
         return;
-    }
+    
     
     const task = AppState.tasks[taskIndex];
     if (!confirm(`هل أنت متأكد من حذف المهمة: "${task.title}"؟`)) return;
@@ -1723,7 +1887,18 @@ function renderCategories() {
     let html = '';
     
     AppState.categories.forEach(category => {
-        const categoryTasks = AppState.tasks.filter(task => task.categoryId === category.id);
+        const categoryTasks = AppState.tasks.filter(task => {
+            if (task.categoryId !== category.id) return false;
+            
+            // تصفية المهام: لا تُظهر المهام المكتملة من الأيام السابقة
+            const today = new Date().toISOString().split('T')[0];
+            if (task.completed && task.date < today) {
+                return false;
+            }
+            
+            return true;
+        });
+        
         // ترتيب المهام: المتأخرة -> الحالية -> المكتملة
         const overdue = categoryTasks.filter(t => isTaskOverdue(t) && !t.completed);
         const pending = categoryTasks.filter(t => !isTaskOverdue(t) && !t.completed);
@@ -1945,7 +2120,44 @@ function renderDailyCalendar(container) {
             const t = timeStrToMinutes(task.time);
             return t >= slotStart && t <= slotEnd;
         });
-
+ 
+    // إضافة خانة للمهام المتأخرة
+    const overdueTasks = AppState.tasks.filter(task => 
+        isTaskOverdue(task) && !task.completed && task.date !== dateStr
+    );
+    
+    if (overdueTasks.length > 0) {
+        html += `
+            <div class="time-slot overdue-slot" style="border: 2px solid var(--danger-color); background: rgba(247, 37, 133, 0.1);">
+                <div class="time-header">
+                    <div class="time-title">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i> 
+                        المهام المتأخرة من الأيام السابقة
+                    </div>
+                    <span class="task-count" style="background: var(--danger-color); color: white;">${overdueTasks.length} مهام</span>
+                </div>
+                <div class="time-tasks">
+        `;
+        
+        overdueTasks.forEach(task => {
+            const category = getCategoryById(task.categoryId);
+            html += `
+                <div class="calendar-task-card overdue" 
+                     data-id="${task.id}"
+                     onclick="openEditTaskModal('${task.id}')"
+                     style="border-left-color: var(--danger-color); border-right-color: var(--danger-color);">
+                    <div class="calendar-task-title">${task.title}</div>
+                    <div class="calendar-task-meta">
+                        <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
+                        <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+    }
+        
         if (slotTasks.length === 0) {
             html += `
                 <div class="time-slot" data-time="${slot.start}" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
@@ -2035,16 +2247,26 @@ function renderWeeklyCalendar(container) {
         if (dayTasks.length===0){
             html+=`<div style="text-align:center;padding:20px;color:var(--gray-color);"><i class="fas fa-calendar-day" style="opacity:0.3;"></i><p>لا توجد مهام</p></div>`;
         } else {
-            dayTasks.forEach(task=>{
+            // تعديل عرض المهام لتكون فوق بعضها
+            dayTasks.forEach(task => {
                 const category = getCategoryById(task.categoryId);
                 const isOver = isTaskOverdue(task);
+                
                 html += `
-                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOver ? 'overdue' : ''}" data-id="${task.id}" onclick="openEditTaskModal('${task.id}')" style="border-left:3px solid ${category.color}; border-right:3px solid ${category.color}; margin-bottom:6px; padding:6px 8px; cursor:pointer;">
-                        <div class="calendar-task-title">${task.title}</div>
-                        <div class="calendar-task-meta"><span><i class="fas fa-clock"></i> ${task.time || ''}</span> <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span></div>
-                    </div>`;
+                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOver ? 'overdue' : ''}" 
+                         data-id="${task.id}" 
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="border-left:3px solid ${category.color}; border-right:3px solid ${category.color}; margin-bottom:4px; padding:8px; cursor:pointer; position: relative;">
+                        <div class="calendar-task-title" style="font-size: 0.85rem; font-weight: 500;">${task.title}</div>
+                        <div class="calendar-task-meta" style="font-size: 0.75rem;">
+                            <span><i class="fas fa-clock"></i> ${task.time || ''}</span>
+                            <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                        </div>
+                        ${isOver ? '<span style="position: absolute; top: 2px; left: 2px; font-size: 0.6rem; color: var(--danger-color);"><i class="fas fa-exclamation-circle"></i></span>' : ''}
+                    </div>
+                `;
             });
-        }
+    
         html += `</div></div>`;
     }
     html += `</div>`;
@@ -2687,7 +2909,7 @@ function setupTaskHoverEffects() {
         });
     });
 }
-function showTaskTooltip(event, task) {
+function showTaskTooltip(event, task, options = {}) {
     const category = getCategoryById(task.categoryId);
     const isOverdue = isTaskOverdue(task);
     
@@ -2737,9 +2959,32 @@ function showTaskTooltip(event, task) {
     positionTooltipNearEvent(tooltip, event);
 }
 
-function showCalendarTooltip(event, task) {
-    showTaskTooltip(event, task); // استخدام نفس الوظيفة للتنسيق الموحد
+// إضافة أحداث التلميحات للجدول
+function setupCalendarTooltips() {
+    document.querySelectorAll('.calendar-task-card, .month-task-item').forEach(card => {
+        card.addEventListener('mouseenter', function(e) {
+            const taskId = this.dataset.id;
+            const task = AppState.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            // إزالة أي تلميحات موجودة
+            hideTooltip();
+            
+            // إظهار التلميح الجديد
+            showTaskTooltip(e, task);
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            hideTooltip();
+        });
+        
+        // منع ظهور التلميح عند النقر
+        card.addEventListener('click', function() {
+            hideTooltip();
+        });
+    });
 }
+
 
 function positionTooltipNearEvent(tooltip, event) {
     const padding = 12;
@@ -3223,55 +3468,44 @@ function calculateCategoryStatus(categoryId) {
 }
 
 // ========== الأدوات العامة: البحث، undo/redo ==========
+
+// تعديل أزرار التراجع/الإعادة
 function setupGlobalControls() {
     const undoBtn = document.getElementById('undo-btn');
     const redoBtn = document.getElementById('redo-btn');
-    const searchInput = document.getElementById('global-search');
-
+    
     if (undoBtn) {
-        undoBtn.addEventListener('click', () => {
-            if (AppState.currentView === 'notes' && AppState.undoStack.length > 0) {
-                const lastState = AppState.undoStack.pop();
-                AppState.redoStack.push({
-                    content: document.getElementById('notes-editor-content').innerHTML,
-                    noteId: AppState.currentNoteId
-                });
-                
-                if (lastState.noteId === AppState.currentNoteId) {
-                    document.getElementById('notes-editor-content').innerHTML = lastState.content;
-                }
+        undoBtn.addEventListener('click', function() {
+            const currentType = getCurrentViewType();
+            if (GlobalUndoManager.undo(currentType)) {
+                console.log(`تم التراجع عن آخر عملية في ${currentType}`);
             } else {
+                // تراجع عام إذا لم يوجد شيء محدد
                 document.execCommand('undo');
             }
         });
     }
     
     if (redoBtn) {
-        redoBtn.addEventListener('click', () => {
-            if (AppState.currentView === 'notes' && AppState.redoStack.length > 0) {
-                const nextState = AppState.redoStack.pop();
-                AppState.undoStack.push({
-                    content: document.getElementById('notes-editor-content').innerHTML,
-                    noteId: AppState.currentNoteId
-                });
-                
-                if (nextState.noteId === AppState.currentNoteId) {
-                    document.getElementById('notes-editor-content').innerHTML = nextState.content;
-                }
+        redoBtn.addEventListener('click', function() {
+            const currentType = getCurrentViewType();
+            if (GlobalUndoManager.redo(currentType)) {
+                console.log(`تمت إعادة آخر عملية في ${currentType}`);
             } else {
+                // إعادة عامة إذا لم يوجد شيء محدد
                 document.execCommand('redo');
             }
         });
     }
-    
-    if (searchInput) {
-        searchInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                performGlobalSearch(searchInput.value.trim());
-            }
-        });
-    }
 }
+
+function getCurrentViewType() {
+    if (AppState.currentView === 'tasks') return 'tasks';
+    if (AppState.currentView === 'categories') return 'categories';
+    if (AppState.currentView === 'notes') return 'notes';
+    return 'general';
+}
+
 // وظيفة البحث المتقدمة
 function performGlobalSearch(query) {
     if (!query) {
