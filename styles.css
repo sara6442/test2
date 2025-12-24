@@ -1163,13 +1163,15 @@ body {
     gap: 5px;
 }
 
-.format-btn:hover { 
-    background: var(--theme-border); 
+.format-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
-.format-btn.active { 
-    background: var(--theme-primary); 
-    color: white; 
-    border-color: var(--theme-primary); 
+
+.format-btn.active {
+    background: var(--theme-primary) !important;
+    color: white !important;
+    border-color: var(--theme-primary) !important;
 }
 
 .font-controls { 
