@@ -152,6 +152,43 @@
                     </div>
                 </div>
 
+                <!-- شريط إحصائيات الفئات -->
+                <div class="categories-stats-bar" style="background: var(--theme-card); border-radius: 12px; padding: 20px; margin-bottom: 25px; border: 1px solid var(--theme-border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <i class="fas fa-chart-line" style="color: var(--theme-primary); font-size: 1.5rem;"></i>
+                            <h3 style="margin: 0; color: var(--theme-text);">إحصائيات اليوم</h3>
+                        </div>
+                        
+                        <div style="display: flex; gap: 30px; align-items: center;">
+                            <div class="stat-item">
+                                <div class="stat-value" id="today-completed-minutes">0</div>
+                                <div class="stat-label">دقائق منجزة</div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-value" id="today-total-minutes">0</div>
+                                <div class="stat-label">إجمالي الدقائق</div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-value" id="today-progress-percentage">0%</div>
+                                <div class="stat-label">نسبة الإنجاز</div>
+                            </div>
+                            
+                            <div class="stat-item">
+                                <div class="stat-value" id="today-completed-tasks">0</div>
+                                <div class="stat-label">مهام مكتملة</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar-container" style="margin-top: 15px;">
+                        <div class="progress-bar" id="today-progress-bar" style="height: 8px; background: var(--theme-border); border-radius: 4px; overflow: hidden;">
+                            <div class="progress-fill" style="height: 100%; background: var(--success-color); width: 0%; transition: width 0.5s ease;"></div>
+                        </div>
+                    </div>
+                </div>
                 <!-- عرض الفئات -->
                 <div id="categories-view" class="view">
                     <div class="categories-header">
