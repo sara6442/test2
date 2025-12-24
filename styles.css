@@ -22,10 +22,10 @@ body {
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
     
-    --theme-bg: #000000;
+    --theme-bg: #ffffff;
     --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
     --theme-text: #212529;
-    --theme-card: black;
+    --theme-card: white;
     --theme-border: #dee2e6;
     --theme-primary: #6c757d;
     --theme-hover: #5a6268;
@@ -33,10 +33,10 @@ body {
 
 /* === هنا أضف ثيم البيج أولاً === */
 .theme-beige {
-    --theme-bg: #000000;
+    --theme-bg: #fefaf6;
     --theme-sidebar: linear-gradient(180deg, #d7ccc8, #bcaaa4);
     --theme-text: #5d4037;
-    --theme-card: black;
+    --theme-card: white;
     --theme-border: #d7ccc8;
     --theme-primary: #8d6e63;
     --theme-hover: #6d4c41;
