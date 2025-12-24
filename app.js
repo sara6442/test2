@@ -977,6 +977,32 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal('edit-task-modal');
         });
     }
+
+    // إصلاح أحداث أزرار نافذة تعديل المهمة
+document.addEventListener('DOMContentLoaded', function() {
+    // زر حفظ التعديلات
+    const saveEditBtn = document.getElementById('save-edit-task');
+    if (saveEditBtn) {
+        saveEditBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            saveEditedTask();
+        });
+    }
+    
+    // زر حذف المهمة
+    const deleteBtn = document.getElementById('delete-edit-task');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (AppState.currentTaskId) {
+                    if (confirm('هل أنت متأكد من حذف هذه المهمة؟')) {
+                        deleteTask(AppState.currentTaskId);
+                        closeModal('edit-task-modal');
+                    }
+                }
+            });
+        }
+    });
     
     // زر إلغاء الفئة
     const cancelCategoryBtn = document.getElementById('cancel-category');
