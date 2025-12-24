@@ -1125,7 +1125,7 @@ function addTask(taskData) {
         isAddingTask = false;
     }, 100);
     
-     // تسجيل العملية للتراجع
+    // تسجيل العملية للتراجع
     GlobalUndoManager.pushAction('tasks', 'add', newTask);
 }
 
@@ -2730,25 +2730,28 @@ function setupNotesEditorEvents() {
         });
     }
     
-   // تعديل زر خانة الاختيار
-        const addCheckboxBtn = document.createElement('button');
-        addCheckboxBtn.className = 'btn btn-warning btn-sm';
-        addCheckboxBtn.id = 'add-checkbox-btn';
-        addCheckboxBtn.title = 'إضافة خانة اختيار';
-        addCheckboxBtn.innerHTML = '<i class="fas fa-square"></i>';
-        addCheckboxBtn.style.width = '36px';
-        addCheckboxBtn.style.height = '36px';
-        addCheckboxBtn.style.padding = '0';
-        addCheckboxBtn.style.display = 'flex';
-        addCheckboxBtn.style.alignItems = 'center';
-        addCheckboxBtn.style.justifyContent = 'center';
-    if (addCheckboxBtn && !addCheckboxBtn._bound) {
-        addCheckboxBtn._bound = true;
-        addCheckboxBtn.addEventListener('click', () => {
-            const checkboxHtml = `<div class="note-checkbox-item"><input type="checkbox" class="note-checkbox"> <span class="note-checkbox-text" contenteditable="true">عنصر جديد</span></div>`;
-            insertHTMLToEditor(checkboxHtml);
-        });
-    }
+   // تعديل زر خانة الاختيار       
+            const addCheckboxBtn = document.getElementById('add-checkbox-btn');
+                addCheckboxBtn.className = 'btn btn-warning btn-sm';
+                addCheckboxBtn.id = 'add-checkbox-btn';
+                addCheckboxBtn.title = 'إضافة خانة اختيار';
+                addCheckboxBtn.innerHTML = '<i class="fas fa-square"></i>';
+                addCheckboxBtn.style.width = '36px';
+                addCheckboxBtn.style.height = '36px';
+                addCheckboxBtn.style.padding = '0';
+                addCheckboxBtn.style.display = 'flex';
+                addCheckboxBtn.style.alignItems = 'center';
+                addCheckboxBtn.style.justifyContent = 'center';
+        if (addCheckboxBtn && !addCheckboxBtn._bound) {
+            addCheckboxBtn._bound = true;
+            addCheckboxBtn.addEventListener('click', () => {
+                const checkboxHtml = `<div class="note-checkbox-item" style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <input type="checkbox" class="note-checkbox" style="width: 18px; height: 18px;">
+                    <span class="note-checkbox-text" contenteditable="true">عنصر جديد</span>
+                </div>`;
+                insertHTMLToEditor(checkboxHtml);
+            });
+        }
     
     // حذف صورة عند الضغط على زر الحذف داخل wrapper
     editor.addEventListener('click', function(e) {
