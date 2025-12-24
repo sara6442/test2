@@ -352,6 +352,45 @@ body {
     font-size: 0.9rem;
 }
 
+.search-results-popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--theme-card);
+    border: 1px solid var(--theme-border);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    z-index: 1000;
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 5px;
+}
+
+.search-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--theme-border);
+}
+
+.search-results-content {
+    padding: 15px;
+}
+
+.search-result-item {
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.search-result-item:hover {
+    background: var(--theme-border);
+    transform: translateX(-5px);
+}
 /* نافذة الإعدادات */
 .settings-popup {
     position: absolute;
