@@ -1,4 +1,3 @@
-// اختبار تحميل CSS
 function checkCSS() {
     console.log("🔍 فحص تحميل CSS...");
     
@@ -6,45 +5,78 @@ function checkCSS() {
     const cssCount = document.styleSheets.length;
     console.log("عدد ملفات CSS:", cssCount);
     
-    // اختبار 2: فحص متغيرات CSS
-    const rootStyles = getComputedStyle(document.documentElement);
-    const themeBg = rootStyles.getPropertyValue('--theme-bg').trim();
-    console.log("متغير --theme-bg:", themeBg);
+    // اختبار 2: فحص متغيرات CSS مع تأخير
+    setTimeout(() => {
+        const rootStyles = getComputedStyle(document.documentElement);
+        const themeBg = rootStyles.getPropertyValue('--theme-bg').trim();
+        console.log("متغير --theme-bg:", themeBg);
+        
+        if (!themeBg || themeBg === 'initial' || themeBg === '') {
+            console.warn("⚠️ متغيرات CSS لم تتحمل بعد، سيتم إعادة المحاولة...");
+            
+            // إعادة المحاولة بعد تأخير
+            setTimeout(() => {
+                const retryStyles = getComputedStyle(document.documentElement);
+                const retryThemeBg = retryStyles.getPropertyValue('--theme-bg').trim();
+                
+                if (!retryThemeBg || retryThemeBg === 'initial' || retryThemeBg === '') {
+                    console.error("❌ متغيرات CSS غير محملة بعد المحاولة!");
+                    
+                    // تطبيق أنماط طارئة فقط إذا لزم الأمر
+                    if (!document.body.style.backgroundColor) {
+                        document.body.style.cssText = `
+                            background-color: #f8f9fa !important;
+                            color: #212529 !important;
+                            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+                        `;
+                    }
+                    
+                    // إضافة رسالة تحذير مؤقتة
+                    const warning = document.createElement('div');
+                    warning.id = 'css-warning';
+                    warning.style.cssText = `
+                        position: fixed;
+                        top: 10px;
+                        right: 10px;
+                        background: #f8d7da;
+                        color: #721c24;
+                        padding: 10px 20px;
+                        border-radius: 5px;
+                        z-index: 99999;
+                        font-family: Arial;
+                        border: 1px solid #f5c6cb;
+                        animation: fadeOut 5s forwards;
+                    `;
+                    warning.innerHTML = '⚠️ جاري تحميل التنسيقات...';
+                    document.body.appendChild(warning);
+                    
+                    // إزالة التحذير بعد 5 ثواني
+                    setTimeout(() => {
+                        const warningEl = document.getElementById('css-warning');
+                        if (warningEl) warningEl.remove();
+                    }, 5000);
+                } else {
+                    console.log("✅ CSS تحمل بنجاح بعد المحاولة الثانية");
+                }
+            }, 1000);
+        } else {
+            console.log("✅ CSS محمل بنجاح");
+        }
+    }, 100);
     
-    if (!themeBg || themeBg === 'initial' || themeBg === '') {
-        console.error("❌ متغيرات CSS غير محملة!");
-        
-        // تطبيق أنماط طارئة
-        document.body.style.cssText = `
-            background-color: #f8f9fa !important;
-            color: #212529 !important;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
-        `;
-        
-        // إضافة رسالة تحذير
-        const warning = document.createElement('div');
-        warning.id = 'css-warning';
-        warning.style.cssText = `
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #f8d7da;
-            color: #721c24;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 99999;
-            font-family: Arial;
-            border: 1px solid #f5c6cb;
-        `;
-        warning.innerHTML = '⚠️ مشكلة في تحميل التنسيقات. الرجاء تحديث الصفحة.';
-        document.body.appendChild(warning);
-        
-        return false;
-    }
-    
-    console.log("✅ CSS محمل بنجاح");
     return true;
 }
+
+// إضافة أنماط CSS للإخفاء التدريجي
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes fadeOut {
+        0% { opacity: 1; }
+        80% { opacity: 1; }
+        100% { opacity: 0; display: none; }
+    }
+`;
+document.head.appendChild(style);
 
 // ========== حالة التطبيق ==========
 const AppState = {
@@ -3076,24 +3108,123 @@ function setupGlobalControls() {
         });
     }
 }
-
+// وظيفة البحث المتقدمة
 function performGlobalSearch(query) {
     if (!query) {
-        alert('الرجاء إدخال نص للبحث');
+        closeSearchResults();
         return;
     }
-    // بحث بسيط عبر العناوين والمحتويات
-    const taskMatches = AppState.tasks.filter(t => (t.title && t.title.includes(query)) || (t.description && t.description.includes(query)));
-    const noteMatches = AppState.notes.filter(n => (n.title && n.title.includes(query)) || (n.content && n.content.includes(query)));
-    const categoryMatches = AppState.categories.filter(c => c.name && c.name.includes(query));
-
-    let message = `نتائج البحث عن "${query}":\n\nالمهام: ${taskMatches.length}\nالملاحظات: ${noteMatches.length}\nالفئات: ${categoryMatches.length}\n\n`;
-    if (taskMatches.length > 0) message += `أولى المهام: ${taskMatches[0].title}\n`;
-    if (noteMatches.length > 0) message += `أولى الملاحظات: ${noteMatches[0].title}\n`;
-    if (categoryMatches.length > 0) message += `أولى الفئات: ${categoryMatches[0].name}\n`;
-
-    alert(message);
+    
+    const results = [];
+    
+    // البحث في المهام
+    AppState.tasks.forEach(task => {
+        if (task.title.includes(query) || task.description.includes(query)) {
+            results.push({
+                type: 'task',
+                id: task.id,
+                title: task.title,
+                description: task.description,
+                date: task.date,
+                icon: 'fas fa-tasks'
+            });
+        }
+    });
+    
+    // البحث في الملاحظات
+    AppState.notes.forEach(note => {
+        if (note.title.includes(query) || note.content.includes(query)) {
+            results.push({
+                type: 'note',
+                id: note.id,
+                title: note.title,
+                description: stripHtml(note.content).substring(0, 100),
+                icon: 'fas fa-sticky-note'
+            });
+        }
+    });
+    
+    // البحث في الفئات
+    AppState.categories.forEach(category => {
+        if (category.name.includes(query)) {
+            results.push({
+                type: 'category',
+                id: category.id,
+                title: category.name,
+                description: `فئة ${category.name}`,
+                icon: 'fas fa-tags'
+            });
+        }
+    });
+    
+    displaySearchResults(results, query);
 }
+
+function displaySearchResults(results, query) {
+    const container = document.getElementById('search-results-content');
+    const popup = document.getElementById('search-results');
+    
+    if (results.length === 0) {
+        container.innerHTML = '<div class="empty-state">لا توجد نتائج</div>';
+    } else {
+        let html = '';
+        results.forEach(result => {
+            html += `
+                <div class="search-result-item" onclick="navigateToResult('${result.type}', '${result.id}')">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="${result.icon}" style="color: var(--theme-primary);"></i>
+                        <div>
+                            <div style="font-weight: 600;">${highlightText(result.title, query)}</div>
+                            <div style="font-size: 0.9rem; color: var(--gray-color);">${highlightText(result.description, query)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+    
+    popup.style.display = 'block';
+}
+
+function closeSearchResults() {
+    document.getElementById('search-results').style.display = 'none';
+}
+
+function navigateToResult(type, id) {
+    closeSearchResults();
+    
+    switch(type) {
+        case 'task':
+            switchView('tasks');
+            setTimeout(() => openEditTaskModal(id), 100);
+            break;
+        case 'note':
+            switchView('notes');
+            setTimeout(() => openNoteEditor(id), 100);
+            break;
+        case 'category':
+            switchView('categories');
+            break;
+    }
+}
+
+function highlightText(text, query) {
+    const regex = new RegExp(`(${query})`, 'gi');
+    return text.replace(regex, '<mark style="background: yellow;">$1</mark>');
+}
+
+function stripHtml(html) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = html;
+    return tmp.textContent || tmp.innerText || '';
+}
+
+// تعديل حدث البحث
+document.getElementById('global-search').addEventListener('input', function(e) {
+    performGlobalSearch(e.target.value.trim());
+});
+
 
 // ========== فحص عناصر DOM ==========
 function checkDOMElements() {
