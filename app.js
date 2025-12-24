@@ -872,12 +872,37 @@ function updateCustomPreview() {
 }
 
 // ========== إدارة المهام ==========
+// متغير لتتبع حالة الإضافة
+let isAddingTask = false;
+
 function addTask(taskData) {
     console.log("إضافة مهمة:", taskData);
+    
+    // منع الإضافة المكررة
+    if (isAddingTask) {
+        console.log("مهمة قيد الإضافة بالفعل");
+        return;
+    }
+    
+    // التحقق من وجود مهمة مماثلة
+    const existingTask = AppState.tasks.find(task => 
+        task.title === taskData.title && 
+        task.date === (taskData.date || new Date().toISOString().split('T')[0]) &&
+        task.categoryId === taskData.categoryId
+    );
+    
+    if (existingTask) {
+        if (!confirm('توجد مهمة مشابهة بالفعل. هل تريد إضافتها على أي حال؟')) {
+            return;
+        }
+    }
+    
+    isAddingTask = true;
     
     const timeframeCheck = checkCategoryTimeframe(taskData.categoryId, parseInt(taskData.duration) || 30);
     
     if (!timeframeCheck.allowed) {
+        isAddingTask = false;
         showTimeframeWarning(timeframeCheck, taskData);
         return;
     }
@@ -924,7 +949,129 @@ function addTask(taskData) {
         if (prioritySelect) {
             prioritySelect.value = 'medium';
         }
+        
+        isAddingTask = false;
     }, 100);
+}
+
+// إصلاح زر الإلغاء
+document.addEventListener('DOMContentLoaded', function() {
+    // زر إلغاء إضافة المهمة
+    const cancelTaskBtn = document.getElementById('cancel-task');
+    if (cancelTaskBtn) {
+        cancelTaskBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal('add-task-modal');
+            // إعادة تعيين النموذج
+            const form = document.getElementById('task-form');
+            if (form) form.reset();
+            isAddingTask = false;
+        });
+    }
+    
+    // زر إلغاء تعديل المهمة
+    const cancelEditBtn = document.getElementById('cancel-edit-task');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal('edit-task-modal');
+        });
+    }
+    
+    // زر إلغاء الفئة
+    const cancelCategoryBtn = document.getElementById('cancel-category');
+    if (cancelCategoryBtn) {
+        cancelCategoryBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeModal('category-modal');
+            // إعادة تعيين النموذج
+            const form = document.getElementById('category-form');
+            if (form) form.reset();
+            AppState.currentCategoryId = null;
+        });
+    }
+});
+
+// وظيفة لمعالجة تكرار المهام
+function handleTaskRepetition(task) {
+    if (!task.repetition || task.repetition.type === 'none') return;
+    
+    const repetition = task.repetition;
+    const today = new Date();
+    const taskDate = new Date(task.date);
+    
+    let nextDate = null;
+    
+    switch(repetition.type) {
+        case 'daily':
+            nextDate = new Date(taskDate);
+            nextDate.setDate(nextDate.getDate() + 1);
+            break;
+            
+        case 'weekly':
+            nextDate = new Date(taskDate);
+            nextDate.setDate(nextDate.getDate() + 7);
+            break;
+            
+        case 'monthly':
+            nextDate = new Date(taskDate);
+            nextDate.setMonth(nextDate.getMonth() + 1);
+            break;
+            
+        case 'custom':
+            if (repetition.days && repetition.days.length > 0) {
+                // تكرار أيام معينة من الأسبوع
+                const currentDay = today.getDay();
+                const nextDays = repetition.days.filter(day => day > currentDay);
+                
+                if (nextDays.length > 0) {
+                    nextDate = new Date(today);
+                    nextDate.setDate(nextDate.getDate() + (nextDays[0] - currentDay));
+                } else {
+                    nextDate = new Date(today);
+                    nextDate.setDate(nextDate.getDate() + (7 - currentDay + repetition.days[0]));
+                }
+            } else if (repetition.dates && repetition.dates.length > 0) {
+                // تكرار تواريخ معينة
+                const nextDateStr = repetition.dates.find(date => date > task.date);
+                if (nextDateStr) {
+                    nextDate = new Date(nextDateStr);
+                }
+            }
+            break;
+    }
+    
+    if (nextDate && nextDate > today) {
+        // إنشاء مهمة جديدة للتكرار التالي
+        const newTask = {
+            ...task,
+            id: generateId(),
+            date: nextDate.toISOString().split('T')[0],
+            completed: false,
+            createdAt: new Date().toISOString(),
+            parentTaskId: task.id // ربط بالمهمة الأصلية
+        };
+        
+        AppState.tasks.push(newTask);
+        saveTasks();
+    }
+}
+
+// تعديل وظيفة إكمال المهمة
+function toggleTaskCompletion(taskId) {
+    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
+    if (taskIndex === -1) return;
+    
+    const wasCompleted = AppState.tasks[taskIndex].completed;
+    AppState.tasks[taskIndex].completed = !wasCompleted;
+    
+    // إذا تم إكمال المهمة ولها تكرار
+    if (!wasCompleted && AppState.tasks[taskIndex].repetition) {
+        handleTaskRepetition(AppState.tasks[taskIndex]);
+    }
+    
+    saveTasks();
+    refreshCurrentView();
 }
 
 function updateTask(taskId, taskData) {
@@ -947,15 +1094,6 @@ function updateTask(taskId, taskData) {
     refreshCurrentView();
     
     closeModal('edit-task-modal');
-}
-
-function toggleTaskCompletion(taskId) {
-    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
-    if (taskIndex === -1) return;
-    
-    AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
-    saveTasks();
-    refreshCurrentView();
 }
 
 function deleteTask(taskId) {
