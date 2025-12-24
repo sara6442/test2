@@ -401,11 +401,13 @@
                 <input type="text" id="notes-editor-title" class="notes-title-input" placeholder="عنوان الملاحظة">
                 <div class="font-controls">
                     <select id="notes-font-family" class="font-select">
+                        <option value="'Cairo', sans-serif">Cairo - القاهرة</option>
+                        <option value="'Tajawal', sans-serif">Tajawal - تجوال</option>
+                        <option value="'Almarai', sans-serif">Almarai - المراعي</option>
+                        <option value="'Changa', sans-serif">Changa - شنغا</option>
+                        <option value="'El Messiri', sans-serif">El Messiri - المصري</option>
+                        <option value="'Reem Kufi', sans-serif">Reem Kufi - ريم كوفي</option>
                         <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
-                        <option value="'Cairo', sans-serif">Cairo</option>
-                        <option value="'Tajawal', sans-serif">Tajawal</option>
-                        <option value="'Arial', sans-serif">Arial</option>
-                        <option value="'Georgia', serif">Georgia</option>
                     </select>
                     <input type="number" id="notes-font-size" class="font-size-input" min="8" max="72" value="16">
                     <select id="notes-font-weight" class="font-weight-select">
@@ -414,10 +416,6 @@
                         <option value="300">خفيف</option>
                         <option value="500">متوسط</option>
                         <option value="700">ثقيل</option>
-                    </select>
-                    <select id="notes-font-style" class="font-style-select">
-                        <option value="normal">عادي</option>
-                        <option value="italic">مائل</option>
                     </select>
                     <input type="color" id="notes-font-color" class="font-color-input" value="#000000">
                     <button class="btn btn-success btn-sm" id="add-link-btn" title="إضافة رابط"><i class="fas fa-link"></i></button>
@@ -456,14 +454,14 @@
                 <i class="fas fa-underline"></i>
             </button>
             <div style="width: 1px; height: 24px; background: var(--theme-border); margin: 0 10px;"></div>
-            <button class="format-btn" data-command="justifyLeft" title="محاذاة لليسار">
-                <i class="fas fa-align-left"></i>
+            <button class="format-btn" data-command="justifyRight" title="محاذاة لليمين">
+                <i class="fas fa-align-right"></i>
             </button>
             <button class="format-btn" data-command="justifyCenter" title="محاذاة للوسط">
                 <i class="fas fa-align-center"></i>
             </button>
-            <button class="format-btn" data-command="justifyRight" title="محاذاة لليمين">
-                <i class="fas fa-align-right"></i>
+            <button class="format-btn" data-command="justifyLeft" title="محاذاة لليسار">
+                <i class="fas fa-align-left"></i>
             </button>
             <div style="width: 1px; height: 24px; background: var(--theme-border); margin: 0 10px;"></div>
             <button class="format-btn" data-command="insertUnorderedList" title="قائمة غير مرقمة">
