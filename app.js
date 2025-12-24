@@ -2597,34 +2597,28 @@ function setupEnhancedNotesEditor() {
 
 // دالة لإضافة رابط (تدعم لف النص المحدد أو إدراج الرابط وحده)
 function addLinkToNote() {
-    const url = prompt('أدخل رابط URL:', 'https://');
-    if (!url) return;
-
     const selection = window.getSelection();
     const editor = document.getElementById('notes-editor-content');
-
-    if (selection && selection.rangeCount > 0 && !selection.isCollapsed && editor.contains(selection.anchorNode)) {
-        // إذا كان هناك نص محدد، إنشاء رابط عليه
-        const selectedText = selection.toString();
-        const linkHTML = `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${selectedText}</a>`;
-        
-        const range = selection.getRangeAt(0);
-        range.deleteContents();
-        
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = linkHTML;
-        
-        const frag = document.createDocumentFragment();
-        let node;
-        while ((node = tempDiv.firstChild)) {
-            frag.appendChild(node);
-        }
-        
-        range.insertNode(frag);
-    } else {
-        // إذا لم يكن هناك نص محدد، إدراج الرابط كاملاً
-        const linkHTML = `<a href="${url}" target="_blank" style="color: inherit; text-decoration: underline;">${url}</a>`;
+    
+    if (!editor.contains(selection.anchorNode)) {
+        alert('يرجى تحديد النص داخل الملاحظة أولاً');
+        return;
+    }
+    
+    const url = prompt('أدخل رابط URL:', 'https://');
+    if (!url) return;
+    
+    if (selection.toString().trim()) {
+        // إذا كان هناك نص محدد
+        const linkHTML = `<a href="${url}" target="_blank" style="color: var(--theme-primary); text-decoration: underline;">${selection.toString()}</a>`;
         insertHTMLToEditor(linkHTML);
+    } else {
+        // إذا لم يكن هناك نص محدد
+        const linkText = prompt('أدخل نص الرابط:', url);
+        if (linkText) {
+            const linkHTML = `<a href="${url}" target="_blank" style="color: var(--theme-primary); text-decoration: underline;">${linkText}</a>`;
+            insertHTMLToEditor(linkHTML);
+        }
     }
     
     editor.focus();
@@ -2711,7 +2705,18 @@ function setupNotesEditorEvents() {
         });
     }
     
-    const addCheckboxBtn = document.getElementById('add-checkbox-btn');
+   // تعديل زر خانة الاختيار
+        const addCheckboxBtn = document.createElement('button');
+        addCheckboxBtn.className = 'btn btn-warning btn-sm';
+        addCheckboxBtn.id = 'add-checkbox-btn';
+        addCheckboxBtn.title = 'إضافة خانة اختيار';
+        addCheckboxBtn.innerHTML = '<i class="fas fa-square"></i>';
+        addCheckboxBtn.style.width = '36px';
+        addCheckboxBtn.style.height = '36px';
+        addCheckboxBtn.style.padding = '0';
+        addCheckboxBtn.style.display = 'flex';
+        addCheckboxBtn.style.alignItems = 'center';
+        addCheckboxBtn.style.justifyContent = 'center';
     if (addCheckboxBtn && !addCheckboxBtn._bound) {
         addCheckboxBtn._bound = true;
         addCheckboxBtn.addEventListener('click', () => {
