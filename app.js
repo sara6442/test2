@@ -1912,14 +1912,15 @@ function renderCategories() {
         html += `
             <div class="category-card" data-id="${category.id}" style="position:relative;">
                 <!-- أزرار الحذف والتعديل في الزاوية اليسرى العلوية -->
-                <div class="category-card-actions" style="position:absolute; top:10px; left:10px; display:flex; gap:6px; z-index:5;">
-                    <button class="btn btn-xs btn-danger category-delete-btn" data-id="${category.id}" title="حذف الفئة">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    <button class="btn btn-xs btn-secondary category-edit-btn" data-id="${category.id}" title="تعديل الفئة">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                </div>
+                // أزرار الحذف والتعديل في الزاوية اليسرى العلوية
+                    <div class="category-card-actions" style="position:absolute; top:10px; left:10px; display:flex; gap:6px; z-index:5;">
+                        <button class="btn btn-xs btn-secondary category-edit-btn" data-id="${category.id}" title="تعديل الفئة">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-xs btn-danger category-delete-btn" data-id="${category.id}" title="حذف الفئة">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
                 
                 <div class="category-header">
                     <div class="category-color" style="background: ${category.color}"></div>
