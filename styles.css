@@ -2014,6 +2014,44 @@ select {
     box-shadow: 0 4px 12px rgba(76, 201, 240, 0.4);
 }
 
+.categories-stats-bar {
+    background: linear-gradient(135deg, var(--theme-card), var(--theme-bg));
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 1px solid var(--theme-border);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.stat-item {
+    text-align: center;
+    min-width: 80px;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--theme-primary);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: var(--gray-color);
+    font-weight: 500;
+}
+
+.progress-bar-container {
+    margin-top: 15px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-color), #3ab5e0);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
 /* ========== تحسين الروابط في الملاحظات ========== */
 .note-content a {
     color: inherit;
