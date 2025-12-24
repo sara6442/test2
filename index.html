@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html lan
-    g="ar" dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,9 +18,21 @@
 <body class="theme-beige">
     <div class="app-container">
         <!-- الشريط الجانبي -->
-        <aside class="sidebar">
-            <div class="logo">
-                <h1><i class="fas fa-tasks"></i> <span>مهامي</span></h1>
+           <aside class="sidebar">
+                <div class="logo">
+                    <h1><i class="fas fa-tasks"></i> <span>مهامي</span></h1>
+                </div>
+            
+            <!-- صندوق البحث فوق الإعدادات -->
+              <div class="search-container" style="padding: 15px 20px 10px;">
+                <div style="position: relative;">
+                    <input id="global-search" type="search" 
+                           placeholder="🔍 ابحث في المهام، الملاحظات، الفئات..." 
+                           style="width:100%; padding:10px 40px 10px 12px; border-radius:8px; 
+                                  border:1px solid var(--theme-border); background: rgba(255,255,255,0.1); 
+                                  color: white; font-size: 0.9rem;">
+                    <i class="fas fa-search" style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color: rgba(255,255,255,0.7); font-size:0.9rem;"></i>
+                </div>
             </div>
             
             <nav class="nav-menu">
@@ -49,33 +60,32 @@
                 </button>
             </div>    
             
-                <!-- نافذة الإعدادات (الثيمات فقط) -->
            <div class="settings-popup" id="settings-popup">
                 <h4>اختر الثيم</h4>
                 <div class="theme-options">
                     <div class="theme-option active" data-theme="gray">
-                    <div class="theme-preview theme-gray-preview"></div>
+                        <div class="theme-preview theme-gray-preview"></div>
                         <span class="theme-name">رمادي</span>
-                </div>
+                    </div>
                     <div class="theme-option" data-theme="black">
-                    <div class="theme-preview theme-black-preview"></div>
+                        <div class="theme-preview theme-black-preview"></div>
                         <span class="theme-name">أسود</span>
-                </div>
+                    </div>
                     <div class="theme-option" data-theme="blue">
-                    <div class="theme-preview theme-blue-preview"></div>
+                        <div class="theme-preview theme-blue-preview"></div>
                         <span class="theme-name">أزرق</span>
-                </div>
+                    </div>
                     <div class="theme-option" data-theme="beige">
-                    <div class="theme-preview theme-beige-preview"></div>
+                        <div class="theme-preview theme-beige-preview"></div>
                         <span class="theme-name">بيج</span>
-                </div>
+                    </div>
                     <div class="theme-option" data-theme="custom">
-                    <div class="theme-preview theme-custom-preview"></div>
+                        <div class="theme-preview theme-custom-preview"></div>
                         <span class="theme-name">مخصص</span>
-                        </div>
                     </div>
                 </div>
-            </aside>
+            </div>
+        </aside>
 
         <!-- المحتوى الرئيسي -->
         <main class="main-content">
@@ -85,10 +95,9 @@
                     <div id="current-date" class="current-date"></div>
                 </div>
                 <div>
-                    <!-- زر إضافة مهمة رئيسي فقط هنا -->
                     <button class="btn btn-primary" id="add-task-btn">
-    <i class="fas fa-plus"></i> إضافة مهمة
-</button>
+                        <i class="fas fa-plus"></i> إضافة مهمة
+                    </button>
                 </div>
             </header>
 
@@ -96,17 +105,25 @@
             <div class="content-area">
                 <!-- عرض المهام -->
                 <div id="tasks-view" class="view active">
+                    <!-- شريط الفلترة الآن فوق المهام -->
+                    <div class="task-filters" id="task-filters" style="display:flex; align-items:center; gap:12px; justify-content:space-between;">
+                        <div class="filters-left" style="display:flex; gap:10px; align-items:center;">
+                            <button class="filter-btn active" data-filter="pending">المهام النشطة</button>
+                            <button class="filter-btn" data-filter="completed">المكتملة</button>
+                            <button class="filter-btn" data-filter="deleted">المحذوفة</button>
+                            <button class="filter-btn" data-filter="overdue">المتأخرة</button>
+                            <button class="filter-btn" data-filter="all">الكل</button>
+                        </div>
+
+                        <div class="filters-right" style="display:flex; align-items:center;">
+                            <button id="categories-status-btn" class="btn btn-info">
+                                <i class="fas fa-chart-pie"></i> حالة الفئات
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="tasks-list" id="tasks-list">
                         <!-- المهام ستظهر هنا -->
-                    </div>
-                    
-                    <!-- مرشحات المهام -->
-                    <div class="task-filters">
-                        <button class="filter-btn active" data-filter="pending">المهام النشطة</button>
-                        <button class="filter-btn" data-filter="completed">المكتملة</button>
-                        <button class="filter-btn" data-filter="deleted">المحذوفة</button>
-                        <button class="filter-btn" data-filter="overdue">المتأخرة</button>
-                        <button class="filter-btn" data-filter="all">الكل</button>
                     </div>
                 </div>
 
@@ -136,7 +153,7 @@
                         </button>
                     </div>
                     <div class="categories-grid" id="categories-list">
-                        <!-- الفئات ستظهر هنا -->
+                        <!-- الفئات ستظهر هنا مع زر إضافة مهمة -->
                     </div>
                 </div>
 
@@ -275,7 +292,6 @@
     </div>
 
     <!-- نافذة إضافة/تعديل فئة -->
- <!-- نافذة إضافة/تعديل فئة -->
 <div class="modal" id="category-modal">
     <div class="modal-content" style="max-width: 500px;">
         <div class="modal-header">
@@ -312,11 +328,11 @@
                 <input type="text" id="notes-editor-title" class="notes-title-input" placeholder="عنوان الملاحظة">
                 <div class="font-controls">
                     <select id="notes-font-family" class="font-select">
-                        <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">سجوي يو آي</option>
-                        <option value="'Cairo', sans-serif">قاهرة</option>
-                        <option value="'Tajawal', sans-serif">تاجوال</option>
-                        <option value="'Arial', sans-serif">أريال</option>
-                        <option value="'Georgia', serif">جورجيا</option>
+                        <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
+                        <option value="'Cairo', sans-serif">Cairo</option>
+                        <option value="'Tajawal', sans-serif">Tajawal</option>
+                        <option value="'Arial', sans-serif">Arial</option>
+                        <option value="'Georgia', serif">Georgia</option>
                     </select>
                     <input type="number" id="notes-font-size" class="font-size-input" min="8" max="72" value="16">
                     <select id="notes-font-weight" class="font-weight-select">
@@ -331,19 +347,29 @@
                         <option value="italic">مائل</option>
                     </select>
                     <input type="color" id="notes-font-color" class="font-color-input" value="#000000">
+                    <button class="btn btn-success btn-sm" id="add-link-btn" title="إضافة رابط"><i class="fas fa-link"></i></button>
+                    <button class="btn btn-info btn-sm" id="add-image-btn" title="إضافة صورة"><i class="fas fa-image"></i></button>
+                    <input type="file" id="notes-image-file-input" accept="image/*,image/gif" style="display: none;">
                 </div>
             </div>
-                   <div class="notes-toolbar-right">
-                        <button class="btn btn-warning btn-sm" id="add-checkbox-btn" title="إضافة خانة اختيار">
-                            <i class="fas fa-square-check"></i>
-                        </button>
-                        <button class="btn btn-success btn-sm" id="save-notes-btn" title="حفظ">
-                            <i class="fas fa-save"></i>
-                        </button>
-                        <button class="btn btn-danger btn-sm" id="close-notes-btn" title="إغلاق">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
+            <div class="notes-toolbar-right" style="display:flex; gap:10px; align-items:center;">
+                <button class="btn btn-warning" id="add-checkbox-btn" title="إضافة خانة اختيار">
+                    <i class="fas fa-square-check"></i> خانة
+                </button>
+                
+                <div class="enhanced-tools" style="display:flex; gap:8px; align-items:center; padding-left:10px; border-left:1px solid var(--theme-border);">
+                    <button class="btn btn-success btn-sm" id="add-link-btn" title="إضافة رابط"><i class="fas fa-link"></i></button>
+                    <button class="btn btn-info btn-sm" id="add-image-btn" title="إضافة صورة"><i class="fas fa-image"></i></button>
+                    <input type="file" id="notes-image-file-input" accept="image/*,image/gif" style="display: none;">
+                </div>
+                
+                <button class="btn btn-secondary" id="save-notes-btn" style="margin-left:10px;">
+                    <i class="fas fa-save"></i> حفظ
+                </button>
+                <button class="btn btn-danger" id="close-notes-btn">
+                    <i class="fas fa-times"></i> إغلاق
+                </button>
+            </div>
         </div>
         
         <div class="formatting-tools">
@@ -380,6 +406,12 @@
 
     <!-- تلميحات عامة -->
     <div id="global-tooltip" class="tooltip"></div>
+
+    <!-- أزرار undo/redo عائمة -->
+    <div id="floating-undo-redo" style="position:fixed; left:12px; bottom:12px; display:flex; flex-direction:column; gap:8px; z-index:20000;">
+        <button id="undo-btn" title="تراجع" class="btn btn-sm" style="width:44px;height:44px;border-radius:50%;"><i class="fas fa-undo"></i></button>
+        <button id="redo-btn" title="إعادة" class="btn btn-sm" style="width:44px;height:44px;border-radius:50%;"><i class="fas fa-redo"></i></button>
+    </div>
 
     <!-- ملف JavaScript الرئيسي -->
     <script src="app.js"></script>
