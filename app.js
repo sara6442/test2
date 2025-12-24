@@ -922,7 +922,7 @@ const GlobalUndoManager = {
     stacks: {
         tasks: { undo: [], redo: [] },
         categories: { undo: [], redo: [] },
-        notes: { undo: redo: [] }
+        notes: { undo: [], redo: [] }
     },
     
     maxStackSize: 50,
@@ -1128,7 +1128,6 @@ function addTask(taskData) {
      // تسجيل العملية للتراجع
     GlobalUndoManager.pushAction('tasks', 'add', newTask);
 }
-}
 
 // إصلاح زر الإلغاء
 document.addEventListener('DOMContentLoaded', function() {
@@ -1276,9 +1275,11 @@ function toggleTaskCompletion(taskId) {
     refreshCurrentView();
 }
 
-
 function updateTask(taskId, taskData) {
-    const oldTask = AppState.tasks.find(t => t.id === taskId);
+    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
+    if (taskIndex === -1) return;
+    
+    const oldTask = AppState.tasks[taskIndex];
     if (!oldTask) return;
     
     // تسجيل العملية للتراجع
@@ -1307,11 +1308,9 @@ function updateTask(taskId, taskData) {
 }
     
 function deleteTask(taskId) {
-    const task = AppState.tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-        GlobalUndoManager.pushAction('tasks', 'delete', task);
-
+    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
+    if (taskIndex === -1) {
+        // التحقق من المهام المحذوفة
         const deletedIndex = AppState.deletedTasks.findIndex(task => task.id === taskId);
         if (deletedIndex !== -1) {
             if (confirm('هذه المهمة محذوفة بالفعل. هل تريد حذفها نهائياً؟')) {
@@ -1323,10 +1322,13 @@ function deleteTask(taskId) {
             alert('هذه المهمة غير موجودة.');
         }
         return;
-    
+    }
     
     const task = AppState.tasks[taskIndex];
     if (!confirm(`هل أنت متأكد من حذف المهمة: "${task.title}"؟`)) return;
+    
+    // تسجيل العملية للتراجع
+    GlobalUndoManager.pushAction('tasks', 'delete', task);
     
     AppState.deletedTasks.push({
         ...task,
