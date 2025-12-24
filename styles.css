@@ -1099,15 +1099,25 @@ body {
     outline: none; 
     border-color: var(--theme-primary); 
 }
-.notes-toolbar-right { 
-    display: flex; 
-    gap: 10px; 
+.notes-toolbar-right {
+    display: flex;
+    gap: 10px;
     align-items: center;
+    margin-right: 20px; /* إضافة مسافة من اليمين */
 }
 
 /* نجعل أزرار الحفظ والإغلاق مفصولة بمسافة */
 .notes-toolbar .notes-toolbar-right > * {
     margin-left: 10px;
+}
+@media (max-width: 768px) {
+    .notes-toolbar-right {
+        margin-right: 10px;
+    }
+    
+    .notes-toolbar {
+        padding: 15px;
+    }
 }
 
 /* أدوات إضافية بجانب اللون */
