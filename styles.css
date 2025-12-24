@@ -22,7 +22,7 @@ body {
     --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     --transition: all 0.3s ease;
     
-    --theme-bg: #ffffff;
+    --theme-bg: #000000;
     --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
     --theme-text: #212529;
     --theme-card: black;
