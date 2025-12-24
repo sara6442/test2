@@ -419,10 +419,33 @@ function saveCategories() {
 function saveNote() {
     if (!AppState.currentNoteId) return;
     
+        document.getElementById('notes-font-size').addEventListener('change', function() {
+        const editor = document.getElementById('notes-editor-content');
+        const selection = window.getSelection();
+        
+        if (selection && selection.rangeCount > 0 && !selection.isCollapsed && editor.contains(selection.anchorNode)) {
+            // إذا كان هناك نص محدد
+            const range = selection.getRangeAt(0);
+            const selectedText = range.extractContents();
+            
+            const span = document.createElement('span');
+            span.style.fontSize = this.value + 'px';
+            span.appendChild(selectedText);
+            
+            range.insertNode(span);
+            
+            // مسح التحديد
+            selection.removeAllRanges();
+        } else {
+            // إذا لم يكن هناك نص محدد - تغيير حجم الخط الكامل
+            editor.style.fontSize = this.value + 'px';
+        }
+        
+        editor.focus();
+    });
     const title = document.getElementById('notes-editor-title').value;
     const content = document.getElementById('notes-editor-content').innerHTML;
     const fontFamily = document.getElementById('notes-font-family').value;
-    const fontSize = document.getElementById('notes-font-size').value;
     const fontWeight = document.getElementById('notes-font-weight').value;
     const fontStyle = document.getElementById('notes-font-style').value;
     const color = document.getElementById('notes-font-color').value;
