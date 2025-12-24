@@ -1863,6 +1863,29 @@ function setupTaskButtonsEvents() {
 } 
 
 // ========== إدارة الفئات ==========
+function updateCategoriesStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const todayTasks = AppState.tasks.filter(task => task.date === today);
+    
+    const completedTasks = todayTasks.filter(task => task.completed);
+    const totalMinutes = todayTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
+    const completedMinutes = completedTasks.reduce((sum, task) => sum + (task.duration || 0), 0);
+    
+    const progressPercentage = totalMinutes > 0 ? Math.round((completedMinutes / totalMinutes) * 100) : 0;
+    
+    // تحديث العناصر
+    document.getElementById('today-completed-minutes').textContent = completedMinutes;
+    document.getElementById('today-total-minutes').textContent = totalMinutes;
+    document.getElementById('today-progress-percentage').textContent = progressPercentage + '%';
+    document.getElementById('today-completed-tasks').textContent = completedTasks.length;
+    
+    // تحديث شريط التقدم
+    const progressBar = document.querySelector('.progress-fill');
+    if (progressBar) {
+        progressBar.style.width = progressPercentage + '%';
+    }
+}
+
 // تحديث renderCategories لإضافة الأزرار
 function renderCategories() {
     console.log("🎯 عرض الفئات...");
@@ -2015,9 +2038,13 @@ function renderCategories() {
             });
         });
     }, 50);
+    
+    updateCategoriesStats();
 
     console.log("✅ تم عرض الفئات بنجاح");
+    
 }
+
 
 function deleteCategory(categoryId) {
     const categoryIndex = AppState.categories.findIndex(c => c.id === categoryId);
@@ -2424,8 +2451,6 @@ document.addEventListener('click', function(e){
         if (item) item.classList.toggle('completed');
     }
 });
-
-// إضافة أزرار جديدة في محرر الملاحظات — الدوال مُعرّفة لاحقاً في setupNotesEditorEvents
 
 function addNote() {
     const newNote = {
