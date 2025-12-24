@@ -197,45 +197,70 @@
             </div>
             <div class="modal-body">
               <form id="task-form">
-    <div class="form-group">
-        <label for="task-title">عنوان المهمة *</label>
-        <input type="text" id="task-title" placeholder="أدخل عنوان المهمة" required>
-    </div>
-    <div class="form-group">
-        <label for="task-category">الفئة *</label>
-        <select id="task-category" required>
-            <!-- سيتم ملؤها بواسطة JavaScript -->
-        </select>
-    </div>
-    <div class="form-row">
-        <div class="form-group">
-            <label for="task-date">تاريخ الاستحقاق</label>
-            <input type="date" id="task-date">
-        </div>
-        <div class="form-group">
-            <label for="task-time">الوقت</label>
-            <input type="time" id="task-time">
-        </div>
-    </div>
-    <div class="form-row">
-        <div class="form-group">
-            <label for="task-duration">المدة (دقائق)</label>
-            <input type="number" id="task-duration" min="1" value="30">
-        </div>
-        <div class="form-group">
-            <label for="task-priority">الأولوية</label>
-            <select id="task-priority">
-                <option value="low">منخفضة</option>
-                <option value="medium" selected>متوسطة</option>
-                <option value="high">عالية</option>
-            </select>
-        </div>
-    </div>
-    <div class="form-group">
-        <label for="task-description">الوصف</label>
-        <textarea id="task-description" placeholder="أدخل وصف المهمة" rows="4"></textarea>
-    </div>
-</form>
+                <div class="form-group">
+                    <label for="task-title">عنوان المهمة *</label>
+                    <input type="text" id="task-title" placeholder="أدخل عنوان المهمة" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-category">الفئة *</label>
+                    <select id="task-category" required>
+                        <!-- سيتم ملؤها بواسطة JavaScript -->
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-date">تاريخ الاستحقاق</label>
+                        <input type="date" id="task-date">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-time">الوقت</label>
+                        <input type="time" id="task-time">
+                    </div>
+                </div>
+                  <!-- أضف هذا في نموذج إضافة المهمة بعد حقل الأولوية -->
+                <div class="form-group">
+                    <label for="task-repetition">التكرار</label>
+                    <select id="task-repetition">
+                        <option value="none">بدون تكرار</option>
+                        <option value="daily">يوميًا</option>
+                        <option value="weekly">أسبوعيًا</option>
+                        <option value="monthly">شهريًا</option>
+                        <option value="custom">مخصص</option>
+                    </select>
+                </div>
+                <div id="custom-repetition-options" style="display: none;">
+                    <div class="form-group">
+                        <label>أيام التكرار</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <label><input type="checkbox" name="repeat-days" value="0"> الأحد</label>
+                            <label><input type="checkbox" name="repeat-days" value="1"> الاثنين</label>
+                            <label><input type="checkbox" name="repeat-days" value="2"> الثلاثاء</label>
+                            <label><input type="checkbox" name="repeat-days" value="3"> الأربعاء</label>
+                            <label><input type="checkbox" name="repeat-days" value="4"> الخميس</label>
+                            <label><input type="checkbox" name="repeat-days" value="5"> الجمعة</label>
+                            <label><input type="checkbox" name="repeat-days" value="6"> السبت</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="task-duration">المدة (دقائق)</label>
+                        <input type="number" id="task-duration" min="1" value="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="task-priority">الأولوية</label>
+                        <select id="task-priority">
+                            <option value="low">منخفضة</option>
+                            <option value="medium" selected>متوسطة</option>
+                            <option value="high">عالية</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">الوصف</label>
+                    <textarea id="task-description" placeholder="أدخل وصف المهمة" rows="4"></textarea>
+                </div>
+            </form>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancel-task">إلغاء</button>
