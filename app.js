@@ -1158,16 +1158,17 @@ function renderTasks() {
     
     let html = '';
     
+      
     tasksToShow.forEach(task => {
         const category = getCategoryById(task.categoryId);
         const isDeleted = AppState.currentFilter === 'deleted';
         const isOverdue = isTaskOverdue(task) && !task.completed;
         
-        // إزالة اللون الأحمر واستخدام علامة فقط
+        // علامة "متأخرة" فقط - بدون تغيير لون البطاقة
         const overdueBadge = isOverdue ? `
             <div class="overdue-badge-container" style="position: absolute; top: 10px; left: 10px;">
                 <span class="overdue-badge" style="
-                    background: linear-gradient(135deg, #ff9800, #ff5722);
+                    background: linear-gradient(135deg, #6c757d, #495057);
                     color: white;
                     padding: 2px 8px;
                     border-radius: 12px;
@@ -1175,7 +1176,7 @@ function renderTasks() {
                     display: inline-flex;
                     align-items: center;
                     gap: 4px;
-                    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+                    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
                     z-index: 2;
                 ">
                     <i class="fas fa-exclamation-circle" style="font-size: 0.6rem;"></i> متأخرة
@@ -1212,7 +1213,7 @@ function renderTasks() {
             `;
          } else {
             // إزالة class 'overdue' وإبقاء الشكل الطبيعي
-            html += `
+              html += `
                 <div class="task-card ${task.completed ? 'completed' : ''}" 
                      data-id="${task.id}"
                      style="position: relative;"
