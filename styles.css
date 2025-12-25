@@ -168,6 +168,14 @@ body {
     background-color: #3d3d3d !important;
 }
 
+.theme-black .btn-info {
+    background: linear-gradient(135deg, #5a6268, #6c757d) !important;
+}
+
+.theme-black .btn-info:hover {
+    background: linear-gradient(135deg, #6c757d, #7d868e) !important;
+}
+
 /* ========== شريط التمرير في الثيم الأسود ========== */
 .theme-black ::-webkit-scrollbar-track {
     background: #1e1e1e !important;
@@ -2070,7 +2078,7 @@ select {
 .stat-value {
     font-size: 1.8rem;
     font-weight: 700;
-    color: var(--theme-primary);
+    color: #faebc3 !important; /* اللون الجديد */
     margin-bottom: 5px;
 }
 
