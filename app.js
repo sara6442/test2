@@ -416,36 +416,14 @@ function saveCategories() {
     }
 }
 
+// بعد التعديل:
 function saveNote() {
     if (!AppState.currentNoteId) return;
     
-        document.getElementById('notes-font-size').addEventListener('change', function() {
-        const editor = document.getElementById('notes-editor-content');
-        const selection = window.getSelection();
-        
-        if (selection && selection.rangeCount > 0 && !selection.isCollapsed && editor.contains(selection.anchorNode)) {
-            // إذا كان هناك نص محدد
-            const range = selection.getRangeAt(0);
-            const selectedText = range.extractContents();
-            
-            const span = document.createElement('span');
-            span.style.fontSize = this.value + 'px';
-            span.appendChild(selectedText);
-            
-            range.insertNode(span);
-            
-            // مسح التحديد
-            selection.removeAllRanges();
-        } else {
-            // إذا لم يكن هناك نص محدد - تغيير حجم الخط الكامل
-            editor.style.fontSize = this.value + 'px';
-        }
-        
-        editor.focus();
-    });
     const title = document.getElementById('notes-editor-title').value;
     const content = document.getElementById('notes-editor-content').innerHTML;
     const fontFamily = document.getElementById('notes-font-family').value;
+    const fontSize = document.getElementById('notes-font-size').value;
     const fontWeight = document.getElementById('notes-font-weight').value;
     const fontStyle = document.getElementById('notes-font-style').value;
     const color = document.getElementById('notes-font-color').value;
@@ -471,6 +449,7 @@ function saveNote() {
     
     document.getElementById('notes-editor').classList.remove('active');
 }
+
 // ========== إدارة الفئات (وظائف مفقودة) ==========
 function openEditCategoryModal(categoryId) {
     console.log("📝 فتح نافذة تعديل الفئة:", categoryId);
@@ -504,64 +483,6 @@ function openEditCategoryModal(categoryId) {
     setTimeout(() => nameInput.focus(), 100);
 }
 
-function saveCategory() {
-    const nameInput = document.getElementById('category-name');
-    const colorInput = document.getElementById('category-color');
-    const timeframeInput = document.getElementById('category-timeframe');
-    
-    if (!nameInput || !colorInput || !timeframeInput) {
-        console.error("❌ عناصر النموذج غير موجودة");
-        return;
-    }
-    
-    const name = nameInput.value.trim();
-    const color = colorInput.value;
-    const timeframeMinutes = parseInt(timeframeInput.value) || 60;
-    
-    if (!name) {
-        alert('يرجى إدخال اسم الفئة');
-        nameInput.focus();
-        return;
-    }
-    
-    if (AppState.currentCategoryId) {
-        // تحديث فئة موجودة
-        const index = AppState.categories.findIndex(c => c.id === AppState.currentCategoryId);
-        if (index !== -1) {
-            AppState.categories[index] = {
-                ...AppState.categories[index],
-                name: name,
-                color: color,
-                timeframeMinutes: timeframeMinutes
-            };
-        }
-    } else {
-        // إضافة فئة جديدة
-        const newCategory = {
-            id: generateId(),
-            name: name,
-            color: color,
-            timeframeMinutes: timeframeMinutes,
-            timeframeType: 'minutes',
-            messagePending: 'هناك مهام معلقة. واصل العمل لإنجازها!',
-            messageCompleted: 'ممتاز! لقد أكملت جميع المهام لهذا اليوم.',
-            messageExceeded: 'لقد تجاوزت الوقت المخصص. حاول إدارة وقتك بشكل أفضل!'
-        };
-        
-        AppState.categories.push(newCategory);
-    }
-    
-    saveCategories();
-    renderCategories();
-    refreshCurrentView();
-    closeModal('category-modal');
-    
-    // إعادة تعيين النموذج
-    if (nameInput) nameInput.value = '';
-    if (colorInput) colorInput.value = '#5a76e8';
-    if (timeframeInput) timeframeInput.value = '60';
-    AppState.currentCategoryId = null;
-}
 
 function saveNotes() {
     try {
@@ -1378,6 +1299,13 @@ function checkCategoryTimeframe(categoryId, newTaskDuration = 0) {
     };
 }
 
+function showAllTasksForDay(dateStr) {
+    const tasks = AppState.tasks.filter(task => task.date === dateStr);
+    if (tasks.length > 0) {
+        alert(`مهام ${dateStr}:\n${tasks.map(t => `- ${t.title} (${t.time || 'بدون وقت'})`).join('\n')}`);
+    }
+}
+
 function showTimeframeWarning(timeframeCheck, taskData) {
     const warningHTML = `
         <div class="modal" id="timeframe-warning-modal">
@@ -2091,6 +2019,12 @@ function deleteCategory(categoryId) {
     alert(`تم حذف فئة "${category.name}" وجميع المهام المرتبطة بها.`);
 }
 
+function renderCategoriesStatus() {
+    // يمكن تنفيذها لاحقاً
+    console.log("عرض حالة الفئات");
+}
+
+
 // ========== عرض الجدول الزمني (موحد) ==========
 function timeStrToMinutes(timeStr) {
     if (!timeStr) return 0;
@@ -2319,13 +2253,15 @@ function renderWeeklyCalendar(container) {
                     </div>
                 `;
             });
-    
-        html += `</div></div>`;
-    }
-    html += `</div>`;
-    container.innerHTML = html;
-    setTimeout(()=>{ setupCalendarTooltips(); setupCalendarHoverEffects(); },100);
+            html += `</div></div>`;
+            
+            container.innerHTML = html;
+            setTimeout(() => { 
+                setupCalendarTooltips(); 
+                setupCalendarHoverEffects(); 
+            }, 100);
 }
+
 
 function renderMonthlyCalendar(container) {
     console.log("📅 عرض الجدول الشهري...");
@@ -2373,8 +2309,11 @@ function renderMonthlyCalendar(container) {
         html += `</div></div>`;
     }
     html += '</div>';
-    container.innerHTML = html;
-    setTimeout(()=>{ setupCalendarTooltips(); setupCalendarHoverEffects(); },100);
+     container.innerHTML = html;
+    setTimeout(() => { 
+        setupCalendarTooltips(); 
+        setupCalendarHoverEffects(); 
+    }, 100);
 }
 
 // دوال التنقل في الجدول
@@ -3664,6 +3603,11 @@ function navigateToResult(type, id) {
             switchView('categories');
             break;
     }
+}
+
+function navigateCalendarWeeks(weeks) {
+    AppState.currentCalendarDate.setDate(AppState.currentCalendarDate.getDate() + (weeks * 7));
+    renderCalendar();
 }
 
 function highlightText(text, query) {
