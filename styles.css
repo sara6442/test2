@@ -464,10 +464,6 @@ body {
     opacity: 0.7; 
     border-color: var(--success-color); 
 }
-.task-card.overdue { 
-    border-color: var(--danger-color); 
-    background: rgba(247, 37, 133, 0.05); 
-}
 .task-card.completed .task-title { 
     text-decoration: line-through; 
     color: var(--gray-color); 
@@ -714,16 +710,39 @@ body {
     border: 1px solid var(--theme-border);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
-
 .stat-item {
     text-align: center;
     min-width: 80px;
+}
+/* تخصيص ألوان الأرقام حسب الثيم */
+.theme-beige .stat-value {
+    color: #8d6e63 !important; /* بني فاتح */
+    text-shadow: 0 1px 2px rgba(141, 110, 99, 0.1);
+}
+
+.theme-gray .stat-value {
+    color: #5a6268 !important; /* رمادي داكن */
+    text-shadow: 0 1px 2px rgba(90, 98, 104, 0.1);
+}
+
+.theme-black .stat-value {
+    color: #ffffff !important; /* أبيض */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-blue .stat-value {
+    color: #4361ee !important; /* أزرق */
+    text-shadow: 0 1px 2px rgba(67, 97, 238, 0.1);
+}
+
+.theme-custom .stat-value {
+    color: var(--theme-primary) !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .stat-value {
     font-size: 1.8rem;
     font-weight: 700;
-    color: #faebc3 !important;
     margin-bottom: 5px;
 }
 
@@ -732,16 +751,17 @@ body {
     color: var(--gray-color);
     font-weight: 500;
 }
-
 .progress-bar-container {
     margin-top: 15px;
 }
-
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--success-color), #3ab5e0);
+    background: linear-gradient(90deg, #4CAF50, #8BC34A) !important; /* أخضر فاتح */
     border-radius: 4px;
     transition: width 0.5s ease;
+}
+.progress-fill[style*="background: var(--success-color)"] {
+    background: linear-gradient(90deg, #4CAF50, #8BC34A) !important;
 }
 
 /* ========== عرض الملاحظات ========== */
@@ -1503,7 +1523,7 @@ body {
 
 /* ========== علامة متأخرة ========== */
 .overdue-badge {
-    background: linear-gradient(135deg, #f72585, #b5179e) !important;
+    background: linear-gradient(135deg, #c95984, #c7739c) !important;
     color: white !important;
     padding: 4px 10px !important;
     border-radius: 15px !important;
