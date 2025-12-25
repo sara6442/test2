@@ -196,16 +196,21 @@
                     </div>
                 </div>
                 <!-- عرض الفئات -->
-                <div id="categories-view" class="view">
+               <div id="categories-view" class="view">
+                    <!-- شريط الإحصائيات سيظهر هنا فقط -->
+                    <div class="categories-stats-bar" style="display: none;">
+                        <!-- محتوى شريط الإحصائيات -->
+                    </div>
+                    
                     <div class="categories-header">
                         <div>
                             <h2 style="color: var(--theme-text);">إدارة الفئات</h2>
-                            <p style="color: var(--gray-color); margin-top: 10px;">إدارة فئات المهام وإضافة مهام جديدة لها</p>
                         </div>
                         <button class="btn btn-primary" id="add-category-btn">
                             <i class="fas fa-plus"></i> فئة جديدة
                         </button>
                     </div>
+                    
                     <div class="categories-grid" id="categories-list">
                         <!-- الفئات ستظهر هنا مع زر إضافة مهمة -->
                     </div>
