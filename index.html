@@ -423,24 +423,23 @@
                     <input type="file" id="notes-image-file-input" accept="image/*,image/gif" style="display: none;">
                 </div>
             </div>
-            <div class="notes-toolbar-right" style="display:flex; gap:10px; align-items:center;">
-                <button class="btn btn-warning" id="add-checkbox-btn" title="إضافة خانة اختيار">
-                    <i class="fas fa-square-check"></i> خانة
-                </button>
-                
-                <div class="enhanced-tools" style="display:flex; gap:8px; align-items:center; padding-left:10px; border-left:1px solid var(--theme-border);">
+                <div class="notes-toolbar-right" style="display:flex; gap:10px; align-items:center;">
+                    <button class="btn btn-warning" id="add-checkbox-btn" title="إضافة خانة اختيار">
+                        <i class="fas fa-square-check"></i> اختيار
+                    </button>
+                    
+                    <!-- إزالة الازدواجية في الأزرار -->
                     <button class="btn btn-success btn-sm" id="add-link-btn" title="إضافة رابط"><i class="fas fa-link"></i></button>
                     <button class="btn btn-info btn-sm" id="add-image-btn" title="إضافة صورة"><i class="fas fa-image"></i></button>
                     <input type="file" id="notes-image-file-input" accept="image/*,image/gif" style="display: none;">
+                    
+                    <button class="btn btn-secondary" id="save-notes-btn" style="margin-left:10px;">
+                        <i class="fas fa-save"></i> حفظ
+                    </button>
+                    <button class="btn btn-danger" id="close-notes-btn">
+                        <i class="fas fa-times"></i> إغلاق
+                    </button>
                 </div>
-                
-                <button class="btn btn-secondary" id="save-notes-btn" style="margin-left:10px;">
-                    <i class="fas fa-save"></i> حفظ
-                </button>
-                <button class="btn btn-danger" id="close-notes-btn">
-                    <i class="fas fa-times"></i> إغلاق
-                </button>
-            </div>
         </div>
         
         <div class="formatting-tools">
