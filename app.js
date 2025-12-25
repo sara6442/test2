@@ -2217,13 +2217,15 @@ function renderWeeklyCalendar(container) {
     `;
     
     const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-    for (let i=0;i<7;i++){
+    for (let i = 0; i < 7; i++) {
         const day = new Date(startOfWeek);
-        day.setDate(startOfWeek.getDate()+i);
+        day.setDate(startOfWeek.getDate() + i);
         const dateStr = day.toISOString().split('T')[0];
         const dayTasks = AppState.tasks.filter(t => t.date === dateStr);
+        
         // ترتيب مهام اليوم
-        dayTasks.sort((a,b)=> (a.time?timeStrToMinutes(a.time):9999) - (b.time?timeStrToMinutes(b.time):9999));
+        dayTasks.sort((a, b) => (a.time ? timeStrToMinutes(a.time) : 9999) - (b.time ? timeStrToMinutes(b.time) : 9999));
+        
         html += `<div class="day-column ${dateStr === new Date().toISOString().split('T')[0] ? 'today' : ''}">
                     <div class="day-header">
                         <div class="day-name">${dayNames[i]}</div>
@@ -2231,8 +2233,12 @@ function renderWeeklyCalendar(container) {
                         <div class="day-task-count">${dayTasks.length} مهام</div>
                     </div>
                     <div class="day-tasks">`;
-        if (dayTasks.length===0){
-            html+=`<div style="text-align:center;padding:20px;color:var(--gray-color);"><i class="fas fa-calendar-day" style="opacity:0.3;"></i><p>لا توجد مهام</p></div>`;
+        
+        if (dayTasks.length === 0) {
+            html += `<div style="text-align:center;padding:20px;color:var(--gray-color);">
+                        <i class="fas fa-calendar-day" style="opacity:0.3;"></i>
+                        <p>لا توجد مهام</p>
+                    </div>`;
         } else {
             // تعديل عرض المهام لتكون فوق بعضها
             dayTasks.forEach(task => {
@@ -2253,15 +2259,19 @@ function renderWeeklyCalendar(container) {
                     </div>
                 `;
             });
-            html += `</div></div>`;
-            
-            container.innerHTML = html;
-            setTimeout(() => { 
-                setupCalendarTooltips(); 
-                setupCalendarHoverEffects(); 
-            }, 100);
+        }
+        
+        html += `</div></div>`;
+    }
+    
+    html += `</div>`;
+    container.innerHTML = html;
+    
+    setTimeout(() => { 
+        setupCalendarTooltips(); 
+        setupCalendarHoverEffects(); 
+    }, 100);
 }
-
 
 function renderMonthlyCalendar(container) {
     console.log("📅 عرض الجدول الشهري...");
