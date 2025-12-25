@@ -328,6 +328,32 @@
                                 <option value="high">عالية</option>
                             </select>
                         </div>
+                              
+                <div class="form-group">
+                    <label for="edit-task-repetition">التكرار</label>
+                    <select id="edit-task-repetition">
+                        <option value="none">بدون تكرار</option>
+                        <option value="daily">يوميًا</option>
+                        <option value="weekly">أسبوعيًا</option>
+                        <option value="monthly">شهريًا</option>
+                        <option value="custom">مخصص</option>
+                    </select>
+                </div>
+                
+                <div id="edit-custom-repetition-options" style="display: none;">
+                    <div class="form-group">
+                        <label>أيام التكرار</label>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <label><input type="checkbox" name="edit-repeat-days" value="0"> الأحد</label>
+                            <label><input type="checkbox" name="edit-repeat-days" value="1"> الاثنين</label>
+                            <label><input type="checkbox" name="edit-repeat-days" value="2"> الثلاثاء</label>
+                            <label><input type="checkbox" name="edit-repeat-days" value="3"> الأربعاء</label>
+                            <label><input type="checkbox" name="edit-repeat-days" value="4"> الخميس</label>
+                            <label><input type="checkbox" name="edit-repeat-days" value="5"> الجمعة</label>
+                            <label><input type="checkbox" name="edit-repeat-days" value="6"> السبت</label>
+                        </div>
+                    </div>
+                </div>
                     </div>
                     <div class="form-group">
                         <label for="edit-task-description">الوصف</label>
