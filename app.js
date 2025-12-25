@@ -566,24 +566,30 @@ function getTaskTimeInMinutes(taskOrTime) {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + (minutes || 0);
 }
-
 function refreshCurrentView() {
+    // إخفاء شريط الإحصائيات أولاً في جميع الحالات
+    const statsBar = document.querySelector('.categories-stats-bar');
+    
     if (AppState.currentView === 'tasks') {
         renderTasks();
-        document.querySelector('.categories-stats-bar').style.display = 'none';
+        if (statsBar) statsBar.style.display = 'none';
     }
     else if (AppState.currentView === 'calendar') {
         renderCalendar();
-        document.querySelector('.categories-stats-bar').style.display = 'none';
+        if (statsBar) statsBar.style.display = 'none';
     }
     else if (AppState.currentView === 'categories') {
         renderCategories();
-        document.querySelector('.categories-stats-bar').style.display = 'block';
+        if (statsBar) {
+            statsBar.style.display = 'block';
+            statsBar.style.marginTop = '0'; // إزالة أي هوامش غير ضرورية
+            statsBar.style.marginBottom = '25px'; // مسافة مناسبة
+        }
         updateCategoriesStats();
     }
     else if (AppState.currentView === 'notes') {
         renderNotes();
-        document.querySelector('.categories-stats-bar').style.display = 'none';
+        if (statsBar) statsBar.style.display = 'none';
     }
     
     // تحديث زر حالة الفئات
@@ -3751,7 +3757,6 @@ function setupAllEvents() {
     document.getElementById('add-category-btn')?.addEventListener('click', () => openAddCategoryModal());
     document.getElementById('add-note-btn')?.addEventListener('click', () => addNote());
 }
-
 function initializePage() {
     console.log("🚀 بدء تهيئة الصفحة...");
     checkCSS();
@@ -3762,15 +3767,20 @@ function initializePage() {
     setupAllEvents();
     setupNotesEvents();
     ensureFilterBar();
+    
+    // إخفاء شريط الإحصائيات في البداية
+    const statsBar = document.querySelector('.categories-stats-bar');
+    if (statsBar) {
+        statsBar.style.display = 'none';
+        statsBar.style.marginBottom = '0'; // إزالة المسافة عندما يكون مخفيًا
+    }
+    
     renderTasks();
     renderCategories();
     renderNotes();
     
-    // إخفاء الإحصائيات في البداية
-    const statsBar = document.querySelector('.categories-stats-bar');
-    if (statsBar) {
-        statsBar.style.display = 'none';
-    }
+    // إظهار المهام أولاً
+    switchView('tasks');
     
     console.log("🎉 التطبيق جاهز للاستخدام!");
 }
