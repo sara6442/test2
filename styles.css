@@ -465,9 +465,15 @@ body {
 /* ========== MAIN ========== */
 .main-content { 
     flex: 1; 
+    margin-top: 0 !important;
     margin-right: 280px; 
+    padding-top: 10px !important;
     padding: 25px; 
     transition: var(--transition); 
+}
+body {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* ========== الهيدر ========== */
@@ -476,12 +482,12 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 30px;
+    margin-top: 0 !important;
     padding: 25px;
     background: var(--theme-card);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
     border: 1px solid var(--theme-border);
-}
 
 .header-left h1 { 
     color: var(--theme-primary); 
