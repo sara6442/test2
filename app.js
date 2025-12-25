@@ -390,9 +390,9 @@ function refreshCurrentView() {
     const statsBar = document.querySelector('.categories-stats-bar');
     
     if (AppState.currentView === 'tasks') {
-        // إنشاء الفلتر مرة واحدة فقط
         ensureFilterBar();
         renderTasks();
+        // إخفاء شريط الإحصائيات دائماً
         if (statsBar) statsBar.style.display = 'none';
     }
     else if (AppState.currentView === 'calendar') {
@@ -406,17 +406,14 @@ function refreshCurrentView() {
             statsBar.style.marginTop = '0';
             statsBar.style.marginBottom = '25px';
         }
-        updateCategoriesStats();
     }
     else if (AppState.currentView === 'notes') {
         renderNotes();
         if (statsBar) statsBar.style.display = 'none';
     }
     
-    // تحديث زر حالة الفئات
     ensureFilterBar();
 }
-
 // ========== إدارة الثيمات ==========
 function initializeThemes() {
     console.log("تهيئة الثيمات...");
@@ -2642,7 +2639,36 @@ function openEditTaskModal(taskId) {
     const timeInput = document.getElementById('edit-task-time');
     const durationInput = document.getElementById('edit-task-duration');
     const priorityInput = document.getElementById('edit-task-priority');
+       // تعيين تكرار المهمة
+    const repetitionSelect = document.getElementById('edit-task-repetition');
+    const customRepetitionDiv = document.getElementById('edit-custom-repetition-options');
     
+    if (repetitionSelect) {
+        repetitionSelect.value = task.repetition?.type || 'none';
+        
+        // إظهار/إخفاء خيارات التكرار المخصص
+        repetitionSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRepetitionDiv.style.display = 'block';
+            } else {
+                customRepetitionDiv.style.display = 'none';
+            }
+        });
+        
+        // تفعيل حالياً إذا كانت القيمة مخصصة
+        if (task.repetition?.type === 'custom') {
+            customRepetitionDiv.style.display = 'block';
+            
+            // تحديد الأيام المختارة
+            if (task.repetition.days) {
+                task.repetition.days.forEach(day => {
+                    const checkbox = document.querySelector(`input[name="edit-repeat-days"][value="${day}"]`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+        }
+    }
+ 
     if (dateInput) dateInput.value = task.date || '';
     if (timeInput) timeInput.value = task.time || '';
     if (durationInput) durationInput.value = task.duration || 30;
@@ -3402,6 +3428,20 @@ function saveEditedTask() {
     const prioritySelect = document.getElementById('edit-task-priority');
     const descriptionTextarea = document.getElementById('edit-task-description');
     
+    let repetition = null;
+    const repetitionType = document.getElementById('edit-task-repetition').value;
+    if (repetitionType !== 'none') {
+        repetition = { type: repetitionType };
+        
+        if (repetitionType === 'custom') {
+            const checkedDays = Array.from(document.querySelectorAll('input[name="edit-repeat-days"]:checked'))
+                .map(cb => parseInt(cb.value));
+            if (checkedDays.length > 0) {
+                repetition.days = checkedDays;
+            }
+        }
+    }
+    
     updateTask(AppState.currentTaskId, {
         title: title,
         description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
@@ -3409,7 +3449,8 @@ function saveEditedTask() {
         duration: durationInput ? parseInt(durationInput.value) || 30 : 30,
         date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
         time: timeInput ? timeInput.value : '',
-        priority: prioritySelect ? prioritySelect.value : 'medium'
+        priority: prioritySelect ? prioritySelect.value : 'medium',
+        repetition: repetition
     });
 }
 
