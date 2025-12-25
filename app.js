@@ -1149,6 +1149,10 @@ function renderTasks() {
                 ${AppState.currentFilter === 'pending' ? '<p>اضغط على "إضافة مهمة" لإنشاء مهمتك الأولى</p>' : ''}
             </div>
         `;
+       }
+    
+    if (tasksToShow.length === 0) {
+        // ... كود العرض الفارغ
         return;
     }
     
@@ -1159,9 +1163,21 @@ function renderTasks() {
         const isDeleted = AppState.currentFilter === 'deleted';
         const isOverdue = isTaskOverdue(task) && !task.completed;
         
+        // إزالة اللون الأحمر واستخدام علامة فقط
         const overdueBadge = isOverdue ? `
-            <div class="overdue-badge-container" style="position: absolute; bottom: 10px; left: 10px;">
-                <span class="overdue-badge" style="background: linear-gradient(135deg, #f72585, #b5179e); color: white; padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; display: inline-flex; align-items: center; gap: 4px; box-shadow: 0 2px 4px rgba(247, 37, 133, 0.3);">
+            <div class="overdue-badge-container" style="position: absolute; top: 10px; left: 10px;">
+                <span class="overdue-badge" style="
+                    background: linear-gradient(135deg, #ff9800, #ff5722);
+                    color: white;
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                    font-size: 0.7rem;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3);
+                    z-index: 2;
+                ">
                     <i class="fas fa-exclamation-circle" style="font-size: 0.6rem;"></i> متأخرة
                 </span>
             </div>
@@ -1194,9 +1210,10 @@ function renderTasks() {
                     </div>
                 </div>
             `;
-        } else {
+         } else {
+            // إزالة class 'overdue' وإبقاء الشكل الطبيعي
             html += `
-                <div class="task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                <div class="task-card ${task.completed ? 'completed' : ''}" 
                      data-id="${task.id}"
                      style="position: relative;"
                      title="انقر لتعديل المهمة">
@@ -1233,7 +1250,7 @@ function renderTasks() {
                     
                     ${overdueBadge}
                     
-                    <div class="task-actions" style="position: absolute; top: 10px; left: 10px;">
+                    <div class="task-actions" style="position: absolute; top: 10px; left: 10px; z-index: 3;">
                         <button class="btn btn-secondary btn-sm edit-task-btn" data-id="${task.id}" title="تعديل المهمة">
                             <i class="fas fa-edit"></i>
                         </button>
@@ -2267,35 +2284,6 @@ function deleteNote(noteId) {
     }
 }
 
-function openNoteEditor(noteId) {
-    const note = AppState.notes.find(n => n.id === noteId);
-    if (!note) return;
-    
-    AppState.currentNoteId = noteId;
-    
-    document.getElementById('notes-editor-title').value = note.title;
-    document.getElementById('notes-font-family').value = note.fontFamily;
-    document.getElementById('notes-font-size').value = note.fontSize;
-    document.getElementById('notes-font-weight').value = note.fontWeight;
-    document.getElementById('notes-font-style').value = note.fontStyle;
-    document.getElementById('notes-font-color').value = note.color;
-    
-    const editor = document.getElementById('notes-editor-content');
-    editor.innerHTML = note.content || '';
-    editor.style.fontFamily = note.fontFamily;
-    editor.style.fontSize = note.fontSize + 'px';
-    editor.style.fontWeight = note.fontWeight;
-    editor.style.fontStyle = note.fontStyle;
-    editor.style.color = note.color;
-    
-    document.getElementById('notes-editor').classList.add('active');
-    
-    setTimeout(() => {
-        setupEnhancedNotesEditor();
-        setupNotesEditorEvents();
-    }, 100);
-}
-
 function saveNote() {
     if (!AppState.currentNoteId) return;
     
@@ -3131,22 +3119,112 @@ function setupAllEvents() {
         }
     });
 }
-
+// في دالة setupNotesEvents() - إضافة مستمعات الأحداث:
 function setupNotesEvents() {
     console.log("📝 إعداد أحداث الملاحظات...");
     
     const addNoteBtn = document.getElementById('add-note-btn');
     if (addNoteBtn) {
-        addNoteBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            addNote();
-        });
+        // إزالة أي مستمعات سابقة لمنع التكرار
+        addNoteBtn.removeEventListener('click', handleAddNoteClick);
+        // إضافة مستمع جديد
+        addNoteBtn.addEventListener('click', handleAddNoteClick);
     }
+    
+    // إضافة مستمعات للنقر على بطاقات الملاحظات
+    document.body.addEventListener('click', function(e) {
+        // فتح محرر الملاحظات عند النقر على بطاقة الملاحظة
+        if (e.target.closest('.note-card')) {
+            const noteCard = e.target.closest('.note-card');
+            if (!e.target.classList.contains('delete-note-btn')) {
+                const noteId = noteCard.dataset.id;
+                openNoteEditor(noteId);
+            }
+        }
+        
+        // التعامل مع خانة الاختيار في الملاحظات
+        if (e.target.classList && e.target.classList.contains('note-checkbox')) {
+            e.stopPropagation();
+            const item = e.target.closest('.note-checkbox-item');
+            if (item) item.classList.toggle('completed');
+        }
+    });
 }
 
+// دالة منفصلة للتعامل مع زر إضافة الملاحظة
+function handleAddNoteClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("➕ زر إضافة ملاحظة تم النقر عليه");
+    addNote();
+}
+
+// في دالة openNoteEditor() - التأكد من أن المحرر يفتح:
+function openNoteEditor(noteId) {
+    console.log("📝 فتح محرر الملاحظات:", noteId);
+    
+    const note = AppState.notes.find(n => n.id === noteId);
+    if (!note) {
+        console.error("❌ الملاحظة غير موجودة:", noteId);
+        return;
+    }
+    
+    AppState.currentNoteId = noteId;
+    
+    // تحديث القيم
+    const titleInput = document.getElementById('notes-editor-title');
+    if (titleInput) titleInput.value = note.title;
+    
+    const fontFamilySelect = document.getElementById('notes-font-family');
+    if (fontFamilySelect) fontFamilySelect.value = note.fontFamily;
+    
+    const fontSizeInput = document.getElementById('notes-font-size');
+    if (fontSizeInput) fontSizeInput.value = note.fontSize;
+    
+    const fontWeightSelect = document.getElementById('notes-font-weight');
+    if (fontWeightSelect) fontWeightSelect.value = note.fontWeight;
+    
+    const fontStyleSelect = document.getElementById('notes-font-style');
+    if (fontStyleSelect) fontStyleSelect.value = note.fontStyle;
+    
+    const fontColorInput = document.getElementById('notes-font-color');
+    if (fontColorInput) fontColorInput.value = note.color;
+    
+    const editor = document.getElementById('notes-editor-content');
+    if (editor) {
+        editor.innerHTML = note.content || '';
+        editor.style.fontFamily = note.fontFamily;
+        editor.style.fontSize = note.fontSize + 'px';
+        editor.style.fontWeight = note.fontWeight;
+        editor.style.fontStyle = note.fontStyle;
+        editor.style.color = note.color;
+    }
+    
+    // إظهار محرر الملاحظات
+    const notesEditor = document.getElementById('notes-editor');
+    if (notesEditor) {
+        notesEditor.classList.add('active');
+        console.log("✅ محرر الملاحظات مفتوح");
+    } else {
+        console.error("❌ عنصر محرر الملاحظات غير موجود!");
+    }
+    
+    // إعداد أحداث المحرر
+    setTimeout(() => {
+        setupEnhancedNotesEditor();
+        setupNotesEditorEvents();
+    }, 100);
+}
+
+// في دالة saveNewTask() - التعديل:
 function saveNewTask() {
     console.log("💾 حفظ مهمة جديدة...");
+    
+    // منع التنفيذ المزدوج
+    if (isAddingTask) {
+        console.log("⚠️ محاولة إضافة مزدوجة - تم منعها");
+        return;
+    }
     
     const titleInput = document.getElementById('task-title');
     const categorySelect = document.getElementById('task-category');
@@ -3192,6 +3270,9 @@ function saveNewTask() {
             }
         }
     }
+    
+    // منع التنفيذ المزدوج بتعيين الحالة
+    isAddingTask = true;
     
     addTask({
         title: title,
