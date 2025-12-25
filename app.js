@@ -1165,20 +1165,9 @@ function renderTasks() {
         const isOverdue = isTaskOverdue(task) && !task.completed;
         
         // علامة "متأخرة" فقط - بدون تغيير لون البطاقة
-        const overdueBadge = isOverdue ? `
-            <div class="overdue-badge-container" style="position: absolute; top: 10px; left: 10px;">
-                <span class="overdue-badge" style="
-                    background: linear-gradient(135deg, #6c757d, #495057);
-                    color: white;
-                    padding: 2px 8px;
-                    border-radius: 12px;
-                    font-size: 0.7rem;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 4px;
-                    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
-                    z-index: 2;
-                ">
+       const overdueBadge = isOverdue ? `
+            <div class="overdue-badge-container">
+                <span class="overdue-badge">
                     <i class="fas fa-exclamation-circle" style="font-size: 0.6rem;"></i> متأخرة
                 </span>
             </div>
@@ -1267,6 +1256,97 @@ function renderTasks() {
     container.innerHTML = html;
     setupTaskButtonsEvents();
 }
+
+// ========== تلميحات المهام ==========
+function setupTaskTooltips() {
+    document.querySelectorAll('.task-card:not(.deleted)').forEach(card => {
+        card.addEventListener('mouseenter', function(e) {
+            const taskId = this.dataset.id;
+            const task = AppState.tasks.find(t => t.id === taskId);
+            if (!task) return;
+            
+            showTaskTooltip(e, task);
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            hideTaskTooltip();
+        });
+        
+        card.addEventListener('click', function() {
+            hideTaskTooltip();
+        });
+    });
+}
+
+function showTaskTooltip(e, task) {
+    const category = getCategoryById(task.categoryId);
+    const isOverdue = isTaskOverdue(task);
+    
+    const tooltip = document.createElement('div');
+    tooltip.className = 'task-tooltip';
+    tooltip.innerHTML = `
+        <div style="padding: 15px; min-width: 250px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+                <strong style="color: ${category.color}; font-size:1.1rem;">${task.title}</strong>
+                <span style="background: ${category.color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem;">
+                    ${category.name}
+                </span>
+            </div>
+            
+            ${isOverdue ? '<div style="background: rgba(247, 37, 133, 0.1); padding: 5px 10px; border-radius: 6px; margin-bottom: 10px; color: #f72585; font-size: 0.85rem;"><i class="fas fa-exclamation-circle"></i> متأخرة</div>' : ''}
+            
+            ${task.description ? `<p style="margin:10px 0;color:var(--theme-text);">${task.description}</p>` : ''}
+            
+            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: var(--gray-color); font-size:0.9rem; margin-top: 10px;">
+                <div><i class="fas fa-calendar"></i> ${formatDate(task.date)}</div>
+                <div><i class="fas fa-clock"></i> ${task.time || 'بدون وقت'}</div>
+                <div><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</div>
+                <div><i class="fas fa-flag"></i> ${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</div>
+            </div>
+        </div>
+    `;
+    
+    tooltip.style.cssText = `
+        position: fixed;
+        background: var(--theme-card);
+        border: 2px solid ${category.color};
+        border-radius: 8px;
+        padding: 0;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        z-index: 10000;
+        max-width: 300px;
+        color: var(--theme-text);
+        font-family: inherit;
+    `;
+    
+    document.body.appendChild(tooltip);
+    
+    // تحديد الموضع
+    const x = e.clientX + 15;
+    const y = e.clientY + 15;
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const rect = tooltip.getBoundingClientRect();
+    
+    let finalX = x;
+    let finalY = y;
+    
+    if (x + rect.width > screenWidth) finalX = screenWidth - rect.width - 15;
+    if (y + rect.height > screenHeight) finalY = screenHeight - rect.height - 15;
+    
+    tooltip.style.left = `${finalX}px`;
+    tooltip.style.top = `${finalY}px`;
+}
+
+function hideTaskTooltip() {
+    const tooltip = document.querySelector('.task-tooltip');
+    if (tooltip) tooltip.remove();
+}
+
+// في دالة renderTasks() بعد setupTaskButtonsEvents():
+setTimeout(() => {
+    setupTaskTooltips();
+}, 100);
 
 function setupTaskButtonsEvents() {
     document.querySelectorAll('.task-checkbox').forEach(checkbox => {
