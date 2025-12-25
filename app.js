@@ -1681,6 +1681,8 @@ function renderDailyCalendar(container) {
     console.log("📅 عرض الجدول اليومي...");
     const date = AppState.currentCalendarDate;
     const dateStr = date.toISOString().split('T')[0];
+    const todayStr = new Date().toISOString().split('T')[0];
+    const isToday = dateStr === todayStr;
     
     // 1. المهام الخاصة باليوم (بما في ذلك المهام المتكررة)
     let tasksForDay = [];
@@ -1702,9 +1704,10 @@ function renderDailyCalendar(container) {
                     if (taskDate <= currentDate) {
                         const repeatedTask = {
                             ...task,
-                            id: task.id + '_' + dateStr, // إنشاء ID فريد
+                            id: task.id + '_' + dateStr,
                             date: dateStr,
                             isRepeated: true,
+                            originalId: task.id,
                             originalDate: task.date
                         };
                         
@@ -1729,6 +1732,7 @@ function renderDailyCalendar(container) {
                                 id: task.id + '_' + dateStr,
                                 date: dateStr,
                                 isRepeated: true,
+                                originalId: task.id,
                                 originalDate: task.date
                             };
                             
@@ -1752,6 +1756,7 @@ function renderDailyCalendar(container) {
                                 id: task.id + '_' + dateStr,
                                 date: dateStr,
                                 isRepeated: true,
+                                originalId: task.id,
                                 originalDate: task.date
                             };
                             
@@ -1765,10 +1770,9 @@ function renderDailyCalendar(container) {
                 case 'custom':
                     // إذا كانت المهمة متكررة حسب أيام مخصصة
                     if (taskDate <= currentDate && task.repetition.days && task.repetition.days.length > 0) {
-                        const dayOfWeek = currentDate.getDay(); // 0 = الأحد، 6 = السبت
+                        const dayOfWeek = currentDate.getDay();
                         
                         if (task.repetition.days.includes(dayOfWeek)) {
-                            // التحقق أن اليوم يطابق أيام التكرار
                             const weeksDiff = Math.floor((currentDate - taskDate) / (7 * 24 * 60 * 60 * 1000));
                             const isRecurringDay = weeksDiff >= 0;
                             
@@ -1778,6 +1782,7 @@ function renderDailyCalendar(container) {
                                     id: task.id + '_' + dateStr,
                                     date: dateStr,
                                     isRepeated: true,
+                                    originalId: task.id,
                                     originalDate: task.date
                                 };
                                 
@@ -1820,9 +1825,17 @@ function renderDailyCalendar(container) {
     
     let html = `
         <div class="calendar-nav" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-            <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)"><i class="fas fa-chevron-right"></i> أمس</button>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)"><i class="fas fa-chevron-right"></i> أمس</button>
+                ${!isToday ? `
+                    <button class="btn btn-primary btn-sm" onclick="AppState.currentCalendarDate = new Date(); renderCalendar();">
+                        <i class="fas fa-calendar-day"></i> العودة لليوم الحالي
+                    </button>
+                ` : ''}
+            </div>
             <h3 style="margin:0 15px; text-align:center; color:var(--theme-text);">
                 ${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                ${isToday ? '<span style="background:var(--theme-primary); color:white; padding:2px 8px; border-radius:12px; font-size:0.9rem; margin-right:8px;">اليوم</span>' : ''}
             </h3>
             <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(1)">غداً <i class="fas fa-chevron-left"></i></button>
         </div>
@@ -1878,9 +1891,22 @@ function renderDailyCalendar(container) {
         });
     
         html += `</div></div>`;
+    } else {
+        html += `
+            <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
+                <div class="time-header">
+                    <div class="time-title"><i class="fas fa-tasks"></i> مهام عامة</div>
+                    <span class="task-count">0 مهام</span>
+                </div>
+                <div style="text-align:center; padding:30px; color:var(--gray-color);">
+                    <i class="fas fa-inbox" style="font-size:2rem; opacity:0.3; margin-bottom:10px;"></i>
+                    <p>لا توجد مهام عامة لهذا اليوم</p>
+                </div>
+            </div>
+        `;
     }
     
-    // 4. عرض الشرائح الزمنية
+    // 4. عرض جميع الشرائح الزمنية (حتى الفارغة)
     timeSlots.forEach(slot => {
         const slotTasks = tasksWithTime.filter(task => {
             const taskTime = timeStrToMinutes(task.time);
@@ -1889,17 +1915,18 @@ function renderDailyCalendar(container) {
             return taskTime >= slotStart && taskTime < slotEnd;
         });
         
-        if (slotTasks.length > 0) {
-            html += `
-                <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
-                    <div class="time-header">
-                        <div class="time-title">
-                            <i class="${slot.icon}"></i> ${slot.label}
-                        </div>
-                        <span class="task-count">${slotTasks.length} مهام</span>
+        html += `
+            <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
+                <div class="time-header">
+                    <div class="time-title">
+                        <i class="${slot.icon}"></i> ${slot.label}
                     </div>
-                    <div class="time-tasks" style="margin-top:10px;">
-            `;
+                    <span class="task-count">${slotTasks.length} مهام</span>
+                </div>
+        `;
+        
+        if (slotTasks.length > 0) {
+            html += `<div class="time-tasks" style="margin-top:10px;">`;
             
             slotTasks.forEach(task => {
                 const category = getCategoryById(task.categoryId);
@@ -1922,6 +1949,7 @@ function renderDailyCalendar(container) {
                                     <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
                                     <span><i class="fas fa-clock"></i> ${task.time}</span>
                                     <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                                    ${task.repetition && task.repetition.type !== 'none' ? `<span><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
                                 </div>
                             </div>
                             ${isOverdue ? '<span style="color:var(--danger-color); font-size:0.8rem;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
@@ -1930,20 +1958,18 @@ function renderDailyCalendar(container) {
                 `;
             });
             
-            html += `</div></div>`;
+            html += `</div>`;
+        } else {
+            html += `
+                <div style="text-align:center; padding:30px; color:var(--gray-color);">
+                    <i class="${slot.icon}" style="font-size:2rem; opacity:0.3; margin-bottom:10px;"></i>
+                    <p>لا توجد مهام في هذا الوقت</p>
+                </div>
+            `;
         }
+        
+        html += `</div>`;
     });
-    
-    // 5. إذا لم تكن هناك مهام
-    if (tasksForDay.length === 0) {
-        html += `
-            <div style="text-align:center; padding:60px 20px; color:var(--gray-color);">
-                <i class="fas fa-calendar-day" style="font-size:3rem; margin-bottom:20px; opacity:0.3;"></i>
-                <h3 style="color:var(--theme-text); margin-bottom:10px;">لا توجد مهام لهذا اليوم</h3>
-                <p>اضغط على "إضافة مهمة" لإنشاء مهمة جديدة</p>
-            </div>
-        `;
-    }
     
     html += `</div>`;
     container.innerHTML = html;
