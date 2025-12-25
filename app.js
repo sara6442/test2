@@ -1677,22 +1677,137 @@ function renderCalendar() {
         setupCalendarTooltips();
     }, 100);
 }
-
 function renderDailyCalendar(container) {
     console.log("📅 عرض الجدول اليومي...");
     const date = AppState.currentCalendarDate;
     const dateStr = date.toISOString().split('T')[0];
-    const tasksForDay = AppState.tasks.filter(task => task.date === dateStr);
-
+    
+    // 1. المهام الخاصة باليوم (بما في ذلك المهام المتكررة)
+    let tasksForDay = [];
+    
+    AppState.tasks.forEach(task => {
+        // المهام العادية
+        if (task.date === dateStr) {
+            tasksForDay.push(task);
+        }
+        
+        // المهام المتكررة
+        if (task.repetition && task.repetition.type !== 'none') {
+            const taskDate = new Date(task.date);
+            const currentDate = new Date(dateStr);
+            
+            switch(task.repetition.type) {
+                case 'daily':
+                    // إذا كانت المهمة متكررة يومياً وتاريخها قبل أو يساوي التاريخ الحالي
+                    if (taskDate <= currentDate) {
+                        const repeatedTask = {
+                            ...task,
+                            id: task.id + '_' + dateStr, // إنشاء ID فريد
+                            date: dateStr,
+                            isRepeated: true,
+                            originalDate: task.date
+                        };
+                        
+                        // التحقق من عدم وجود نسخة مكررة
+                        if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                            tasksForDay.push(repeatedTask);
+                        }
+                    }
+                    break;
+                    
+                case 'weekly':
+                    // إذا كانت المهمة متكررة أسبوعياً وتاريخها قبل أو يساوي التاريخ الحالي
+                    if (taskDate <= currentDate) {
+                        // حساب عدد الأسابيع الفارقة
+                        const weeksDiff = Math.floor((currentDate - taskDate) / (7 * 24 * 60 * 60 * 1000));
+                        const repeatedDate = new Date(taskDate);
+                        repeatedDate.setDate(repeatedDate.getDate() + (weeksDiff * 7));
+                        
+                        if (repeatedDate.toISOString().split('T')[0] === dateStr) {
+                            const repeatedTask = {
+                                ...task,
+                                id: task.id + '_' + dateStr,
+                                date: dateStr,
+                                isRepeated: true,
+                                originalDate: task.date
+                            };
+                            
+                            if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                                tasksForDay.push(repeatedTask);
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'monthly':
+                    // إذا كانت المهمة متكررة شهرياً وتاريخها قبل أو يساوي التاريخ الحالي
+                    if (taskDate <= currentDate) {
+                        // نفس اليوم من كل شهر
+                        const taskDay = taskDate.getDate();
+                        const currentDay = currentDate.getDate();
+                        
+                        if (taskDay === currentDay) {
+                            const repeatedTask = {
+                                ...task,
+                                id: task.id + '_' + dateStr,
+                                date: dateStr,
+                                isRepeated: true,
+                                originalDate: task.date
+                            };
+                            
+                            if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                                tasksForDay.push(repeatedTask);
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'custom':
+                    // إذا كانت المهمة متكررة حسب أيام مخصصة
+                    if (taskDate <= currentDate && task.repetition.days && task.repetition.days.length > 0) {
+                        const dayOfWeek = currentDate.getDay(); // 0 = الأحد، 6 = السبت
+                        
+                        if (task.repetition.days.includes(dayOfWeek)) {
+                            // التحقق أن اليوم يطابق أيام التكرار
+                            const weeksDiff = Math.floor((currentDate - taskDate) / (7 * 24 * 60 * 60 * 1000));
+                            const isRecurringDay = weeksDiff >= 0;
+                            
+                            if (isRecurringDay) {
+                                const repeatedTask = {
+                                    ...task,
+                                    id: task.id + '_' + dateStr,
+                                    date: dateStr,
+                                    isRepeated: true,
+                                    originalDate: task.date
+                                };
+                                
+                                if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                                    tasksForDay.push(repeatedTask);
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+    });
+    
+    // 2. فرز المهام
     const tasksWithTime = tasksForDay.filter(task => task.time);
     const tasksWithoutTime = tasksForDay.filter(task => !task.time);
-
+    
+    // المهام المتأخرة (بدون وقت)
+    const overdueTasks = tasksWithoutTime.filter(task => isTaskOverdue(task));
+    // المهام غير المتأخرة (بدون وقت)
+    const normalTasksWithoutTime = tasksWithoutTime.filter(task => !isTaskOverdue(task));
+    
+    // فرز المهام التي لها وقت حسب الوقت
     tasksWithTime.sort((a, b) => {
         const aMin = timeStrToMinutes(a.time);
         const bMin = timeStrToMinutes(b.time);
         return aMin - bMin;
     });
-
+    
     const timeSlots = [
         { start: '00:00', end: '04:00', label: 'منتصف الليل (12ص - 4ص)', icon: 'fas fa-moon' },
         { start: '04:00', end: '06:00', label: 'الفجر (4ص - 6ص)', icon: 'fas fa-sun' },
@@ -1714,28 +1829,49 @@ function renderDailyCalendar(container) {
         <div class="daily-calendar" id="daily-calendar-container" style="padding-right:10px;">
     `;
     
-    if (tasksWithoutTime.length > 0) {
+    // 3. عرض المهام العامة (بدون وقت + المهام المتأخرة)
+    const allGeneralTasks = [...overdueTasks, ...normalTasksWithoutTime];
+    if (allGeneralTasks.length > 0) {
         html += `
             <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
                 <div class="time-header">
-                    <div class="time-title"><i class="fas fa-clock"></i> مهام عامة (بدون وقت)</div>
-                    <span class="task-count">${tasksWithoutTime.length} مهام</span>
+                    <div class="time-title"><i class="fas fa-tasks"></i> مهام عامة</div>
+                    <div style="display:flex; gap:10px;">
+                        ${overdueTasks.length > 0 ? `
+                            <span class="task-count" style="background:rgba(247, 37, 133, 0.1); color:#f72585; padding:2px 8px; border-radius:12px; font-size:0.8rem;">
+                                ${overdueTasks.length} متأخرة
+                            </span>
+                        ` : ''}
+                        <span class="task-count">${allGeneralTasks.length} مهام</span>
+                    </div>
                 </div>
                 <div class="time-tasks" style="margin-top:10px;">
         `;
     
-        tasksWithoutTime.forEach(task => {
+        allGeneralTasks.forEach(task => {
             const category = getCategoryById(task.categoryId);
             const isOverdue = isTaskOverdue(task);
+            const isRepeated = task.isRepeated;
+            
             html += `
                 <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
-                     data-id="${task.id}"
-                     onclick="openEditTaskModal('${task.id}')"
+                     data-id="${task.isRepeated ? task.originalId || task.id : task.id}"
+                     onclick="openEditTaskModal('${task.isRepeated ? task.originalId || task.id : task.id}')"
                      style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; position:relative;"
-                     title="انقر للتعديل">
-                     <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">${task.title}</div>
-                     <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px;">
-                         <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                     title="انقر لتعديل المهمة${isRepeated ? ' (مهمة متكررة)' : ''}">
+                     <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                        <div style="flex:1;">
+                            <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">
+                                ${task.title}
+                                ${isRepeated ? ' <i class="fas fa-redo" style="color:var(--theme-primary); font-size:0.8rem;" title="مهمة متكررة"></i>' : ''}
+                            </div>
+                            <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px; margin-top:5px;">
+                                <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
+                                <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                                ${task.repetition ? `<span><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                            </div>
+                        </div>
+                        ${isOverdue ? '<span style="color:var(--danger-color); font-size:0.8rem;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
                      </div>
                 </div>
             `;
@@ -1743,9 +1879,94 @@ function renderDailyCalendar(container) {
     
         html += `</div></div>`;
     }
- 
-    html += '</div>';
+    
+    // 4. عرض الشرائح الزمنية
+    timeSlots.forEach(slot => {
+        const slotTasks = tasksWithTime.filter(task => {
+            const taskTime = timeStrToMinutes(task.time);
+            const slotStart = timeStrToMinutes(slot.start);
+            const slotEnd = timeStrToMinutes(slot.end);
+            return taskTime >= slotStart && taskTime < slotEnd;
+        });
+        
+        if (slotTasks.length > 0) {
+            html += `
+                <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
+                    <div class="time-header">
+                        <div class="time-title">
+                            <i class="${slot.icon}"></i> ${slot.label}
+                        </div>
+                        <span class="task-count">${slotTasks.length} مهام</span>
+                    </div>
+                    <div class="time-tasks" style="margin-top:10px;">
+            `;
+            
+            slotTasks.forEach(task => {
+                const category = getCategoryById(task.categoryId);
+                const isOverdue = isTaskOverdue(task);
+                const isRepeated = task.isRepeated;
+                
+                html += `
+                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                         data-id="${task.isRepeated ? task.originalId || task.id : task.id}"
+                         onclick="openEditTaskModal('${task.isRepeated ? task.originalId || task.id : task.id}')"
+                         style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; position:relative;"
+                         title="انقر لتعديل المهمة${isRepeated ? ' (مهمة متكررة)' : ''}">
+                         <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                            <div style="flex:1;">
+                                <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">
+                                    ${task.title}
+                                    ${isRepeated ? ' <i class="fas fa-redo" style="color:var(--theme-primary); font-size:0.8rem;" title="مهمة متكررة"></i>' : ''}
+                                </div>
+                                <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px; margin-top:5px;">
+                                    <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
+                                    <span><i class="fas fa-clock"></i> ${task.time}</span>
+                                    <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                                </div>
+                            </div>
+                            ${isOverdue ? '<span style="color:var(--danger-color); font-size:0.8rem;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
+                         </div>
+                    </div>
+                `;
+            });
+            
+            html += `</div></div>`;
+        }
+    });
+    
+    // 5. إذا لم تكن هناك مهام
+    if (tasksForDay.length === 0) {
+        html += `
+            <div style="text-align:center; padding:60px 20px; color:var(--gray-color);">
+                <i class="fas fa-calendar-day" style="font-size:3rem; margin-bottom:20px; opacity:0.3;"></i>
+                <h3 style="color:var(--theme-text); margin-bottom:10px;">لا توجد مهام لهذا اليوم</h3>
+                <p>اضغط على "إضافة مهمة" لإنشاء مهمة جديدة</p>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
     container.innerHTML = html;
+}
+
+// دالة مساعدة للحصول على وصف التكرار
+function getRepetitionLabel(repetition) {
+    if (!repetition || repetition.type === 'none') return '';
+    
+    const labels = {
+        'daily': 'يومياً',
+        'weekly': 'أسبوعياً',
+        'monthly': 'شهرياً',
+        'custom': 'مخصص'
+    };
+    
+    if (repetition.type === 'custom' && repetition.days && repetition.days.length > 0) {
+        const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const customDays = repetition.days.map(day => dayNames[day]).join('، ');
+        return `أيام محددة: ${customDays}`;
+    }
+    
+    return labels[repetition.type] || '';
 }
 
 function renderWeeklyCalendar(container) {
