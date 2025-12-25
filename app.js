@@ -390,6 +390,8 @@ function refreshCurrentView() {
     const statsBar = document.querySelector('.categories-stats-bar');
     
     if (AppState.currentView === 'tasks') {
+        // إنشاء الفلتر مرة واحدة فقط
+        ensureFilterBar();
         renderTasks();
         if (statsBar) statsBar.style.display = 'none';
     }
@@ -2469,16 +2471,28 @@ function switchView(viewName) {
     const target = document.getElementById(`${viewName}-view`);
     if (target) target.classList.add('active');
     
-    refreshCurrentView();
+    // تحديث العرض دون استدعاء ensureFilterBar مرة أخرى
+    if (viewName === 'tasks') {
+        renderTasks();
+        updateFilterButtons();
+    } else {
+        refreshCurrentView();
+    }
 }
 
 function ensureFilterBar() {
     const filters = document.querySelector('.task-filters');
     if (!filters) return;
     
-    const existingFilters = filters.querySelectorAll('.filters-left, .filters-center, .filters-right');
-    existingFilters.forEach(el => el.remove());
+    // التحقق إذا كان شريط الفلتر موجودًا بالفعل
+    const existingFilterContainer = filters.querySelector('.filters-container');
+    if (existingFilterContainer) {
+        // إذا كان موجودًا، فقط تحديث الحالة النشطة للأزرار
+        updateFilterButtons();
+        return;
+    }
     
+    // إذا لم يكن موجودًا، إنشاؤه
     const filterContainer = document.createElement('div');
     filterContainer.className = 'filters-container';
     filterContainer.style.display = 'flex';
@@ -2511,6 +2525,37 @@ function ensureFilterBar() {
     filterContainer.appendChild(statusBtn);
     
     filters.appendChild(filterContainer);
+    
+    // إضافة مستمع الأحداث مرة واحدة فقط
+    setupFilterButtonsEvents();
+}
+
+function setupFilterButtonsEvents() {
+    const filtersContainer = document.querySelector('.filters-container');
+    if (!filtersContainer) return;
+    
+    // إزالة المستمعات القديمة إن وجدت
+    filtersContainer.removeEventListener('click', handleFilterClick);
+    
+    // إضافة مستمع جديد
+    filtersContainer.addEventListener('click', handleFilterClick);
+}
+
+function handleFilterClick(e) {
+    if (e.target.classList.contains('filter-btn')) {
+        e.preventDefault();
+        const filter = e.target.dataset.filter;
+        setFilter(filter);
+    }
+}
+
+function updateFilterButtons() {
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.filter === AppState.currentFilter) {
+            btn.classList.add('active');
+        }
+    });
 }
 
 function showCategoriesStatusModal() {
