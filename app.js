@@ -568,16 +568,26 @@ function getTaskTimeInMinutes(taskOrTime) {
 }
 
 function refreshCurrentView() {
-    if (AppState.currentView === 'tasks') renderTasks();
-    else if (AppState.currentView === 'calendar') renderCalendar();
-    else if (AppState.currentView === 'categories') renderCategories();
-    else if (AppState.currentView === 'notes') renderNotes();
+    if (AppState.currentView === 'tasks') {
+        renderTasks();
+        document.querySelector('.categories-stats-bar').style.display = 'none';
+    }
+    else if (AppState.currentView === 'calendar') {
+        renderCalendar();
+        document.querySelector('.categories-stats-bar').style.display = 'none';
+    }
+    else if (AppState.currentView === 'categories') {
+        renderCategories();
+        document.querySelector('.categories-stats-bar').style.display = 'block';
+        updateCategoriesStats();
+    }
+    else if (AppState.currentView === 'notes') {
+        renderNotes();
+        document.querySelector('.categories-stats-bar').style.display = 'none';
+    }
     
     // تحديث زر حالة الفئات
     ensureFilterBar();
-    if (typeof renderCategoriesStatus === 'function') {
-        renderCategoriesStatus();
-    }
 }
 
 // ========== إدارة الثيمات ==========
@@ -966,8 +976,6 @@ const GlobalUndoManager = {
 
 // ========== إدارة المهام ==========
 // متغير لتتبع حالة الإضافة
-let isAddingTask = false;
-
 function addTask(taskData) {
     console.log("إضافة مهمة:", taskData);
     
@@ -975,19 +983,6 @@ function addTask(taskData) {
     if (isAddingTask) {
         console.log("مهمة قيد الإضافة بالفعل");
         return;
-    }
-    
-    // التحقق من وجود مهمة مماثلة
-    const existingTask = AppState.tasks.find(task => 
-        task.title === taskData.title && 
-        task.date === (taskData.date || new Date().toISOString().split('T')[0]) &&
-        task.categoryId === taskData.categoryId
-    );
-    
-    if (existingTask) {
-        if (!confirm('توجد مهمة مشابهة بالفعل. هل تريد إضافتها على أي حال؟')) {
-            return;
-        }
     }
     
     isAddingTask = true;
@@ -1019,7 +1014,10 @@ function addTask(taskData) {
     
     closeModal('add-task-modal');
     
-    // إعادة تعيين النموذج بشكل صحيح
+    // تسجيل العملية للتراجع
+    GlobalUndoManager.pushAction('tasks', 'add', newTask);
+    
+    // تأخير إعادة التعيين لمنع التكرار
     setTimeout(() => {
         const form = document.getElementById('task-form');
         if (form) form.reset();
@@ -1044,12 +1042,8 @@ function addTask(taskData) {
         }
         
         isAddingTask = false;
-    }, 100);
-    
-    // تسجيل العملية للتراجع
-    GlobalUndoManager.pushAction('tasks', 'add', newTask);
+    }, 500);
 }
-
 // إصلاح زر الإلغاء
 document.addEventListener('DOMContentLoaded', function() {
     // زر إلغاء إضافة المهمة
@@ -1887,8 +1881,6 @@ function renderCategories() {
         
         html += `
             <div class="category-card" data-id="${category.id}" style="position:relative;">
-                <!-- أزرار الحذف والتعديل في الزاوية اليسرى العلوية -->
-                // أزرار الحذف والتعديل في الزاوية اليسرى العلوية
                     <div class="category-card-actions" style="position:absolute; top:10px; left:10px; display:flex; gap:6px; z-index:5;">
                         <button class="btn btn-xs btn-secondary category-edit-btn" data-id="${category.id}" title="تعديل الفئة">
                             <i class="fas fa-edit"></i>
@@ -2070,10 +2062,14 @@ function renderDailyCalendar(container) {
     const dateStr = date.toISOString().split('T')[0];
     const tasksForDay = AppState.tasks.filter(task => task.date === dateStr);
 
-    // ترتيب المهام حسب الوقت (بدون وقت تذهب للأخير)
-    tasksForDay.sort((a, b) => {
-        const aMin = a.time ? timeStrToMinutes(a.time) : 9999;
-        const bMin = b.time ? timeStrToMinutes(b.time) : 9999;
+    // فصل المهام حسب الوقت
+    const tasksWithTime = tasksForDay.filter(task => task.time);
+    const tasksWithoutTime = tasksForDay.filter(task => !task.time);
+
+    // ترتيب المهام حسب الوقت
+    tasksWithTime.sort((a, b) => {
+        const aMin = timeStrToMinutes(a.time);
+        const bMin = timeStrToMinutes(b.time);
         return aMin - bMin;
     });
 
@@ -2087,84 +2083,30 @@ function renderDailyCalendar(container) {
         { start: '18:00', end: '19:00', label: 'المغرب (6م - 7م)', icon: 'fas fa-sunset' },
         { start: '19:00', end: '24:00', label: 'العشاء (7م - 12ص)', icon: 'fas fa-star-and-crescent' }
     ];
-
-    let html = `
-      <div class="calendar-nav" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-         <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)"><i class="fas fa-chevron-right"></i> أمس</button>
-         <h3 style="margin:0 15px; text-align:center; color:var(--theme-text);">
-            ${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-         </h3>
-         <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(1)">غداً <i class="fas fa-chevron-left"></i></button>
-      </div>
-      <div class="daily-calendar" id="daily-calendar-container" style="padding-right:10px;">
-    `;
-
-    timeSlots.forEach(slot => {
-        const slotStart = timeStrToMinutes(slot.start);
-        const slotEnd = slot.end === '24:00' ? 24*60-1 : timeStrToMinutes(slot.end);
-        const slotTasks = tasksForDay.filter(task => {
-            if (!task.time) return false;
-            const t = timeStrToMinutes(task.time);
-            return t >= slotStart && t <= slotEnd;
-        });
- 
-    // إضافة خانة للمهام المتأخرة
-    const overdueTasks = AppState.tasks.filter(task => 
-        isTaskOverdue(task) && !task.completed && task.date !== dateStr
-    );
     
-    if (overdueTasks.length > 0) {
-        html += `
-            <div class="time-slot overdue-slot" style="border: 2px solid var(--danger-color); background: rgba(247, 37, 133, 0.1);">
-                <div class="time-header">
-                    <div class="time-title">
-                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i> 
-                        المهام المتأخرة من الأيام السابقة
-                    </div>
-                    <span class="task-count" style="background: var(--danger-color); color: white;">${overdueTasks.length} مهام</span>
-                </div>
-                <div class="time-tasks">
+        let html = `
+          <div class="calendar-nav" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+             <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)"><i class="fas fa-chevron-right"></i> أمس</button>
+             <h3 style="margin:0 15px; text-align:center; color:var(--theme-text);">
+                ${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+             </h3>
+             <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(1)">غداً <i class="fas fa-chevron-left"></i></button>
+          </div>
+          <div class="daily-calendar" id="daily-calendar-container" style="padding-right:10px;">
         `;
-        
-        overdueTasks.forEach(task => {
-            const category = getCategoryById(task.categoryId);
+    
+        // عرض المهام بدون وقت أولاً في قسم "عام"
+        if (tasksWithoutTime.length > 0) {
             html += `
-                <div class="calendar-task-card overdue" 
-                     data-id="${task.id}"
-                     onclick="openEditTaskModal('${task.id}')"
-                     style="border-left-color: var(--danger-color); border-right-color: var(--danger-color);">
-                    <div class="calendar-task-title">${task.title}</div>
-                    <div class="calendar-task-meta">
-                        <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
-                        <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
+                    <div class="time-header">
+                        <div class="time-title"><i class="fas fa-clock"></i> مهام عامة (بدون وقت)</div>
+                        <span class="task-count">${tasksWithoutTime.length} مهام</span>
                     </div>
-                </div>
-            `;
-        });
-        
-        html += `</div></div>`;
-    }
-        
-        if (slotTasks.length === 0) {
-            html += `
-                <div class="time-slot" data-time="${slot.start}" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
-                    <div class="time-header"><div class="time-title"><i class="${slot.icon}"></i> ${slot.label}</div><span class="task-count">0 مهام</span></div>
                     <div class="time-tasks" style="margin-top:10px;">
-                        <div style="text-align:center;padding:12px;color:var(--gray-color);">لا توجد مهام في هذه الفترة</div>
-                    </div>
-                </div>
             `;
-        } else {
-            html += `
-                <div class="time-slot" data-time="${slot.start}" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
-                    <div class="time-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-                        <div class="time-title"><i class="${slot.icon}"></i> ${slot.label}</div>
-                        <span class="task-count">${slotTasks.length} مهام</span>
-                    </div>
-                    <div class="time-tasks">
-            `;
-
-            slotTasks.forEach(task => {
+    
+            tasksWithoutTime.forEach(task => {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
                 html += `
@@ -2175,15 +2117,15 @@ function renderDailyCalendar(container) {
                          title="انقر للتعديل">
                          <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">${task.title}</div>
                          <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px;">
-                             <span><i class="fas fa-clock"></i> ${task.time || ''}</span>
                              <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
                          </div>
                     </div>
                 `;
             });
-
+    
             html += `</div></div>`;
         }
+        
     });
 
     html += '</div>';
@@ -2411,6 +2353,40 @@ function renderNotes() {
     container.innerHTML = html;
 }
 
+// إصلاح أحداث الملاحظات
+function setupNotesEvents() {
+    console.log("📝 إعداد أحداث الملاحظات...");
+    
+    // زر إضافة ملاحظة جديدة
+    const addNoteBtn = document.getElementById('add-note-btn');
+    if (addNoteBtn) {
+        addNoteBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            addNote();
+        });
+    }
+    
+    // زر حفظ الملاحظة
+    const saveNotesBtn = document.getElementById('save-notes-btn');
+    if (saveNotesBtn) {
+        saveNotesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveNote();
+        });
+    }
+    
+    // زر إغلاق محرر الملاحظات
+    const closeNotesBtn = document.getElementById('close-notes-btn');
+    if (closeNotesBtn) {
+        closeNotesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('notes-editor').classList.remove('active');
+        });
+    }
+}
 // تنسيق مساعدة لمنع XSS بسيط في عناوين العرض
 function escapeHtml(text) {
     if (!text) return '';
@@ -3790,8 +3766,9 @@ function initializePage() {
     initializeThemes();
     setupEventDelegation();
     setupAllEvents();
+    setupNotesEvents();
     ensureFilterBar();
-    renderTasks();
+    renderTasks(); 
     renderCategoriesStatus();
     renderCategories();
     renderNotes();
