@@ -2050,6 +2050,7 @@ function renderCalendar() {
         setupCalendarTooltips();
     }, 100);
 }
+
 function renderDailyCalendar(container) {
     console.log("📅 عرض الجدول اليومي (مقسّم إلى فترات ثابتة)...");
     const date = AppState.currentCalendarDate;
@@ -2078,50 +2079,48 @@ function renderDailyCalendar(container) {
         { start: '19:00', end: '24:00', label: 'العشاء (7م - 12ص)', icon: 'fas fa-star-and-crescent' }
     ];
     
-        let html = `
-          <div class="calendar-nav" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-             <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)"><i class="fas fa-chevron-right"></i> أمس</button>
-             <h3 style="margin:0 15px; text-align:center; color:var(--theme-text);">
+    let html = `
+        <div class="calendar-nav" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(-1)"><i class="fas fa-chevron-right"></i> أمس</button>
+            <h3 style="margin:0 15px; text-align:center; color:var(--theme-text);">
                 ${date.toLocaleDateString('ar-SA', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
-             </h3>
-             <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(1)">غداً <i class="fas fa-chevron-left"></i></button>
-          </div>
-          <div class="daily-calendar" id="daily-calendar-container" style="padding-right:10px;">
+            </h3>
+            <button class="btn btn-secondary btn-sm" onclick="changeCalendarDate(1)">غداً <i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div class="daily-calendar" id="daily-calendar-container" style="padding-right:10px;">
+    `;
+    
+    // عرض المهام بدون وقت أولاً في قسم "عام"
+    if (tasksWithoutTime.length > 0) {
+        html += `
+            <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
+                <div class="time-header">
+                    <div class="time-title"><i class="fas fa-clock"></i> مهام عامة (بدون وقت)</div>
+                    <span class="task-count">${tasksWithoutTime.length} مهام</span>
+                </div>
+                <div class="time-tasks" style="margin-top:10px;">
         `;
     
-        // عرض المهام بدون وقت أولاً في قسم "عام"
-        if (tasksWithoutTime.length > 0) {
+        tasksWithoutTime.forEach(task => {
+            const category = getCategoryById(task.categoryId);
+            const isOverdue = isTaskOverdue(task);
             html += `
-                <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
-                    <div class="time-header">
-                        <div class="time-title"><i class="fas fa-clock"></i> مهام عامة (بدون وقت)</div>
-                        <span class="task-count">${tasksWithoutTime.length} مهام</span>
-                    </div>
-                    <div class="time-tasks" style="margin-top:10px;">
+                <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                     data-id="${task.id}"
+                     onclick="openEditTaskModal('${task.id}')"
+                     style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; position:relative;"
+                     title="انقر للتعديل">
+                     <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">${task.title}</div>
+                     <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px;">
+                         <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
+                     </div>
+                </div>
             `;
+        });
     
-            tasksWithoutTime.forEach(task => {
-                const category = getCategoryById(task.categoryId);
-                const isOverdue = isTaskOverdue(task);
-                html += `
-                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
-                         data-id="${task.id}"
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; position:relative;"
-                         title="انقر للتعديل">
-                         <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">${task.title}</div>
-                         <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px;">
-                             <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
-                         </div>
-                    </div>
-                `;
-            });
-    
-            html += `</div></div>`;
-        }
-        
-    });
-
+        html += `</div></div>`;
+    }
+ 
     html += '</div>';
     container.innerHTML = html;
 
