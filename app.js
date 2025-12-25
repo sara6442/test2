@@ -3272,71 +3272,47 @@ function ensureFilterBar() {
     const filters = document.querySelector('.task-filters');
     if (!filters) return;
     
-    // تأكد من أن الشريط موجود بالترتيب الصحيح
-    const leftContainer = filters.querySelector('.filters-left');
-    const rightContainer = filters.querySelector('.filters-right');
+    // إزالة جميع الفلاتر الموجودة أولاً
+    const existingFilters = filters.querySelectorAll('.filters-left, .filters-center, .filters-right');
+    existingFilters.forEach(el => el.remove());
     
-    // إنشاء/تحديد اليمين (زر حالة الفئات)
-    let right = rightContainer;
-    if (!right) {
-        right = document.createElement('div');
-        right.className = 'filters-right';
-        right.style.display = 'flex';
-        right.style.alignItems = 'center';
-        right.style.gap = '8px';
-        right.style.marginRight = 'auto'; // يدفعه لليمين
-        
-        const statusBtn = document.createElement('button');
-        statusBtn.id = 'categories-status-btn';
-        statusBtn.className = 'btn btn-info';
-        statusBtn.innerHTML = '<i class="fas fa-chart-pie"></i> حالة الفئات';
-        statusBtn.addEventListener('click', showCategoriesStatusModal);
-        right.appendChild(statusBtn);
-        
-        // إضافة الزر إلى البداية (ليكون على اليمين)
-        filters.prepend(right);
-    } else {
-        // نقل الزر ليكون أول عنصر (على اليمين)
-        if (!document.getElementById('categories-status-btn')) {
-            const statusBtn = document.createElement('button');
-            statusBtn.id = 'categories-status-btn';
-            statusBtn.className = 'btn btn-info';
-            statusBtn.innerHTML = '<i class="fas fa-chart-pie"></i> حالة الفئات';
-            statusBtn.addEventListener('click', showCategoriesStatusModal);
-            right.prepend(statusBtn);
-        }
-    }
+    // إنشاء حاوية واحدة فقط للفلتر
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'filters-container';
+    filterContainer.style.display = 'flex';
+    filterContainer.style.justifyContent = 'center';
+    filterContainer.style.alignItems = 'center';
+    filterContainer.style.gap = '10px';
+    filterContainer.style.width = '100%';
     
-    // تأكد من أن الفلاتر على اليسار
-    let left = leftContainer;
-    if (!left) {
-        left = document.createElement('div');
-        left.className = 'filters-left';
-        left.style.display = 'flex';
-        left.style.gap = '10px';
-        left.style.alignItems = 'center';
-        left.style.marginLeft = 'auto'; // يدفعه لليسار
-        
-        const filterButtons = [
-            { filter: 'pending', text: 'المهام النشطة' },
-            { filter: 'completed', text: 'المكتملة' },
-            { filter: 'deleted', text: 'المحذوفة' },
-            { filter: 'overdue', text: 'المتأخرة' },
-            { filter: 'all', text: 'الكل' }
-        ];
-        
-        filterButtons.forEach(btnData => {
-            const btn = document.createElement('button');
-            btn.className = `filter-btn ${AppState.currentFilter === btnData.filter ? 'active' : ''}`;
-            btn.dataset.filter = btnData.filter;
-            btn.textContent = btnData.text;
-            left.appendChild(btn);
-        });
-        
-        filters.appendChild(left);
-    }
+    // إنشاء الفلاتر الأساسية
+    const filterButtons = [
+        { filter: 'pending', text: 'المهام النشطة' },
+        { filter: 'completed', text: 'المكتملة' },
+        { filter: 'deleted', text: 'المحذوفة' },
+        { filter: 'overdue', text: 'المتأخرة' },
+        { filter: 'all', text: 'الكل' }
+    ];
+    
+    filterButtons.forEach(btnData => {
+        const btn = document.createElement('button');
+        btn.className = `filter-btn ${AppState.currentFilter === btnData.filter ? 'active' : ''}`;
+        btn.dataset.filter = btnData.filter;
+        btn.textContent = btnData.text;
+        filterContainer.appendChild(btn);
+    });
+    
+    // زر حالة الفئات
+    const statusBtn = document.createElement('button');
+    statusBtn.id = 'categories-status-btn';
+    statusBtn.className = 'btn btn-info';
+    statusBtn.innerHTML = '<i class="fas fa-chart-pie"></i> حالة الفئات';
+    statusBtn.addEventListener('click', showCategoriesStatusModal);
+    filterContainer.appendChild(statusBtn);
+    
+    // إضافة الحاوية إلى الفلاتر
+    filters.appendChild(filterContainer);
 }
-
 
 function showCategoriesStatusModal() {
     let modalHTML = `
