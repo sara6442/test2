@@ -1,4 +1,3 @@
-app.js
 function checkCSS() {
     console.log("🔍 فحص تحميل CSS...");
     
