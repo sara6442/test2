@@ -14,31 +14,45 @@
     <!-- 3. أنماط التطبيق -->
     <link rel="stylesheet" href="styles.css">
 </head>
+<body>
+  <div class="app-container">
+    <aside class="sidebar">
+      <div class="logo">
+        <h1><i class="fas fa-tasks"></i><span>مدير المهام</span></h1>
+      </div>
 
-<body class="theme-beige">
-    <div class="app-container">
-        <!-- الشريط الجانبي -->
-           <aside class="sidebar">
-                <div class="logo">
-                    <h1><i class="fas fa-tasks"></i> <span>مهامي</span></h1>
-                </div>
+      <nav class="nav-menu">
+        <a href="#" class="nav-item active" data-view="tasks">
+          <i class="fas fa-tasks"></i><span>المهام</span>
+        </a>
+        <a href="#" class="nav-item" data-view="calendar">
+          <i class="fas fa-calendar-alt"></i><span>الجدول الزمني</span>
+        </a>
+        <a href="#" class="nav-item" data-view="categories">
+          <i class="fas fa-tags"></i><span>الفئات</span>
+        </a>
+        <a href="#" class="nav-item" data-view="notes">
+          <i class="fas fa-sticky-note"></i><span>الملاحظات</span>
+        </a>
+      </nav>
+
+          <div class="search-container">
+              <div style="position: relative; width: 100%;">
+                <input type="search" id="global-search" placeholder="🔍 ابحث عن مهمة أو ملاحظة...">
+                <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.6);"></i>
+              </div>
+              <div id="search-results" class="search-results-popup" style="display:none;"></div>
+            </div>
             
-              <!-- نقل البحث إلى أعلى الإعدادات -->
-                <div class="search-container" style="padding: 15px 20px 10px; position: relative;">
-                    <div style="position: relative; width: 100%;">
-                        <input id="global-search" type="search" 
-                               placeholder="🔍 ابحث في المهام، الملاحظات، الفئات..." 
-                               style="width:100%; padding:12px 40px 12px 12px; border-radius:10px; 
-                                      border:1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); 
-                                      color: white; font-size: 0.9rem; outline: none;">
-                        <i class="fas fa-search" style="position:absolute; left:15px; top:50%; transform:translateY(-50%); color: rgba(255,255,255,0.8); font-size:0.9rem;"></i>
-                    </div>
-                    <!-- نافذة نتائج البحث -->
-                    <div id="search-results" class="search-results-popup" style="display: none;">
-                        <!-- ... -->
-                    </div>
-                </div>
-               
+            <!-- ثم زر الإعدادات -->
+            <div class="sidebar-footer">
+              <button class="settings-btn" id="settings-btn">
+                <i class="fas fa-cog"></i>
+                <span>الإعدادات</span>
+              </button>
+            </div>
+
+    <main class="main-content">
                     <!-- نافذة نتائج البحث -->
                     <div id="search-results" class="search-results-popup" style="display: none;">
                         <div class="search-results-header">
