@@ -693,7 +693,8 @@ body {
     border: 1px solid var(--theme-border);
     flex-wrap: wrap;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    order: -1;
+    position: relative;
+    z-index: 10;
 }
 
 .task-filters .filters-left {
@@ -712,7 +713,7 @@ body {
 }
 
 .filter-btn {
-    padding: 8px 20px !important;
+    padding: 8px 16px !important;
     border: 2px solid var(--theme-border) !important;
     background: var(--theme-card) !important;
     border-radius: 20px !important;
@@ -720,7 +721,8 @@ body {
     transition: all 0.3s ease !important;
     color: var(--theme-text) !important;
     font-weight: 500 !important;
-    font-size: 0.9rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap !important;
 }
 
 .filter-btn:hover {
@@ -777,6 +779,17 @@ body {
     flex-direction: column;
 }
 
+.category-card-actions {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 6px;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
 .category-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0,0,0,0.12);
@@ -815,8 +828,20 @@ body {
     opacity: 0; 
     transition: var(--transition); 
 }
-.category-card:hover .category-actions { 
-    opacity: 1; 
+
+.category-edit-btn,
+.category-delete-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border-radius: 6px;
+}
+
+.category-card:hover .category-card-actions {
+    opacity: 1;
 }
 
 /* شريط التقدم داخل الفئة */
