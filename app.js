@@ -3863,6 +3863,7 @@ function testAddTaskForm() {
 }
 
 // مساعدة: إتاحة بعض الدوال على window
+// ========== إتاحة الدوال على window ==========
 window.openEditTaskModal = openEditTaskModal;
 window.openAddTaskModal = openAddTaskModal;
 window.updateNoteTitle = updateNoteTitle;
@@ -3885,7 +3886,8 @@ window.changeCalendarMonth = changeCalendarMonth;
 window.changeCalendarWeek = changeCalendarWeek;
 
 // إعداد undo/redo event binding
-window.addEventListener('load', () => {
+document.addEventListener('DOMContentLoaded', function() {
     setupGlobalControls();
 });
 
+// ========== النهاية ==========
