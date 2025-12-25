@@ -1147,12 +1147,6 @@ function handleTaskRepetition(task) {
                     nextDate = new Date(today);
                     nextDate.setDate(nextDate.getDate() + (7 - currentDay + repetition.days[0]));
                 }
-            } else if (repetition.dates && repetition.dates.length > 0) {
-                // تكرار تواريخ معينة
-                const nextDateStr = repetition.dates.find(date => date > task.date);
-                if (nextDateStr) {
-                    nextDate = new Date(nextDateStr);
-                }
             }
             break;
     }
@@ -3761,6 +3755,7 @@ function setupAllEvents() {
 
 function initializePage() {
     console.log("🚀 بدء تهيئة الصفحة...");
+    checkCSS();
     checkDOMElements();
     initializeData();
     initializeThemes();
@@ -3768,10 +3763,16 @@ function initializePage() {
     setupAllEvents();
     setupNotesEvents();
     ensureFilterBar();
-    renderTasks(); 
-    renderCategoriesStatus();
+    renderTasks();
     renderCategories();
     renderNotes();
+    
+    // إخفاء الإحصائيات في البداية
+    const statsBar = document.querySelector('.categories-stats-bar');
+    if (statsBar) {
+        statsBar.style.display = 'none';
+    }
+    
     console.log("🎉 التطبيق جاهز للاستخدام!");
 }
 
