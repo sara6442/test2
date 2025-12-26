@@ -4202,7 +4202,7 @@ window.addTaskAnyway = addTaskAnyway;
 window.changeCalendarDate = changeCalendarDate;
 window.navigateCalendarWeeks = navigateCalendarWeeks;
 window.changeCalendarMonth = changeCalendarMonth;
-window.showAllTasksForDay = showAllTasksForDay;
+window.showDayTasksModal = showDayTasksModal;
 
 // تهيئة عند DOM loaded
 window.addEventListener('DOMContentLoaded', function() {
