@@ -133,11 +133,12 @@ body {
 
 .search-container {
     padding: 15px 20px 10px !important;
+    position: relative;
 }
 
 #global-search {
     width: 100%;
-    padding: 10px 40px 10px 12px;
+    padding: 10px 40px 10px 40px; /* تعديل padding */
     border-radius: 8px;
     border: 1px solid rgba(255,255,255,0.12);
     background: rgba(255,255,255,0.06);
@@ -145,6 +146,30 @@ body {
     font-size: 0.9rem;
 }
 
+#global-search + i.fa-search {
+    position: absolute !important;
+    left: auto !important;
+    right: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    color: rgba(255,255,255,0.6) !important;
+}
+
+#global-search-clear {
+    position: absolute !important;
+    left: 12px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: none !important;
+    border: none !important;
+    color: rgba(255,255,255,0.6) !important;
+    cursor: pointer !important;
+    font-size: 0.9rem !important;
+    display: none !important;
+}
+#global-search-clear.visible {
+    display: block !important;
+}
 .search-results-popup {
     position: fixed !important;
     top: 50% !important;
