@@ -2700,16 +2700,23 @@ function deleteNote(noteId) {
 }
 
 function saveNote() {
-    if (!AppState.currentNoteId) return;
+    if (!AppState.currentNoteId) {
+        console.error("❌ لا يوجد معرف للملاحظة الحالية");
+        return;
+    }
     
-    const title = document.getElementById('notes-editor-title').value;
-    const content = document.getElementById('notes-editor-content').innerHTML;
-    const fontFamily = document.getElementById('notes-font-family').value;
-    const fontSize = document.getElementById('notes-font-size').value;
-    const fontWeight = document.getElementById('notes-font-weight').value;
-    const fontStyle = document.getElementById('notes-font-style').value;
-    const color = document.getElementById('notes-font-color').value;
+    console.log("💾 حفظ الملاحظة...", AppState.currentNoteId);
     
+    // الحصول على بيانات النموذج
+    const title = document.getElementById('notes-editor-title')?.value || 'ملاحظة جديدة';
+    const content = document.getElementById('notes-editor-content')?.innerHTML || '';
+    const fontFamily = document.getElementById('notes-font-family')?.value || "'Segoe UI', sans-serif";
+    const fontSize = document.getElementById('notes-font-size')?.value || "16";
+    const fontWeight = document.getElementById('notes-font-weight')?.value || "normal";
+    const fontStyle = document.getElementById('notes-font-style')?.value || "normal";
+    const color = document.getElementById('notes-font-color')?.value || "#000000";
+    
+    // تحديث الملاحظة
     updateNote(AppState.currentNoteId, {
         title: title,
         content: content,
@@ -2720,7 +2727,9 @@ function saveNote() {
         color: color
     });
     
+    // إغلاق المحرر
     document.getElementById('notes-editor').classList.remove('active');
+    console.log("✅ تم حفظ الملاحظة بنجاح");
 }
 
 function setupEnhancedNotesEditor() {
@@ -2941,7 +2950,6 @@ function setupNotesEditorEvents() {
         console.error("❌ محرر الملاحظات غير موجود!");
         return;
     }
-    
      
     // إضافة حدث الحفظ
     const saveNotesBtn = document.getElementById('save-notes-btn');
@@ -3062,11 +3070,6 @@ function setupNotesEditorEvents() {
             const editorLocal = document.getElementById('notes-editor-content');
             if (editorLocal) editorLocal.style.color = this.value;
         });
-    }
-    
-    const saveNotesBtn = document.getElementById('save-notes-btn');
-    if (saveNotesBtn) {
-        saveNotesBtn.addEventListener('click', saveNote); // تأكد من وجود هذا السطر
     }
     
 }
@@ -3857,6 +3860,22 @@ function setupAllEvents() {
     document.getElementById('add-category-btn')?.addEventListener('click', () => openAddCategoryModal());
     document.getElementById('add-note-btn')?.addEventListener('click', () => addNote());
     
+    // ⬇️⬇️⬇️ أضف هذه الأسطر ⬇️⬇️⬇️
+    document.getElementById('save-task')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("🔄 زر حفظ المهمة تم النقر عليه");
+        saveNewTask();
+    });
+    
+    document.getElementById('save-edit-task')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("🔄 زر تعديل المهمة تم النقر عليه");
+        saveEditedTask();
+    });
+    // ⬆️⬆️⬆️ نهاية الإضافة ⬆️⬆️⬆️
+    
     document.addEventListener('click', function(e){
         if (e.target && e.target.classList && e.target.classList.contains('note-checkbox')) {
             e.stopPropagation();
@@ -3864,7 +3883,6 @@ function setupAllEvents() {
             if (item) item.classList.toggle('completed');
         }
     });
-        document.getElementById('save-task')?.addEventListener('click', saveNewTask);
 }
 
 // في دالة setupNotesEvents() - إضافة مستمعات الأحداث:
