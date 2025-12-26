@@ -3883,7 +3883,18 @@ function setupAllEvents() {
             if (item) item.classList.toggle('completed');
         }
     });
+        const saveTaskBtn = document.getElementById('save-task');
+    if (saveTaskBtn && !saveTaskBtn._bound) {
+        saveTaskBtn._bound = true;
+        saveTaskBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("✅ تم النقر على زر الحفظ، استدعاء saveNewTask...");
+            saveNewTask();
+        });
+    }
 }
+
 
 // في دالة setupNotesEvents() - إضافة مستمعات الأحداث:
 function setupNotesEvents() {
@@ -4258,4 +4269,8 @@ window.addEventListener('DOMContentLoaded', function() {
         const warning = document.getElementById('css-warning');
         if (warning) warning.remove();
     }, 5000);
+});
+
+window.addEventListener('DOMContentLoaded', function() {
+    initializePage();
 });
