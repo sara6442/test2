@@ -32,42 +32,43 @@ body {
 }
 
 /* ========== الثيمات ========== */
+/* ========== الثيمات المعدلة ========== */
 .theme-beige {
-    --theme-bg: linear-gradient(180deg, #fefaf6 0%, #f5f1ed 100%);
+    --theme-bg: linear-gradient(180deg, #fefaf6 0%, #e8e2d9 100%);
     --theme-sidebar: linear-gradient(180deg, #d7ccc8, #bcaaa4);
     --theme-text: #5d4037;
-    --theme-card: rgba(255, 255, 255, 0.95);
-    --theme-border: rgba(215, 204, 200, 0.3);
+    --theme-card: rgba(255, 255, 255, 0.97);
+    --theme-border: rgba(215, 204, 200, 0.4);
     --theme-primary: #8d6e63;
     --theme-hover: #6d4c41;
 }
 
 .theme-gray {
-    --theme-bg: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+    --theme-bg: linear-gradient(180deg, #f8f9fa 0%, #dee2e6 100%);
     --theme-sidebar: linear-gradient(180deg, #5a6268, #495057);
     --theme-text: #212529;
-    --theme-card: rgba(255, 255, 255, 0.95);
-    --theme-border: rgba(222, 226, 230, 0.3);
+    --theme-card: rgba(255, 255, 255, 0.97);
+    --theme-border: rgba(222, 226, 230, 0.4);
     --theme-primary: #6c757d;
     --theme-hover: #5a6268;
 }
 
 .theme-black {
-    --theme-bg: linear-gradient(180deg, #121212 0%, #2d2d2d 100%);
+    --theme-bg: linear-gradient(180deg, #121212 0%, #3a3a3a 100%);
     --theme-sidebar: linear-gradient(180deg, #1a1a1a, #2d2d2d);
     --theme-text: #ffffff;
-    --theme-card: rgba(30, 30, 30, 0.95);
-    --theme-border: rgba(68, 68, 68, 0.3);
-    --theme-primary: #5a6268;
-    --theme-hover: #6c757d;
+    --theme-card: rgba(40, 40, 40, 0.97);
+    --theme-border: rgba(68, 68, 68, 0.4);
+    --theme-primary: #888888;
+    --theme-hover: #aaaaaa;
 }
 
 .theme-blue {
-    --theme-bg: linear-gradient(180deg, #f0f7ff 0%, #e1effe 100%);
+    --theme-bg: linear-gradient(180deg, #f0f7ff 0%, #c2d6ff 100%);
     --theme-sidebar: linear-gradient(180deg, #4361ee, #3a56d4);
     --theme-text: #212529;
-    --theme-card: rgba(255, 255, 255, 0.95);
-    --theme-border: rgba(194, 214, 255, 0.3);
+    --theme-card: rgba(255, 255, 255, 0.97);
+    --theme-border: rgba(194, 214, 255, 0.4);
     --theme-primary: #4361ee;
     --theme-hover: #3a56d4;
 }
@@ -76,8 +77,8 @@ body {
     --theme-bg: linear-gradient(180deg, var(--custom-color1, #ffffff) 0%, var(--custom-color2, #f8f9fa) 100%);
     --theme-sidebar: linear-gradient(180deg, var(--custom-color1, #5a6268), var(--custom-color2, #495057));
     --theme-text: var(--custom-text, #212529);
-    --theme-card: rgba(255, 255, 255, 0.95);
-    --theme-border: rgba(222, 226, 230, 0.3);
+    --theme-card: rgba(255, 255, 255, 0.97);
+    --theme-border: rgba(222, 226, 230, 0.4);
     --theme-primary: var(--custom-color1, #6c757d);
     --theme-hover: var(--custom-color2, #5a6268);
 }
