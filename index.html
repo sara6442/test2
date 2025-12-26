@@ -392,6 +392,32 @@
                     </div>
                 </form>
             </div>
+                        <!-- الحقول الحالية -->
+                        <div class="form-group">
+                            <label for="category-message-empty">رسالة الفئة فارغة</label>
+                            <input type="text" id="category-message-empty" 
+                                   placeholder="مثال: لا توجد مهام في هذه الفئة">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="category-message-pending">رسالة الفئة تحتوي على مهام معلقة</label>
+                            <input type="text" id="category-message-pending" 
+                                   placeholder="مثال: هناك مهام معلقة. واصل العمل لإنجازها!">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="category-message-completed">رسالة الفئة مكتملة</label>
+                            <input type="text" id="category-message-completed" 
+                                   placeholder="مثال: ممتاز! لقد أكملت جميع المهام.">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="category-message-exceeded">رسالة الفئة تجاوزت الحد الزمني</label>
+                            <input type="text" id="category-message-exceeded" 
+                                   placeholder="مثال: لقد تجاوزت الوقت المخصص.">
+                        </div>
+                    </form>
+                </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="closeModal('category-modal')">إلغاء</button>
                 <button class="btn btn-primary" id="save-category">حفظ الفئة</button>
