@@ -3221,11 +3221,16 @@ function openAddTaskModal(preselectedCategory = null) {
         dateInput.value = today;
         dateInput.min = today;
     }
-    
+      
+    // إعادة ربط حدث الحفظ بعد فتح النافذة
     setTimeout(() => {
-        const titleInput = document.getElementById('task-title');
-        if (titleInput) titleInput.focus();
-    }, 150);
+        const saveTaskBtn = document.getElementById('save-task');
+        if (saveTaskBtn) {
+            saveTaskBtn.removeEventListener('click', handleSaveTaskClick);
+            saveTaskBtn.addEventListener('click', handleSaveTaskClick);
+            console.log("✅ تم إعادة ربط حدث الحفظ للمهمة");
+        }
+    }, 100);
 }
 
 function closeModal(modalId) {
@@ -3517,47 +3522,67 @@ function setupSettingsEvents() {
     
     const settingsBtn = document.getElementById('settings-btn');
     if (settingsBtn) {
-        settingsBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            
-            const popup = document.getElementById('settings-popup');
-            if (popup) {
-                popup.classList.toggle('active');
-            } else {
-                console.error("❌ نافذة الإعدادات غير موجودة!");
-            }
-        });
+        // إزالة أي مستمعات سابقة
+        settingsBtn.removeEventListener('click', handleSettingsClick);
+        // إضافة مستمع جديد
+        settingsBtn.addEventListener('click', handleSettingsClick);
     } else {
         console.error("❌ زر الإعدادات غير موجود!");
     }
     
-    document.addEventListener('click', function(e) {
-        const popup = document.getElementById('settings-popup');
-        const settingsBtn = document.getElementById('settings-btn');
-        
-        if (popup && popup.classList.contains('active') && 
-            !popup.contains(e.target) && 
+    // إعادة ربط أحداث تغيير الثيمات
+    setTimeout(() => {
+        document.querySelectorAll('.theme-option').forEach(option => {
+            option.removeEventListener('click', handleThemeChange);
+            option.addEventListener('click', handleThemeChange);
+        });
+    }, 500);
+}
+
+// دالة منفصلة للتعامل مع زر الإعدادات
+function handleSettingsClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("⚙️ زر الإعدادات تم النقر عليه");
+    
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.classList.toggle('active');
+        console.log("نافذة الإعدادات:", popup.classList.contains('active') ? "مفتوحة" : "مغلقة");
+    } else {
+        console.error("❌ نافذة الإعدادات غير موجودة!");
+    }
+}
+
+// دالة منفصلة للتعامل مع تغيير الثيم
+function handleThemeChange(e) {
+    e.stopPropagation();
+    const theme = this.dataset.theme;
+    console.log("🎨 تغيير الثيم إلى:", theme);
+    changeTheme(theme);
+    
+    const popup = document.getElementById('settings-popup');
+    if (popup) {
+        popup.classList.remove('active');
+    }
+}
+
+// إضافة مستمع للأحداث لإغلاق نافذة الإعدادات عند النقر خارجها
+document.addEventListener('click', function(e) {
+    const popup = document.getElementById('settings-popup');
+    const settingsBtn = document.getElementById('settings-btn');
+    
+    if (popup && popup.classList.contains('active')) {
+        // التحقق إذا كان النقر خارج النافذة وليس على زر الإعدادات
+        if (!popup.contains(e.target) && 
             e.target !== settingsBtn && 
             !settingsBtn.contains(e.target)) {
             popup.classList.remove('active');
             console.log("تم إغلاق نافذة الإعدادات");
         }
-    });
-    
-    document.querySelectorAll('.theme-option').forEach(option => {
-        option.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const theme = this.dataset.theme;
-            changeTheme(theme);
-            
-            const popup = document.getElementById('settings-popup');
-            if (popup) {
-                popup.classList.remove('active');
-            }
-        });
-    });
-}
+    }
+});
+
 // ========== وظيفة البحث ==========
 function setupSearch() {
     const searchInput = document.getElementById('global-search');
@@ -3859,44 +3884,33 @@ function setupAllEvents() {
     // ربط مباشر لزر إضافة المهمة
     const addTaskBtn = document.getElementById('add-task-btn');
     if (addTaskBtn) {
-        addTaskBtn.addEventListener('click', () => openAddTaskModal());
+        // إزالة المستمع القديم أولاً لمنع التكرار
+        addTaskBtn.removeEventListener('click', handleAddTaskClick);
+        // إضافة المستمع الجديد
+        addTaskBtn.addEventListener('click', handleAddTaskClick);
     }
     
     // ربط مباشر لزر حفظ المهمة
     const saveTaskBtn = document.getElementById('save-task');
-    if (saveTaskBtn && !saveTaskBtn._bound) {
-        saveTaskBtn._bound = true;
-        saveTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("✅ تم النقر على زر حفظ المهمة");
-            saveNewTask();
-        });
+    if (saveTaskBtn) {
+        // إزالة المستمع القديم أولاً
+        saveTaskBtn.removeEventListener('click', handleSaveTaskClick);
+        // إضافة المستمع الجديد
+        saveTaskBtn.addEventListener('click', handleSaveTaskClick);
     }
     
     // ربط زر تعديل المهمة
     const saveEditTaskBtn = document.getElementById('save-edit-task');
-    if (saveEditTaskBtn && !saveEditTaskBtn._bound) {
-        saveEditTaskBtn._bound = true;
-        saveEditTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            saveEditedTask();
-        });
+    if (saveEditTaskBtn) {
+        saveEditTaskBtn.removeEventListener('click', handleSaveEditTaskClick);
+        saveEditTaskBtn.addEventListener('click', handleSaveEditTaskClick);
     }
     
     // ربط زر حذف المهمة في التعديل
     const deleteEditTaskBtn = document.getElementById('delete-edit-task');
-    if (deleteEditTaskBtn && !deleteEditTaskBtn._bound) {
-        deleteEditTaskBtn._bound = true;
-        deleteEditTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (AppState.currentTaskId) {
-                deleteTask(AppState.currentTaskId);
-                closeModal('edit-task-modal');
-            }
-        });
+    if (deleteEditTaskBtn) {
+        deleteEditTaskBtn.removeEventListener('click', handleDeleteEditTaskClick);
+        deleteEditTaskBtn.addEventListener('click', handleDeleteEditTaskClick);
     }
     
     document.addEventListener('click', function(e){
@@ -3945,6 +3959,41 @@ function setupNotesEvents() {
             if (item) item.classList.toggle('completed');
         }
     });
+}
+
+// دالة منفصلة للتعامل مع زر إضافة المهمة
+function handleAddTaskClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("➕ زر إضافة مهمة تم النقر عليه");
+    openAddTaskModal();
+}
+
+// دالة منفصلة للتعامل مع حفظ المهمة الجديدة
+function handleSaveTaskClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("💾 زر حفظ مهمة تم النقر عليه");
+    saveNewTask();
+}
+
+// دالة منفصلة للتعامل مع حفظ تعديل المهمة
+function handleSaveEditTaskClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("✏️ زر حفظ تعديل تم النقر عليه");
+    saveEditedTask();
+}
+
+// دالة منفصلة للتعامل مع حذف المهمة في التعديل
+function handleDeleteEditTaskClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("🗑️ زر حذف مهمة تم النقر عليه");
+    if (AppState.currentTaskId) {
+        deleteTask(AppState.currentTaskId);
+        closeModal('edit-task-modal');
+    }
 }
 
 // دالة منفصلة للتعامل مع زر إضافة الملاحظة
@@ -4186,7 +4235,7 @@ function initializePage() {
     setupAllEvents();
     setupNotesEvents();
     ensureFilterBar();
-    setupSearch(); // إضافة البحث
+    setupSearch();
     
     // إخفاء شريط الإحصائيات
     const statsBar = document.querySelector('.categories-stats-bar');
@@ -4218,6 +4267,22 @@ function initializePage() {
     
     // إعداد أحداث التكرار للنماذج
     setupRepetitionEvents();
+    
+    // إعادة ربط أحداث الإعدادات والثيمات بعد تحميل الصفحة
+    setTimeout(() => {
+        setupSettingsEvents();
+        console.log("✅ تم إعادة ربط أحداث الإعدادات");
+        
+        // جعل الدوال متاحة للتصحيح
+        window.debugAddTask = debugAddTask;
+        window.debugSettings = function() {
+            console.log("🔧 تصحيح الإعدادات:");
+            console.log("زر الإعدادات موجود:", !!document.getElementById('settings-btn'));
+            console.log("نافذة الإعدادات موجودة:", !!document.getElementById('settings-popup'));
+            const popup = document.getElementById('settings-popup');
+            console.log("حالة نافذة الإعدادات:", popup ? popup.classList.contains('active') : 'غير موجودة');
+        };
+    }, 1000);
     
     console.log("🎉 التطبيق جاهز للاستخدام!");
 }
