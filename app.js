@@ -335,15 +335,6 @@ function saveCategories() {
     }
 }
 
-function saveNotes() {
-    try {
-        localStorage.setItem('mytasks_notes', JSON.stringify(AppState.notes));
-        console.log("✅ تم حفظ الملاحظات");
-    } catch (e) {
-        console.error("❌ خطأ في حفظ الملاحظات:", e);
-    }
-}
-
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -1608,10 +1599,17 @@ function deleteCategory(categoryId) {
     alert(`تم حذف فئة "${category.name}" وجميع المهام المرتبطة بها.`);
 }
 
+
 function saveCategory() {
     const nameInput = document.getElementById('category-name');
     const colorInput = document.getElementById('category-color');
     const timeframeInput = document.getElementById('category-timeframe');
+    
+    // حقول الرسائل الجديدة
+    const messageEmptyInput = document.getElementById('category-message-empty');
+    const messagePendingInput = document.getElementById('category-message-pending');
+    const messageCompletedInput = document.getElementById('category-message-completed');
+    const messageExceededInput = document.getElementById('category-message-exceeded');
     
     if (!nameInput || !colorInput || !timeframeInput) {
         console.error("❌ عناصر النموذج غير موجودة");
@@ -1621,6 +1619,12 @@ function saveCategory() {
     const name = nameInput.value.trim();
     const color = colorInput.value;
     const timeframeMinutes = parseInt(timeframeInput.value) || 60;
+    
+    // الحصول على قيم الرسائل
+    const messageEmpty = messageEmptyInput ? messageEmptyInput.value.trim() : '';
+    const messagePending = messagePendingInput ? messagePendingInput.value.trim() : '';
+    const messageCompleted = messageCompletedInput ? messageCompletedInput.value.trim() : '';
+    const messageExceeded = messageExceededInput ? messageExceededInput.value.trim() : '';
     
     if (!name || name.length === 0) {
         alert('يرجى إدخال اسم الفئة');
@@ -1647,7 +1651,11 @@ function saveCategory() {
                     ...AppState.categories[index],
                     name: name,
                     color: color,
-                    timeframeMinutes: timeframeMinutes
+                    timeframeMinutes: timeframeMinutes,
+                    messageEmpty: messageEmpty,
+                    messagePending: messagePending,
+                    messageCompleted: messageCompleted,
+                    messageExceeded: messageExceeded
                 };
             }
         } else {
@@ -1657,9 +1665,10 @@ function saveCategory() {
                 color: color,
                 timeframeMinutes: timeframeMinutes,
                 timeframeType: 'minutes',
-                messagePending: 'هناك مهام معلقة. واصل العمل لإنجازها!',
-                messageCompleted: 'ممتاز! لقد أكملت جميع المهام لهذا اليوم.',
-                messageExceeded: 'لقد تجاوزت الوقت المخصص. حاول إدارة وقتك بشكل أفضل!'
+                messageEmpty: messageEmpty || 'لا توجد مهام في هذه الفئة',
+                messagePending: messagePending || 'هناك مهام معلقة. واصل العمل لإنجازها!',
+                messageCompleted: messageCompleted || 'ممتاز! لقد أكملت جميع المهام لهذا اليوم.',
+                messageExceeded: messageExceeded || 'لقد تجاوزت الوقت المخصص. حاول إدارة وقتك بشكل أفضل!'
             };
             
             AppState.categories.push(newCategory);
@@ -1670,9 +1679,23 @@ function saveCategory() {
         refreshCurrentView();
         closeModal('category-modal');
         
-        if (nameInput) nameInput.value = '';
-        if (colorInput) colorInput.value = '#5a76e8';
-        if (timeframeInput) timeframeInput.value = '60';
+        // إعادة تعيين الحقول
+        const inputs = [nameInput, colorInput, timeframeInput, 
+                       messageEmptyInput, messagePendingInput, 
+                       messageCompletedInput, messageExceededInput];
+        
+        inputs.forEach(input => {
+            if (input) {
+                if (input.id === 'category-color') {
+                    input.value = '#5a76e8';
+                } else if (input.id === 'category-timeframe') {
+                    input.value = '60';
+                } else {
+                    input.value = '';
+                }
+            }
+        });
+        
         AppState.currentCategoryId = null;
         
         return true;
@@ -1683,6 +1706,7 @@ function saveCategory() {
         return false;
     }
 }
+
 
 function calculateCategoryStatus(categoryId) {
     const category = AppState.categories.find(c => c.id === categoryId);
@@ -1779,11 +1803,16 @@ function renderDailyCalendar(container) {
     const todayStr = new Date().toISOString().split('T')[0];
     const isToday = dateStr === todayStr;
     
-    // 1. المهام الخاصة باليوم (بما في ذلك المهام المتكررة)
+    // 1. المهام الخاصة باليوم (بما في ذلك المهام المتأخرة والمتكررة)
     let tasksForDay = [];
     
+    // جمع جميع المهام المتأخرة من الأيام السابقة
+    const overdueTasksAll = AppState.tasks.filter(task => 
+        !task.completed && isTaskOverdue(task) && task.date < dateStr
+    );
+    
     AppState.tasks.forEach(task => {
-        // المهام العادية
+        // المهام العادية للتاريخ الحالي
         if (task.date === dateStr) {
             tasksForDay.push(task);
         }
@@ -1892,20 +1921,44 @@ function renderDailyCalendar(container) {
         }
     });
     
+    // إضافة المهام المتأخرة من الأيام السابقة
+    overdueTasksAll.forEach(task => {
+        if (!tasksForDay.some(t => t.id === task.id)) {
+            const overdueTaskCopy = {
+                ...task,
+                id: task.id + '_overdue_' + dateStr,
+                isOverdueFromPast: true,
+                originalDate: task.date
+            };
+            tasksForDay.push(overdueTaskCopy);
+        }
+    });
+    
     // 2. فرز المهام
     const tasksWithTime = tasksForDay.filter(task => task.time);
     const tasksWithoutTime = tasksForDay.filter(task => !task.time);
-    
-    // المهام المتأخرة (بدون وقت)
-    const overdueTasks = tasksWithoutTime.filter(task => isTaskOverdue(task));
-    // المهام غير المتأخرة (بدون وقت)
-    const normalTasksWithoutTime = tasksWithoutTime.filter(task => !isTaskOverdue(task));
     
     // فرز المهام التي لها وقت حسب الوقت
     tasksWithTime.sort((a, b) => {
         const aMin = timeStrToMinutes(a.time);
         const bMin = timeStrToMinutes(b.time);
         return aMin - bMin;
+    });
+    
+    // فرز المهام بدون وقت (المتأخرة أولاً، ثم المكتملة في الأسفل)
+    tasksWithoutTime.sort((a, b) => {
+        // المهام المتأخرة أولاً
+        const aOverdue = a.isOverdueFromPast || isTaskOverdue(a);
+        const bOverdue = b.isOverdueFromPast || isTaskOverdue(b);
+        
+        if (aOverdue && !bOverdue) return -1;
+        if (!aOverdue && bOverdue) return 1;
+        
+        // ثم المهام غير المكتملة
+        if (!a.completed && b.completed) return -1;
+        if (a.completed && !b.completed) return 1;
+        
+        return 0;
     });
     
     const timeSlots = [
@@ -1937,46 +1990,50 @@ function renderDailyCalendar(container) {
         <div class="daily-calendar" id="daily-calendar-container" style="padding-right:10px;">
     `;
     
-    // 3. عرض المهام العامة (بدون وقت + المهام المتأخرة)
-    const allGeneralTasks = [...overdueTasks, ...normalTasksWithoutTime];
-    if (allGeneralTasks.length > 0) {
+    // 3. عرض المهام العامة (بدون وقت)
+    if (tasksWithoutTime.length > 0) {
         html += `
             <div class="time-slot" style="background:var(--theme-card);border:1px solid var(--theme-border);border-radius:12px;padding:15px;margin-bottom:15px;">
                 <div class="time-header">
                     <div class="time-title"><i class="fas fa-tasks"></i> مهام عامة</div>
                     <div style="display:flex; gap:10px;">
-                        ${overdueTasks.length > 0 ? `
+                        ${overdueTasksAll.length > 0 ? `
                             <span class="task-count" style="background:rgba(247, 37, 133, 0.1); color:#f72585; padding:2px 8px; border-radius:12px; font-size:0.8rem;">
-                                ${overdueTasks.length} متأخرة
+                                ${overdueTasksAll.length} متأخرة
                             </span>
                         ` : ''}
-                        <span class="task-count">${allGeneralTasks.length} مهام</span>
+                        <span class="task-count">${tasksWithoutTime.length} مهام</span>
                     </div>
                 </div>
                 <div class="time-tasks" style="margin-top:10px;">
         `;
-    
-        allGeneralTasks.forEach(task => {
+        
+        tasksWithoutTime.forEach(task => {
             const category = getCategoryById(task.categoryId);
-            const isOverdue = isTaskOverdue(task);
+            const isOverdue = task.isOverdueFromPast || isTaskOverdue(task);
             const isRepeated = task.isRepeated;
+            const isCompleted = task.completed;
             
             html += `
-                <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                <div class="calendar-task-card ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
                      data-id="${task.isRepeated ? task.originalId || task.id : task.id}"
                      onclick="openEditTaskModal('${task.isRepeated ? task.originalId || task.id : task.id}')"
-                     style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; position:relative;"
-                     title="انقر لتعديل المهمة${isRepeated ? ' (مهمة متكررة)' : ''}">
+                     style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; 
+                            background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; 
+                            cursor:pointer; position:relative;
+                            ${isCompleted ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
                      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                         <div style="flex:1;">
                             <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">
                                 ${task.title}
                                 ${isRepeated ? ' <i class="fas fa-redo" style="color:var(--theme-primary); font-size:0.8rem;" title="مهمة متكررة"></i>' : ''}
+                                ${task.isOverdueFromPast ? ' <i class="fas fa-history" style="color:#f72585; font-size:0.8rem;" title="مهمة متأخرة من تاريخ سابق"></i>' : ''}
                             </div>
                             <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px; margin-top:5px;">
                                 <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
                                 <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
-                                ${task.repetition ? `<span><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                                ${task.repetition && task.repetition.type !== 'none' ? `<span><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                                ${task.isOverdueFromPast ? `<span><i class="fas fa-calendar" title="تاريخها الأصلي: ${formatDate(task.originalDate)}"></i> من ${formatDate(task.originalDate)}</span>` : ''}
                             </div>
                         </div>
                         ${isOverdue ? '<span style="color:var(--danger-color); font-size:0.8rem;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
@@ -1984,7 +2041,7 @@ function renderDailyCalendar(container) {
                 </div>
             `;
         });
-    
+        
         html += `</div></div>`;
     } else {
         html += `
@@ -2027,13 +2084,16 @@ function renderDailyCalendar(container) {
                 const category = getCategoryById(task.categoryId);
                 const isOverdue = isTaskOverdue(task);
                 const isRepeated = task.isRepeated;
+                const isCompleted = task.completed;
                 
                 html += `
-                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                    <div class="calendar-task-card ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
                          data-id="${task.isRepeated ? task.originalId || task.id : task.id}"
                          onclick="openEditTaskModal('${task.isRepeated ? task.originalId || task.id : task.id}')"
-                         style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; cursor:pointer; position:relative;"
-                         title="انقر لتعديل المهمة${isRepeated ? ' (مهمة متكررة)' : ''}">
+                         style="border-left:4px solid ${category.color}; border-right:4px solid ${category.color}; 
+                                background:var(--theme-card); padding:10px; border-radius:8px; margin-bottom:8px; 
+                                cursor:pointer; position:relative;
+                                ${isCompleted ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
                          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                             <div style="flex:1;">
                                 <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">
@@ -2068,26 +2128,6 @@ function renderDailyCalendar(container) {
     
     html += `</div>`;
     container.innerHTML = html;
-}
-
-// دالة مساعدة للحصول على وصف التكرار
-function getRepetitionLabel(repetition) {
-    if (!repetition || repetition.type === 'none') return '';
-    
-    const labels = {
-        'daily': 'يومياً',
-        'weekly': 'أسبوعياً',
-        'monthly': 'شهرياً',
-        'custom': 'مخصص'
-    };
-    
-    if (repetition.type === 'custom' && repetition.days && repetition.days.length > 0) {
-        const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-        const customDays = repetition.days.map(day => dayNames[day]).join('، ');
-        return `أيام محددة: ${customDays}`;
-    }
-    
-    return labels[repetition.type] || '';
 }
 
 function renderWeeklyCalendar(container) {
@@ -2385,60 +2425,122 @@ function saveNote() {
     
     document.getElementById('notes-editor').classList.remove('active');
 }
-
 function setupEnhancedNotesEditor() {
     console.log("🖼️ إعداد محرر ملاحظات متقدم...");
     
-    const toolbarLeft = document.querySelector('.notes-toolbar .font-controls');
-    if (!toolbarLeft) return;
-    
-    if (!document.getElementById('add-link-btn')) {
-        const linkBtn = document.createElement('button');
-        linkBtn.className = 'btn btn-success btn-sm';
-        linkBtn.id = 'add-link-btn';
-        linkBtn.title = 'إضافة رابط';
-        linkBtn.innerHTML = '<i class="fas fa-link"></i>';
-        toolbarLeft.appendChild(linkBtn);
-        linkBtn.addEventListener('click', addLinkToNote);
+    // تحديث قائمة الخطوط
+    const fontFamilySelect = document.getElementById('notes-font-family');
+    if (fontFamilySelect) {
+        fontFamilySelect.innerHTML = `
+            <option value="'Cairo', sans-serif">Cairo - القاهرة</option>
+            <option value="'Tajawal', sans-serif">Tajawal - تجوال</option>
+            <option value="'Amiri', serif">Amiri - أميري</option>
+            <option value="'Changa', sans-serif">Changa - تغيير</option>
+            <option value="'El Messiri', sans-serif">El Messiri - المسيري</option>
+            <option value="'Lateef', serif">Lateef - لطيف</option>
+            <option value="'Mirza', serif">Mirza - مرزا</option>
+            <option value="'Noto Naskh Arabic', serif">Noto Naskh - نسخ عربي</option>
+            <option value="'Reem Kufi', sans-serif">Reem Kufi - ريم كوفي</option>
+            <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI</option>
+            <option value="'Arial', sans-serif">Arial</option>
+        `;
     }
     
-    if (!document.getElementById('add-image-btn')) {
-        const imgBtn = document.createElement('button');
-        imgBtn.className = 'btn btn-info btn-sm';
-        imgBtn.id = 'add-image-btn';
-        imgBtn.title = 'إضافة صورة';
-        imgBtn.innerHTML = '<i class="fas fa-image"></i>';
-        toolbarLeft.appendChild(imgBtn);
-        imgBtn.addEventListener('click', () => {
+    // زر إضافة خانة الاختيار
+    const addCheckboxBtn = document.getElementById('add-checkbox-btn');
+    if (addCheckboxBtn && !addCheckboxBtn._bound) {
+        addCheckboxBtn._bound = true;
+        addCheckboxBtn.addEventListener('click', function() {
+            const editor = document.getElementById('notes-editor-content');
+            if (!editor) return;
+            
+            const checkboxHTML = `
+                <div class="note-checkbox-item" contenteditable="false">
+                    <input type="checkbox" class="note-checkbox">
+                    <span class="note-checkbox-text" contenteditable="true">عنصر قائمة</span>
+                </div>
+            `;
+            
+            insertHTMLToEditor(checkboxHTML);
+            
+            // التركيز على النص
+            setTimeout(() => {
+                const textSpan = editor.querySelector('.note-checkbox-item:last-child .note-checkbox-text');
+                if (textSpan) {
+                    textSpan.focus();
+                }
+            }, 10);
+        });
+    }
+    
+    // زر إضافة رابط
+    const addLinkBtn = document.getElementById('add-link-btn');
+    if (addLinkBtn && !addLinkBtn._bound) {
+        addLinkBtn._bound = true;
+        addLinkBtn.addEventListener('click', addLinkToNote);
+    }
+    
+    // زر إضافة صورة
+    const addImageBtn = document.getElementById('add-image-btn');
+    if (addImageBtn && !addImageBtn._bound) {
+        addImageBtn._bound = true;
+        addImageBtn.addEventListener('click', () => {
             const input = document.getElementById('notes-image-file-input');
             if (input) input.click();
         });
     }
     
+    // معالجة تحميل الصور
     const fileInput = document.getElementById('notes-image-file-input');
     if (fileInput && !fileInput._bound) {
         fileInput._bound = true;
         fileInput.addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
+            
+            // التحقق من نوع الملف
             if (!file.type.startsWith('image/')) {
-                alert('الرجاء اختيار ملف صورة');
+                alert('الرجاء اختيار ملف صورة فقط');
+                e.target.value = '';
                 return;
             }
+            
+            // التحقق من حجم الملف (5MB كحد أقصى)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('حجم الصورة كبير جداً. الحد الأقصى 5MB');
+                e.target.value = '';
+                return;
+            }
+            
             const reader = new FileReader();
             reader.onload = function(ev) {
-                const imgHTML = `<div class="note-image-wrapper" contenteditable="false" style="position:relative; display:inline-block;">
-                    <img src="${ev.target.result}" class="note-embedded-image" style="max-width:100%; height:auto; border:1px solid var(--theme-border); border-radius:8px;">
-                    <button class="remove-image-btn" title="حذف الصورة" style="position:absolute; top:6px; left:6px; background:rgba(0,0,0,0.6); color:#fff; border:none; padding:4px 6px; border-radius:6px; cursor:pointer;">حذف</button>
-                </div>`;
+                const imgHTML = `
+                    <div class="note-image-wrapper" contenteditable="false" 
+                         style="position:relative; display:inline-block; margin:10px 0;">
+                        <img src="${ev.target.result}" class="note-embedded-image" 
+                             style="max-width:100%; height:auto; border:2px solid var(--theme-border); 
+                                    border-radius:8px; max-height:300px; object-fit:contain;">
+                        <button class="remove-image-btn" title="حذف الصورة" 
+                                style="position:absolute; top:8px; left:8px; background:rgba(0,0,0,0.7); 
+                                       color:#fff; border:none; padding:6px 10px; border-radius:6px; 
+                                       cursor:pointer; font-size:0.8rem;">حذف</button>
+                    </div>
+                `;
                 insertHTMLToEditor(imgHTML);
             };
+            
+            reader.onerror = function() {
+                alert('حدث خطأ أثناء تحميل الصورة');
+                e.target.value = '';
+            };
+            
             reader.readAsDataURL(file);
             e.target.value = '';
         });
     }
 }
 
+// دالة إضافة الرابط
 function addLinkToNote() {
     const selection = window.getSelection();
     const editor = document.getElementById('notes-editor-content');
@@ -2451,18 +2553,62 @@ function addLinkToNote() {
     const url = prompt('أدخل رابط URL:', 'https://');
     if (!url) return;
     
+    // التحقق من صحة الرابط
+    let validUrl = url;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        validUrl = 'https://' + url;
+    }
+    
     if (selection.toString().trim()) {
-        const linkHTML = `<a href="${url}" target="_blank" style="color: var(--theme-primary); text-decoration: underline;">${selection.toString()}</a>`;
+        const linkHTML = `<a href="${validUrl}" target="_blank" 
+                           style="color: var(--theme-primary); text-decoration: underline;">
+                           ${selection.toString()}</a>`;
         insertHTMLToEditor(linkHTML);
     } else {
-        const linkText = prompt('أدخل نص الرابط:', url);
+        const linkText = prompt('أدخل نص الرابط:', validUrl);
         if (linkText) {
-            const linkHTML = `<a href="${url}" target="_blank" style="color: var(--theme-primary); text-decoration: underline;">${linkText}</a>`;
+            const linkHTML = `<a href="${validUrl}" target="_blank" 
+                               style="color: var(--theme-primary); text-decoration: underline;">
+                               ${linkText}</a>`;
             insertHTMLToEditor(linkHTML);
         }
     }
     
     editor.focus();
+}
+
+// دالة الحفظ
+function saveNote() {
+    if (!AppState.currentNoteId) return;
+    
+    const title = document.getElementById('notes-editor-title').value;
+    const content = document.getElementById('notes-editor-content').innerHTML;
+    const fontFamily = document.getElementById('notes-font-family').value;
+    const fontSize = document.getElementById('notes-font-size').value;
+    const fontWeight = document.getElementById('notes-font-weight').value;
+    const fontStyle = document.getElementById('notes-font-style').value;
+    const color = document.getElementById('notes-font-color').value;
+    
+    // تنظيف المحتوى (إزالة سمات style الزائدة)
+    let cleanedContent = content.replace(/style="[^"]*"/g, '');
+    cleanedContent = cleanedContent.replace(/<font[^>]*>/g, '');
+    cleanedContent = cleanedContent.replace(/<\/font>/g, '');
+    
+    // إعادة إضافة السمات الأساسية
+    cleanedContent = cleanedContent.replace(/<a /g, '<a target="_blank" ');
+    cleanedContent = cleanedContent.replace(/<img /g, '<img style="max-width:100%; height:auto;" ');
+    
+    updateNote(AppState.currentNoteId, {
+        title: title,
+        content: cleanedContent,
+        fontFamily: fontFamily,
+        fontSize: fontSize,
+        fontWeight: fontWeight,
+        fontStyle: fontStyle,
+        color: color
+    });
+    
+    document.getElementById('notes-editor').classList.remove('active');
 }
 
 function insertHTMLToEditor(html) {
@@ -2498,11 +2644,15 @@ function setupNotesEditorEvents() {
         return;
     }
     
+     
+    // إضافة حدث الحفظ
     const saveNotesBtn = document.getElementById('save-notes-btn');
     if (saveNotesBtn && !saveNotesBtn._bound) {
         saveNotesBtn._bound = true;
         saveNotesBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            e.stopPropagation();
+            console.log("💾 حفظ الملاحظة...");
             saveNote();
         });
     }
@@ -2707,6 +2857,12 @@ function openEditCategoryModal(categoryId) {
     const colorInput = document.getElementById('category-color');
     const timeframeInput = document.getElementById('category-timeframe');
     
+    // حقول الرسائل الجديدة
+    const messageEmptyInput = document.getElementById('category-message-empty');
+    const messagePendingInput = document.getElementById('category-message-pending');
+    const messageCompletedInput = document.getElementById('category-message-completed');
+    const messageExceededInput = document.getElementById('category-message-exceeded');
+    
     if (!modal || !title || !nameInput || !colorInput || !timeframeInput) {
         console.error("❌ عناصر نافذة الفئة غير موجودة!");
         alert('خطأ: عناصر النافذة غير موجودة');
@@ -2717,6 +2873,12 @@ function openEditCategoryModal(categoryId) {
     nameInput.value = category.name;
     colorInput.value = category.color || '#5a76e8';
     timeframeInput.value = category.timeframeMinutes || '60';
+    
+    // تعيين قيم الرسائل
+    if (messageEmptyInput) messageEmptyInput.value = category.messageEmpty || '';
+    if (messagePendingInput) messagePendingInput.value = category.messagePending || '';
+    if (messageCompletedInput) messageCompletedInput.value = category.messageCompleted || '';
+    if (messageExceededInput) messageExceededInput.value = category.messageExceeded || '';
     
     modal.classList.add('active');
     setTimeout(() => nameInput.focus(), 100);
@@ -3115,6 +3277,205 @@ function setupSettingsEvents() {
         });
     });
 }
+// ========== وظيفة البحث ==========
+function setupSearch() {
+    const searchInput = document.getElementById('global-search');
+    const searchClearBtn = document.getElementById('global-search-clear');
+    
+    if (!searchInput) return;
+    
+    // إنشاء زر الحذف إذا لم يكن موجوداً
+    if (!searchClearBtn) {
+        const clearBtn = document.createElement('button');
+        clearBtn.id = 'global-search-clear';
+        clearBtn.innerHTML = '<i class="fas fa-times"></i>';
+        clearBtn.style.cssText = `
+            position: absolute !important;
+            left: 12px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            background: none !important;
+            border: none !important;
+            color: rgba(255,255,255,0.6) !important;
+            cursor: pointer !important;
+            font-size: 0.9rem !important;
+            display: none !important;
+            padding: 5px !important;
+        `;
+        searchInput.parentNode.appendChild(clearBtn);
+        
+        // حدث الحذف
+        clearBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            clearBtn.classList.remove('visible');
+            closeSearchResults();
+        });
+    }
+    
+    // أحداث البحث
+    searchInput.addEventListener('input', function(e) {
+        const clearBtn = document.getElementById('global-search-clear');
+        if (clearBtn) {
+            if (this.value.trim()) {
+                clearBtn.classList.add('visible');
+                performSearch(this.value);
+            } else {
+                clearBtn.classList.remove('visible');
+                closeSearchResults();
+            }
+        }
+    });
+    
+    // حدث إدخال
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Escape') {
+            this.value = '';
+            const clearBtn = document.getElementById('global-search-clear');
+            if (clearBtn) clearBtn.classList.remove('visible');
+            closeSearchResults();
+        }
+    });
+}
+
+function performSearch(query) {
+    if (!query.trim()) {
+        closeSearchResults();
+        return;
+    }
+    
+    const searchTerm = query.toLowerCase();
+    const results = {
+        tasks: [],
+        notes: [],
+        categories: []
+    };
+    
+    // البحث في المهام
+    results.tasks = AppState.tasks.filter(task => 
+        task.title.toLowerCase().includes(searchTerm) ||
+        (task.description && task.description.toLowerCase().includes(searchTerm))
+    );
+    
+    // البحث في الملاحظات
+    results.notes = AppState.notes.filter(note => 
+        note.title.toLowerCase().includes(searchTerm) ||
+        (note.content && note.content.toLowerCase().includes(searchTerm))
+    );
+    
+    // البحث في الفئات
+    results.categories = AppState.categories.filter(category => 
+        category.name.toLowerCase().includes(searchTerm)
+    );
+    
+    showSearchResults(results, query);
+}
+
+function showSearchResults(results, query) {
+    let resultsContainer = document.getElementById('search-results-content');
+    if (!resultsContainer) {
+        const resultsPopup = document.createElement('div');
+        resultsPopup.id = 'search-results';
+        resultsPopup.className = 'search-results-popup';
+        resultsPopup.style.cssText = `
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 500px !important;
+            max-width: 90vw !important;
+            max-height: 70vh !important;
+            background: var(--theme-card);
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3) !important;
+            z-index: 1000;
+            display: none;
+        `;
+        
+        resultsPopup.innerHTML = `
+            <div class="search-results-header" style="padding:20px;border-bottom:1px solid var(--theme-border);display:flex;justify-content:space-between;align-items:center;">
+                <h4>نتائج البحث: "${query}"</h4>
+                <button onclick="closeSearchResults()" class="close-btn" style="background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--gray-color);">&times;</button>
+            </div>
+            <div id="search-results-content" class="search-results-content" style="padding:20px;max-height:50vh;overflow-y:auto;"></div>
+        `;
+        
+        document.body.appendChild(resultsPopup);
+        resultsContainer = document.getElementById('search-results-content');
+    }
+    
+    let html = '';
+    const totalResults = results.tasks.length + results.notes.length + results.categories.length;
+    
+    if (totalResults === 0) {
+        html = `<div style="text-align:center;padding:40px;color:var(--gray-color);">
+                    <i class="fas fa-search" style="font-size:2rem;margin-bottom:15px;opacity:0.3;"></i>
+                    <p>لا توجد نتائج لـ "${query}"</p>
+                </div>`;
+    } else {
+        // عرض المهام
+        if (results.tasks.length > 0) {
+            html += `<h5 style="margin-bottom:15px;color:var(--theme-primary);"><i class="fas fa-tasks"></i> المهام (${results.tasks.length})</h5>`;
+            results.tasks.forEach(task => {
+                const category = getCategoryById(task.categoryId);
+                html += `
+                    <div class="search-result-item" onclick="openEditTaskModal('${task.id}'); closeSearchResults();" 
+                         style="padding:12px;border-radius:8px;border:1px solid var(--theme-border);margin-bottom:10px;cursor:pointer;transition:all 0.2s;">
+                        <div style="font-weight:500;color:var(--theme-text);">${task.title}</div>
+                        <div style="font-size:0.85rem;color:var(--gray-color);display:flex;gap:10px;margin-top:5px;">
+                            <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // عرض الملاحظات
+        if (results.notes.length > 0) {
+            html += `<h5 style="margin-top:20px;margin-bottom:15px;color:var(--theme-primary);"><i class="fas fa-sticky-note"></i> الملاحظات (${results.notes.length})</h5>`;
+            results.notes.forEach(note => {
+                html += `
+                    <div class="search-result-item" onclick="openNoteEditor('${note.id}'); closeSearchResults();"
+                         style="padding:12px;border-radius:8px;border:1px solid var(--theme-border);margin-bottom:10px;cursor:pointer;transition:all 0.2s;">
+                        <div style="font-weight:500;color:var(--theme-text);">${note.title}</div>
+                        <div style="font-size:0.85rem;color:var(--gray-color);margin-top:5px;">
+                            ${note.updatedAt ? `آخر تعديل: ${formatDate(note.updatedAt)}` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+        
+        // عرض الفئات
+        if (results.categories.length > 0) {
+            html += `<h5 style="margin-top:20px;margin-bottom:15px;color:var(--theme-primary);"><i class="fas fa-tags"></i> الفئات (${results.categories.length})</h5>`;
+            results.categories.forEach(category => {
+                html += `
+                    <div class="search-result-item" onclick="switchView('categories'); closeSearchResults();"
+                         style="padding:12px;border-radius:8px;border:1px solid var(--theme-border);margin-bottom:10px;cursor:pointer;transition:all 0.2s;">
+                        <div style="font-weight:500;color:var(--theme-text);display:flex;align-items:center;gap:10px;">
+                            <div style="width:12px;height:12px;border-radius:50%;background:${category.color};"></div>
+                            ${category.name}
+                        </div>
+                        <div style="font-size:0.85rem;color:var(--gray-color);margin-top:5px;">
+                            ${category.timeframeMinutes} دقيقة (حد زمني)
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    }
+    
+    resultsContainer.innerHTML = html;
+    document.getElementById('search-results').style.display = 'block';
+}
+
+function closeSearchResults() {
+    const resultsPopup = document.getElementById('search-results');
+    if (resultsPopup) {
+        resultsPopup.style.display = 'none';
+    }
+}
 
 function setFilter(filterName) {
     AppState.currentFilter = filterName;
@@ -3487,7 +3848,6 @@ function checkDOMElements() {
         console.log("✅ جميع عناصر DOM موجودة");
     }
 }
-
 function initializePage() {
     console.log("🚀 بدء تهيئة الصفحة...");
     checkCSS();
@@ -3498,22 +3858,72 @@ function initializePage() {
     setupAllEvents();
     setupNotesEvents();
     ensureFilterBar();
+    setupSearch(); // إضافة البحث
     
+    // إخفاء شريط الإحصائيات
     const statsBar = document.querySelector('.categories-stats-bar');
     if (statsBar) {
         statsBar.style.display = 'none';
         statsBar.style.marginBottom = '0';
     }
     
+    // تحديث التاريخ الحالي
+    const currentDateElement = document.getElementById('current-date');
+    if (currentDateElement) {
+        const now = new Date();
+        currentDateElement.textContent = now.toLocaleDateString('ar-SA', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    }
+    
+    // تحميل جميع العروض
     renderTasks();
     renderCategories();
     renderNotes();
+    renderCalendar(); // تأكد من تحميل الجدول
     
+    // عرض المهام كصفحة افتراضية
     switchView('tasks');
+    
+    // إعداد أحداث التكرار للنماذج
+    setupRepetitionEvents();
     
     console.log("🎉 التطبيق جاهز للاستخدام!");
 }
 
+// دالة إعداد أحداث التكرار
+function setupRepetitionEvents() {
+    // لنموذج إضافة المهمة
+    const repetitionSelect = document.getElementById('task-repetition');
+    const customRepetitionDiv = document.getElementById('custom-repetition-options');
+    
+    if (repetitionSelect && customRepetitionDiv) {
+        repetitionSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRepetitionDiv.style.display = 'block';
+            } else {
+                customRepetitionDiv.style.display = 'none';
+            }
+        });
+    }
+    
+    // لنموذج تعديل المهمة
+    const editRepetitionSelect = document.getElementById('edit-task-repetition');
+    const editCustomRepetitionDiv = document.getElementById('edit-custom-repetition-options');
+    
+    if (editRepetitionSelect && editCustomRepetitionDiv) {
+        editRepetitionSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                editCustomRepetitionDiv.style.display = 'block';
+            } else {
+                editCustomRepetitionDiv.style.display = 'none';
+            }
+        });
+    }
+}
 // إتاحة الدوال على window
 window.openEditTaskModal = openEditTaskModal;
 window.openAddTaskModal = openAddTaskModal;
