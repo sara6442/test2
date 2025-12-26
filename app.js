@@ -3992,8 +3992,14 @@ function saveNewTask() {
         return;
     }
     
+    // الحصول على بيانات النموذج بشكل صحيح
     const titleInput = document.getElementById('task-title');
     const categorySelect = document.getElementById('task-category');
+    const descriptionTextarea = document.getElementById('task-description');
+    const durationInput = document.getElementById('task-duration');
+    const dateInput = document.getElementById('task-date');
+    const timeInput = document.getElementById('task-time');
+    const prioritySelect = document.getElementById('task-priority');
     const repetitionSelect = document.getElementById('task-repetition');
     
     if (!titleInput || !categorySelect) {
@@ -4004,7 +4010,7 @@ function saveNewTask() {
     
     const title = titleInput.value.trim();
     const category = categorySelect.value;
-    const repetitionType = repetitionSelect.value;
+    const repetitionType = repetitionSelect ? repetitionSelect.value : 'none';
     
     if (!title) {
         alert('يرجى إدخال عنوان المهمة');
@@ -4017,12 +4023,6 @@ function saveNewTask() {
         categorySelect.focus();
         return;
     }
-    
-    const descriptionTextarea = document.querySelector('#task-description');
-    const durationInput = document.querySelector('#task-duration');
-    const dateInput = document.querySelector('#task-date');
-    const timeInput = document.querySelector('#task-time');
-    const prioritySelect = document.querySelector('#task-priority');
     
     let repetition = null;
     if (repetitionType !== 'none') {
@@ -4044,7 +4044,7 @@ function saveNewTask() {
         title: title,
         description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
         categoryId: category,
-        duration: parseInt(durationInput ? durationInput.value : 30),
+        duration: durationInput ? parseInt(durationInput.value) || 30 : 30,
         date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
         time: timeInput ? timeInput.value : '',
         priority: prioritySelect ? prioritySelect.value : 'medium',
