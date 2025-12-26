@@ -1766,6 +1766,234 @@ function calculateCategoryStatus(categoryId) {
 }
 
 // ========== عرض الجدول الزمني ==========
+function showDayTasksModal(dateStr, dayTitle) {
+    // جمع المهام العادية والمتكررة لهذا اليوم
+    let tasksForDay = [];
+    
+    // المهام العادية للتاريخ الحالي
+    const regularTasks = AppState.tasks.filter(task => task.date === dateStr);
+    tasksForDay.push(...regularTasks);
+    
+    // المهام المتكررة
+    AppState.tasks.forEach(task => {
+        if (task.repetition && task.repetition.type !== 'none') {
+            const taskDate = new Date(task.date);
+            const currentDate = new Date(dateStr);
+            
+            switch(task.repetition.type) {
+                case 'daily':
+                    if (taskDate <= currentDate) {
+                        const repeatedTask = {
+                            ...task,
+                            id: task.id + '_' + dateStr,
+                            date: dateStr,
+                            isRepeated: true,
+                            originalId: task.id,
+                            originalDate: task.date
+                        };
+                        
+                        if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                            tasksForDay.push(repeatedTask);
+                        }
+                    }
+                    break;
+                    
+                case 'weekly':
+                    if (taskDate <= currentDate) {
+                        const weeksDiff = Math.floor((currentDate - taskDate) / (7 * 24 * 60 * 60 * 1000));
+                        const repeatedDate = new Date(taskDate);
+                        repeatedDate.setDate(repeatedDate.getDate() + (weeksDiff * 7));
+                        
+                        if (repeatedDate.toISOString().split('T')[0] === dateStr) {
+                            const repeatedTask = {
+                                ...task,
+                                id: task.id + '_' + dateStr,
+                                date: dateStr,
+                                isRepeated: true,
+                                originalId: task.id,
+                                originalDate: task.date
+                            };
+                            
+                            if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                                tasksForDay.push(repeatedTask);
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'monthly':
+                    if (taskDate <= currentDate) {
+                        const taskDay = taskDate.getDate();
+                        const currentDay = currentDate.getDate();
+                        
+                        if (taskDay === currentDay) {
+                            const repeatedTask = {
+                                ...task,
+                                id: task.id + '_' + dateStr,
+                                date: dateStr,
+                                isRepeated: true,
+                                originalId: task.id,
+                                originalDate: task.date
+                            };
+                            
+                            if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                                tasksForDay.push(repeatedTask);
+                            }
+                        }
+                    }
+                    break;
+                    
+                case 'custom':
+                    if (taskDate <= currentDate && task.repetition.days && task.repetition.days.length > 0) {
+                        const dayOfWeek = currentDate.getDay();
+                        
+                        if (task.repetition.days.includes(dayOfWeek)) {
+                            const weeksDiff = Math.floor((currentDate - taskDate) / (7 * 24 * 60 * 60 * 1000));
+                            const isRecurringDay = weeksDiff >= 0;
+                            
+                            if (isRecurringDay) {
+                                const repeatedTask = {
+                                    ...task,
+                                    id: task.id + '_' + dateStr,
+                                    date: dateStr,
+                                    isRepeated: true,
+                                    originalId: task.id,
+                                    originalDate: task.date
+                                };
+                                
+                                if (!tasksForDay.some(t => t.id === repeatedTask.id)) {
+                                    tasksForDay.push(repeatedTask);
+                                }
+                            }
+                        }
+                    }
+                    break;
+            }
+        }
+    });
+    
+    // فرز المهام: مهام لها وقت أولاً، ثم المهام المتأخرة
+    tasksForDay.sort((a, b) => {
+        // المهام المتأخرة أولاً
+        const aOverdue = isTaskOverdue(a);
+        const bOverdue = isTaskOverdue(b);
+        if (aOverdue && !bOverdue) return -1;
+        if (!aOverdue && bOverdue) return 1;
+        
+        // المهام التي لها وقت أولاً
+        const aHasTime = a.time ? timeStrToMinutes(a.time) : 9999;
+        const bHasTime = b.time ? timeStrToMinutes(b.time) : 9999;
+        return aHasTime - bHasTime;
+    });
+    
+    if (tasksForDay.length === 0) {
+        alert(`لا توجد مهام في ${dayTitle}`);
+        return;
+    }
+    
+    let modalHTML = `
+        <div class="modal" id="day-tasks-modal">
+            <div class="modal-content" style="max-width: 700px; max-height: 85vh;">
+                <div class="modal-header">
+                    <h3 style="color: var(--theme-primary);">
+                        <i class="fas fa-calendar-day"></i> مهام ${dayTitle}
+                        <span style="font-size:0.9rem; color:var(--gray-color); margin-right:10px;">
+                            (${tasksForDay.length} مهمة)
+                        </span>
+                    </h3>
+                    <button class="close-btn" onclick="closeModal('day-tasks-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="tasks-list" style="max-height: 65vh; overflow-y: auto; padding-right: 10px;">
+    `;
+    
+    tasksForDay.forEach(task => {
+        const category = getCategoryById(task.categoryId);
+        const isOverdue = isTaskOverdue(task);
+        const isCompleted = task.completed;
+        const isRepeated = task.isRepeated;
+        
+        modalHTML += `
+            <div class="task-card" onclick="openEditTaskModal('${isRepeated ? task.originalId || task.id : task.id}'); closeModal('day-tasks-modal');" 
+                 style="cursor: pointer; margin-bottom: 12px; padding: 15px; border-left: 5px solid ${category.color};
+                        background: var(--theme-card); border-radius: 10px; border: 1px solid var(--theme-border);
+                        transition: all 0.2s ease;">
+                <div style="display: flex; align-items: flex-start; gap: 15px;">
+                    <input type="checkbox" class="task-checkbox" ${isCompleted ? 'checked' : ''} 
+                           onclick="event.stopPropagation(); toggleTaskCompletion('${isRepeated ? task.originalId || task.id : task.id}')"
+                           style="margin-top: 3px;">
+                    <div style="flex: 1;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+                            <div style="font-weight: 600; font-size: 1.05rem; color: var(--theme-text); ${isCompleted ? 'text-decoration: line-through; opacity: 0.7;' : ''}">
+                                ${task.title}
+                                ${isRepeated ? ' <i class="fas fa-redo" style="color: var(--theme-primary); font-size: 0.8rem;" title="مهمة متكررة"></i>' : ''}
+                            </div>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                ${isOverdue ? '<span style="background: rgba(247, 37, 133, 0.1); color: #f72585; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
+                                <span style="background: ${category.color}15; color: ${category.color}; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
+                                    ${category.name}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        ${task.description ? `
+                            <div style="color: var(--gray-color); font-size: 0.9rem; margin-bottom: 10px; padding: 8px; background: var(--theme-bg); border-radius: 6px;">
+                                ${task.description}
+                            </div>
+                        ` : ''}
+                        
+                        <div style="display: flex; gap: 20px; font-size: 0.85rem; color: var(--gray-color); flex-wrap: wrap;">
+                            <span><i class="fas fa-clock"></i> ${task.time || 'بدون وقت محدد'}</span>
+                            <span><i class="fas fa-stopwatch"></i> ${task.duration} دقيقة</span>
+                            <span><i class="fas fa-flag" style="color: ${task.priority === 'high' ? '#f72585' : task.priority === 'medium' ? '#f8961e' : '#4cc9f0'};"></i> 
+                                ${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}
+                            </span>
+                            ${task.repetition && task.repetition.type !== 'none' ? 
+                                `<span><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    modalHTML += `
+                    </div>
+                </div>
+                <div class="modal-footer" style="display: flex; justify-content: space-between;">
+                    <button class="btn btn-primary" onclick="openAddTaskModalForDate('${dateStr}'); closeModal('day-tasks-modal')">
+                        <i class="fas fa-plus"></i> إضافة مهمة لهذا اليوم
+                    </button>
+                    <button class="btn btn-secondary" onclick="closeModal('day-tasks-modal')">إغلاق</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const existingModal = document.getElementById('day-tasks-modal');
+    if (existingModal) existingModal.remove();
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    document.getElementById('day-tasks-modal').classList.add('active');
+}
+
+// دالة مساعدة لإضافة مهمة لليوم المحدد
+function openAddTaskModalForDate(dateStr) {
+    openAddTaskModal();
+    
+    setTimeout(() => {
+        const dateInput = document.getElementById('task-date');
+        if (dateInput) {
+            dateInput.value = dateStr;
+        }
+        
+        const titleInput = document.getElementById('task-title');
+        if (titleInput) {
+            titleInput.focus();
+        }
+    }, 300);
+}
+
 function renderCalendar() {
     console.log("📅 عرض الجدول الزمني...");
     
@@ -2130,7 +2358,6 @@ function renderDailyCalendar(container) {
     html += `</div>`;
     container.innerHTML = html;
 }
-
 function renderWeeklyCalendar(container) {
     console.log("📅 عرض الجدول الأسبوعي...");
     
@@ -2153,6 +2380,7 @@ function renderWeeklyCalendar(container) {
     `;
     
     const dayNames = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+    
     for (let i = 0; i < 7; i++) {
         const day = new Date(startOfWeek);
         day.setDate(startOfWeek.getDate() + i);
@@ -2161,7 +2389,11 @@ function renderWeeklyCalendar(container) {
         
         dayTasks.sort((a, b) => (a.time ? timeStrToMinutes(a.time) : 9999) - (b.time ? timeStrToMinutes(b.time) : 9999));
         
-        html += `<div class="day-column ${dateStr === new Date().toISOString().split('T')[0] ? 'today' : ''}">
+        const todayStr = new Date().toISOString().split('T')[0];
+        const isToday = dateStr === todayStr;
+        
+        html += `<div class="day-column ${isToday ? 'today' : ''}" 
+                        onclick="showDayTasksModal('${dateStr}', '${dayNames[i]} ${day.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })}')">
                     <div class="day-header">
                         <div class="day-name">${dayNames[i]}</div>
                         <div class="day-date">${day.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })}</div>
@@ -2175,17 +2407,20 @@ function renderWeeklyCalendar(container) {
                         <p>لا توجد مهام</p>
                     </div>`;
         } else {
-            dayTasks.forEach(task => {
+            dayTasks.slice(0, 4).forEach(task => {
                 const category = getCategoryById(task.categoryId);
                 const isOver = isTaskOverdue(task);
+                const isCompleted = task.completed;
                 
                 html += `
-                    <div class="calendar-task-card ${task.completed ? 'completed' : ''} ${isOver ? 'overdue' : ''}" 
+                    <div class="calendar-task-card ${isCompleted ? 'completed' : ''} ${isOver ? 'overdue' : ''}" 
                          data-id="${task.id}" 
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="border-left:3px solid ${category.color}; border-right:3px solid ${category.color}; margin-bottom:4px; padding:8px; cursor:pointer; position: relative;">
+                         onclick="event.stopPropagation(); openEditTaskModal('${task.id}')"
+                         style="border-left:3px solid ${category.color}; border-right:3px solid ${category.color}; 
+                                margin-bottom:4px; padding:8px; cursor:pointer; position: relative;
+                                ${isCompleted ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
                         <div class="calendar-task-title" style="font-size: 0.85rem; font-weight: 500;">${task.title}</div>
-                        <div class="calendar-task-meta" style="font-size: 0.75rem;">
+                        <div class="calendar-task-meta" style="font-size: 0.75rem; display: flex; justify-content: space-between;">
                             <span><i class="fas fa-clock"></i> ${task.time || ''}</span>
                             <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
                         </div>
@@ -2193,6 +2428,13 @@ function renderWeeklyCalendar(container) {
                     </div>
                 `;
             });
+            
+            if (dayTasks.length > 4) {
+                html += `<div style="font-size:0.75rem;color:var(--theme-primary);cursor:pointer;text-align:center;padding:4px;" 
+                              onclick="event.stopPropagation(); showDayTasksModal('${dateStr}', '${dayNames[i]} ${day.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' })}')">
+                            +${dayTasks.length - 4} مهام أخرى
+                        </div>`;
+            }
         }
         
         html += `</div></div>`;
@@ -2211,6 +2453,10 @@ function renderMonthlyCalendar(container) {
     const lastDay = new Date(year, month+1, 0);
     const daysInMonth = lastDay.getDate();
     const startDay = firstDay.getDay();
+    
+    const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 
+                        'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+    
     let html = `
         <div class="calendar-nav" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
             <button class="btn btn-secondary btn-sm" onclick="changeCalendarMonth(-1)"><i class="fas fa-chevron-right"></i> الشهر الماضي</button>
@@ -2221,34 +2467,63 @@ function renderMonthlyCalendar(container) {
             <button class="btn btn-primary btn-sm" onclick="AppState.currentCalendarDate = new Date(); renderCalendar();"><i class="fas fa-calendar-alt"></i> العودة للشهر الحالي</button>
         </div>
         <div class="monthly-calendar">`;
+    
     const dayHeaders = ['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
     dayHeaders.forEach(d=> html+=`<div class="month-day-header">${d}</div>`);
+    
     for (let i=0;i<startDay;i++) html += '<div class="empty-day"></div>';
+    
     for (let day=1; day<=daysInMonth; day++){
         const dateStr = `${year}-${(month+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
         const dayTasks = AppState.tasks.filter(t=>t.date===dateStr);
         const isToday = dateStr === new Date().toISOString().split('T')[0];
-        html += `<div class="month-day ${isToday? 'today':''}" data-date="${dateStr}">
+        
+        html += `<div class="month-day ${isToday? 'today':''}" data-date="${dateStr}" 
+                         onclick="showDayTasksModal('${dateStr}', '${day} ${monthNames[month]} ${year}')">
                     <div class="day-number">${day}${isToday? '<span style="font-size:0.7rem;color:var(--theme-primary);">(اليوم)</span>':''}</div>
                     <div class="month-tasks">`;
+        
         if (dayTasks.length===0){
             html += `<div style="text-align:center;color:var(--gray-color);"><i class="fas fa-calendar-day" style="opacity:0.3;"></i></div>`;
         } else {
-            dayTasks.slice(0,3).forEach(task=>{
+            dayTasks.slice(0,2).forEach(task=>{
                 const category = getCategoryById(task.categoryId);
-                html += `<div class="month-task-item" data-id="${task.id}" onclick="openEditTaskModal('${task.id}')" title="${task.title}" style="border-right:2px solid ${category.color}; background:var(--theme-bg); padding:6px 8px; margin-bottom:4px;">
-                            <div style="display:flex;align-items:center;gap:6px;"><span class="month-task-dot" style="background:${category.color};"></span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${task.title.length>20?task.title.substring(0,20)+'...':task.title}</span></div>
-                            <div style="font-size:0.75rem;color:var(--gray-color);display:flex;justify-content:space-between;"><span>${task.time||''}</span>${task.completed?'<span style="color:var(--success-color);"><i class="fas fa-check"></i></span>':''}</div>
+                const isCompleted = task.completed;
+                const isOverdue = isTaskOverdue(task);
+                
+                html += `<div class="month-task-item" 
+                               onclick="event.stopPropagation(); openEditTaskModal('${task.id}')" 
+                               title="${task.title}" 
+                               style="border-right:2px solid ${category.color}; 
+                                      background:var(--theme-bg); 
+                                      padding:4px 6px; 
+                                      margin-bottom:3px;
+                                      cursor: pointer;
+                                      ${isCompleted ? 'text-decoration: line-through; opacity: 0.6;' : ''}">
+                            <div style="display:flex;align-items:center;gap:4px;font-size:0.75rem;">
+                                <span class="month-task-dot" style="width:8px;height:8px;background:${category.color};border-radius:50%;"></span>
+                                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;">
+                                    ${task.title.length>15?task.title.substring(0,15)+'...':task.title}
+                                </span>
+                                ${isCompleted ? '<i class="fas fa-check" style="color:var(--success-color);font-size:0.6rem;"></i>' : ''}
+                                ${isOverdue ? '<i class="fas fa-exclamation-circle" style="color:var(--danger-color);font-size:0.6rem;"></i>' : ''}
+                            </div>
                         </div>`;
             });
-            if (dayTasks.length>3){
-                html += `<div style="font-size:0.75rem;color:var(--theme-primary);cursor:pointer;text-align:center;padding:4px;" onclick="showAllTasksForDay('${dateStr}')">+${dayTasks.length-3} أخرى</div>`;
+            
+            if (dayTasks.length>2){
+                html += `<div style="font-size:0.7rem;color:var(--theme-primary);cursor:pointer;text-align:center;padding:3px;margin-top:2px;" 
+                              onclick="event.stopPropagation(); showDayTasksModal('${dateStr}', '${day} ${monthNames[month]} ${year}')">
+                            +${dayTasks.length-2} أخرى
+                        </div>`;
             }
         }
+        
         html += `</div></div>`;
     }
+    
     html += '</div>';
-     container.innerHTML = html;
+    container.innerHTML = html;
 }
 
 function changeCalendarDate(days) {
@@ -2274,11 +2549,23 @@ Date.prototype.getWeekNumber = function() {
     return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
 };
 
-function showAllTasksForDay(dateStr) {
-    const tasks = AppState.tasks.filter(task => task.date === dateStr);
-    if (tasks.length > 0) {
-        alert(`مهام ${dateStr}:\n${tasks.map(t => `- ${t.title} (${t.time || 'بدون وقت'})`).join('\n')}`);
+function getRepetitionLabel(repetition) {
+    if (!repetition || repetition.type === 'none') return '';
+    
+    const labels = {
+        'daily': 'يومياً',
+        'weekly': 'أسبوعياً',
+        'monthly': 'شهرياً',
+        'custom': 'مخصص'
+    };
+    
+    if (repetition.type === 'custom' && repetition.days && repetition.days.length > 0) {
+        const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const customDays = repetition.days.map(day => dayNames[day]).join('، ');
+        return `أيام محددة: ${customDays}`;
     }
+    
+    return labels[repetition.type] || '';
 }
 
 // ========== إدارة الملاحظات ==========
