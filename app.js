@@ -3856,25 +3856,48 @@ function setupAllEvents() {
     setupEventDelegation();
     setupSettingsEvents();
     
-    document.getElementById('add-task-btn')?.addEventListener('click', () => openAddTaskModal());
-    document.getElementById('add-category-btn')?.addEventListener('click', () => openAddCategoryModal());
-    document.getElementById('add-note-btn')?.addEventListener('click', () => addNote());
+    // ربط مباشر لزر إضافة المهمة
+    const addTaskBtn = document.getElementById('add-task-btn');
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', () => openAddTaskModal());
+    }
     
-    // ⬇️⬇️⬇️ أضف هذه الأسطر ⬇️⬇️⬇️
-    document.getElementById('save-task')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log("🔄 زر حفظ المهمة تم النقر عليه");
-        saveNewTask();
-    });
+    // ربط مباشر لزر حفظ المهمة
+    const saveTaskBtn = document.getElementById('save-task');
+    if (saveTaskBtn && !saveTaskBtn._bound) {
+        saveTaskBtn._bound = true;
+        saveTaskBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log("✅ تم النقر على زر حفظ المهمة");
+            saveNewTask();
+        });
+    }
     
-    document.getElementById('save-edit-task')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log("🔄 زر تعديل المهمة تم النقر عليه");
-        saveEditedTask();
-    });
-    // ⬆️⬆️⬆️ نهاية الإضافة ⬆️⬆️⬆️
+    // ربط زر تعديل المهمة
+    const saveEditTaskBtn = document.getElementById('save-edit-task');
+    if (saveEditTaskBtn && !saveEditTaskBtn._bound) {
+        saveEditTaskBtn._bound = true;
+        saveEditTaskBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            saveEditedTask();
+        });
+    }
+    
+    // ربط زر حذف المهمة في التعديل
+    const deleteEditTaskBtn = document.getElementById('delete-edit-task');
+    if (deleteEditTaskBtn && !deleteEditTaskBtn._bound) {
+        deleteEditTaskBtn._bound = true;
+        deleteEditTaskBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (AppState.currentTaskId) {
+                deleteTask(AppState.currentTaskId);
+                closeModal('edit-task-modal');
+            }
+        });
+    }
     
     document.addEventListener('click', function(e){
         if (e.target && e.target.classList && e.target.classList.contains('note-checkbox')) {
@@ -3883,17 +3906,13 @@ function setupAllEvents() {
             if (item) item.classList.toggle('completed');
         }
     });
-        const saveTaskBtn = document.getElementById('save-task');
-    if (saveTaskBtn && !saveTaskBtn._bound) {
-        saveTaskBtn._bound = true;
-        saveTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("✅ تم النقر على زر الحفظ، استدعاء saveNewTask...");
-            saveNewTask();
-        });
-    }
+        document.getElementById('add-category-btn')?.addEventListener('click', () => openAddCategoryModal());
+    document.getElementById('add-note-btn')?.addEventListener('click', () => addNote());
+    
+    // جعل الدالة متاحة للتصحيح
+    window.debugAddTask = debugAddTask;
 }
+
 
 
 // في دالة setupNotesEvents() - إضافة مستمعات الأحداث:
@@ -4201,6 +4220,50 @@ function initializePage() {
     setupRepetitionEvents();
     
     console.log("🎉 التطبيق جاهز للاستخدام!");
+}
+
+// ========== دالة التصحيح السريع ==========
+function debugAddTask() {
+    console.log("🔧 بدء تصحيح إضافة المهمة...");
+    
+    // 1. فتح نافذة الإضافة
+    openAddTaskModal();
+    
+    // 2. بعد تأخير، تعبئة البيانات واختبار
+    setTimeout(() => {
+        const titleInput = document.getElementById('task-title');
+        const categorySelect = document.getElementById('task-category');
+        const saveBtn = document.getElementById('save-task');
+        
+        if (titleInput && categorySelect && saveBtn) {
+            console.log("✅ جميع العناصر موجودة");
+            
+            // تعبئة بيانات تجريبية
+            titleInput.value = "مهمة تجريبية للاختبار";
+            if (categorySelect.options.length > 0) {
+                categorySelect.selectedIndex = 1;
+            }
+            
+            // عرض معلومات الحقول
+            console.log("📋 حالة الحقول:");
+            console.log("عنوان:", titleInput.value);
+            console.log("فئة:", categorySelect.value);
+            console.log("زر الحفظ موجود:", !!saveBtn);
+            
+            // إضافة مستمع للأحداث
+            const hasListener = saveBtn.hasAttribute('_bound');
+            console.log("هل الزر له مستمع أحداث:", hasListener);
+            
+            // اختبار النقر اليدوي
+            console.log("🎯 جاري اختبار النقر على زر الحفظ...");
+            
+        } else {
+            console.error("❌ عناصر مفقودة:");
+            console.error("- titleInput:", !!titleInput);
+            console.error("- categorySelect:", !!categorySelect);
+            console.error("- saveBtn:", !!saveBtn);
+        }
+    }, 500);
 }
 
 // دالة إعداد أحداث التكرار
