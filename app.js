@@ -3063,6 +3063,12 @@ function setupNotesEditorEvents() {
             if (editorLocal) editorLocal.style.color = this.value;
         });
     }
+    
+    const saveNotesBtn = document.getElementById('save-notes-btn');
+    if (saveNotesBtn) {
+        saveNotesBtn.addEventListener('click', saveNote); // تأكد من وجود هذا السطر
+    }
+    
 }
 
 // ========== النوافذ والتنقل ==========
@@ -3858,7 +3864,9 @@ function setupAllEvents() {
             if (item) item.classList.toggle('completed');
         }
     });
+        document.getElementById('save-task')?.addEventListener('click', saveNewTask);
 }
+
 // في دالة setupNotesEvents() - إضافة مستمعات الأحداث:
 function setupNotesEvents() {
     console.log("📝 إعداد أحداث الملاحظات...");
