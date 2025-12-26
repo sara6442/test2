@@ -1182,15 +1182,19 @@ body {
     border-radius: 12px; 
     padding: 15px; 
     border: 1px solid var(--theme-border); 
-    min-height: 400px; 
+    min-height: 400px !important;
     max-height: 500px; 
     overflow-y: auto; 
-    transition: all 0.3s ease;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+
 }
 
 .day-column:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transform: translateY(-3px) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+    border-color: var(--theme-primary) !important;
+
 }
 
 .day-column.today {
@@ -1240,17 +1244,21 @@ body {
     background: var(--theme-card); 
     border-radius: 8px; 
     padding: 10px; 
-    min-height: 120px; 
+    min-height: 120px !important;
     border: 1px solid var(--theme-border); 
     position: relative; 
     overflow-y: auto; 
     max-height: 150px; 
-    transition: all 0.3s ease;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+
 }
 
 .month-day:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    border-color: var(--theme-primary) !important;
+
 }
 
 .month-day.today {
@@ -1286,6 +1294,23 @@ body {
     background: linear-gradient(135deg, var(--theme-primary), var(--theme-hover)) !important;
     color: white !important;
     font-weight: 600 !important;
+}
+
+.day-column .day-tasks,
+.month-day .month-tasks {
+    pointer-events: none !important;
+}
+
+.day-column .calendar-task-card,
+.month-day .month-task-item {
+    pointer-events: auto !important;
+    cursor: pointer !important;
+}
+
+/* التأكد من أن النص الإضافي قابل للنقر */
+.day-column div[onclick*="showDayTasksModal"],
+.month-day div[onclick*="showDayTasksModal"] {
+    pointer-events: auto !important;
 }
 
 /* ========== النوافذ المنبثقة ========== */
