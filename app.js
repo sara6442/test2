@@ -1600,6 +1600,7 @@ function deleteCategory(categoryId) {
 }
 
 
+
 function saveCategory() {
     const nameInput = document.getElementById('category-name');
     const colorInput = document.getElementById('category-color');
@@ -2839,7 +2840,6 @@ function openEditTaskModal(taskId) {
     const modal = document.getElementById('edit-task-modal');
     if (modal) modal.classList.add('active');
 }
-
 function openEditCategoryModal(categoryId) {
     console.log("📝 فتح نافذة تعديل الفئة:", categoryId);
     
@@ -2879,31 +2879,6 @@ function openEditCategoryModal(categoryId) {
     if (messagePendingInput) messagePendingInput.value = category.messagePending || '';
     if (messageCompletedInput) messageCompletedInput.value = category.messageCompleted || '';
     if (messageExceededInput) messageExceededInput.value = category.messageExceeded || '';
-    
-    modal.classList.add('active');
-    setTimeout(() => nameInput.focus(), 100);
-}
-
-function openAddCategoryModal() {
-    console.log("📝 فتح نافذة إضافة فئة جديدة");
-    AppState.currentCategoryId = null;
-    
-    const modal = document.getElementById('category-modal');
-    const title = document.getElementById('category-modal-title');
-    const nameInput = document.getElementById('category-name');
-    const colorInput = document.getElementById('category-color');
-    const timeframeInput = document.getElementById('category-timeframe');
-    
-    if (!modal || !title || !nameInput || !colorInput || !timeframeInput) {
-        console.error("❌ عناصر نافذة الفئة غير موجودة!");
-        alert('خطأ: عناصر النافذة غير موجودة');
-        return;
-    }
-    
-    title.textContent = 'إضافة فئة جديدة';
-    nameInput.value = '';
-    colorInput.value = '#5a76e8';
-    timeframeInput.value = '60';
     
     modal.classList.add('active');
     setTimeout(() => nameInput.focus(), 100);
