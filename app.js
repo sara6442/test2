@@ -335,6 +335,15 @@ function saveCategories() {
     }
 }
 
+function saveNotes() {
+    try {
+        localStorage.setItem('mytasks_notes', JSON.stringify(AppState.notes));
+        console.log("✅ تم حفظ الملاحظات بنجاح");
+    } catch (e) {
+        console.error("❌ خطأ في حفظ الملاحظات:", e);
+    }
+}
+
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
@@ -2713,6 +2722,7 @@ function saveNote() {
     
     document.getElementById('notes-editor').classList.remove('active');
 }
+
 function setupEnhancedNotesEditor() {
     console.log("🖼️ إعداد محرر ملاحظات متقدم...");
     
