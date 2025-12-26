@@ -33,11 +33,11 @@ body {
 
 /* ========== الثيمات ========== */
 .theme-beige {
-    --theme-bg: #fefaf6;
+    --theme-bg: linear-gradient(135deg, #fefaf6 0%, #f5f1ed 100%);
     --theme-sidebar: linear-gradient(180deg, #d7ccc8, #bcaaa4);
     --theme-text: #5d4037;
-    --theme-card: white;
-    --theme-border: #d7ccc8;
+    --theme-card: rgba(255, 255, 255, 0.95);
+    --theme-border: rgba(215, 204, 200, 0.3);
     --theme-primary: #8d6e63;
     --theme-hover: #6d4c41;
 }
