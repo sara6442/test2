@@ -92,11 +92,13 @@ body {
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--theme-bg);
+    background: var(--theme-bg);
     color: var(--theme-text);
     direction: rtl;
     min-height: 100vh;
     transition: var(--transition);
+    background-attachment: fixed;
+    background-size: cover;
 }
 
 /* ========== الهيكل ========== */
