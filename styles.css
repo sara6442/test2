@@ -1316,6 +1316,45 @@ body {
     pointer-events: auto !important;
 }
 
+/* أنماط حقل التكرار */
+#custom-repetition-options,
+#edit-custom-repetition-options {
+    background: var(--theme-bg);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--theme-border);
+    margin-bottom: 15px;
+    animation: fadeIn 0.3s ease;
+}
+
+#custom-repetition-options label,
+#edit-custom-repetition-options label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 10px !important;
+    background: var(--theme-card) !important;
+    border: 1px solid var(--theme-border) !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+#custom-repetition-options label:hover,
+#edit-custom-repetition-options label:hover {
+    background: var(--theme-primary) !important;
+    color: white !important;
+    border-color: var(--theme-primary) !important;
+}
+
+#custom-repetition-options input[type="checkbox"],
+#edit-custom-repetition-options input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    cursor: pointer !important;
+    accent-color: var(--theme-primary) !important;
+}
+
 /* ========== النوافذ المنبثقة ========== */
 .modal {
     display: none;
@@ -1434,6 +1473,74 @@ body {
     display: none;
     pointer-events: none;
     white-space: normal;
+}
+
+.task-tooltip {
+    position: fixed !important;
+    background: var(--theme-card) !important;
+    border: 2px solid var(--theme-primary) !important;
+    border-radius: 10px !important;
+    padding: 15px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+    z-index: 10000 !important;
+    max-width: 320px !important;
+    min-width: 250px !important;
+    color: var(--theme-text) !important;
+    font-family: inherit !important;
+    animation: fadeIn 0.2s ease !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+}
+
+
+.task-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    right: 20px;
+    width: 10px;
+    height: 10px;
+    background: var(--theme-card);
+    transform: rotate(45deg);
+    border-left: 2px solid var(--theme-primary);
+    border-top: 2px solid var(--theme-primary);
+}
+
+/* نمط المهام المتكررة */
+.task-card .repetition-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: linear-gradient(135deg, var(--theme-primary), var(--theme-hover));
+    color: white;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    z-index: 2;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* تحسين عرض التكرار في القوائم */
+.calendar-task-card .repetition-icon {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    color: var(--theme-primary);
+    font-size: 0.7rem;
+    opacity: 0.8;
+}
+
+.month-task-item .repetition-icon {
+    margin-left: 5px;
+    color: var(--theme-primary);
+    font-size: 0.6rem;
+}
+
+/* تحسين التلميحات في الجدول الزمني */
+.calendar-task-card:hover .task-tooltip,
+.month-task-item:hover .task-tooltip {
+    display: block !important;
 }
 
 /* ========== التصميم المتجاوب ========== */
@@ -1633,6 +1740,41 @@ body {
 
 #floating-undo-redo button:active {
     transform: translateY(-2px) scale(0.98);
+}
+
+/* ========================== */
+/* أنماط المهام المتأخرة في القائمة العامة */
+.overdue-tasks-section {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: linear-gradient(135deg, rgba(247, 37, 133, 0.05), rgba(247, 37, 133, 0.1));
+    border-radius: 12px;
+    border: 2px solid rgba(247, 37, 133, 0.2);
+}
+
+.overdue-tasks-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    color: var(--danger-color);
+    font-weight: 600;
+}
+
+.overdue-tasks-header i {
+    font-size: 1.2rem;
+}
+
+.task-card.overdue-highlight {
+    border: 2px solid rgba(247, 37, 133, 0.3) !important;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(247, 37, 133, 0.05)) !important;
+    animation: pulseOverdue 2s infinite !important;
+}
+
+@keyframes pulseOverdue {
+    0% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.2); }
+    70% { box-shadow: 0 0 0 8px rgba(247, 37, 133, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0); }
 }
 
 /* ========== النهاية ========== */
