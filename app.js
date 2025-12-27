@@ -4401,6 +4401,49 @@ function saveEditedTask() {
     });
 }
 
+// ========== إعداد أحداث التكرار ==========
+function setupRepetitionEvents() {
+    // لنموذج إضافة المهمة
+    const repetitionSelect = document.getElementById('task-repetition');
+    const customRepetitionDiv = document.getElementById('custom-repetition-options');
+    
+    if (repetitionSelect && customRepetitionDiv) {
+        repetitionSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                customRepetitionDiv.style.display = 'block';
+            } else {
+                customRepetitionDiv.style.display = 'none';
+            }
+        });
+        
+        // تحميل أولي
+        if (repetitionSelect.value === 'custom') {
+            customRepetitionDiv.style.display = 'block';
+        }
+    }
+    
+    // لنموذج تعديل المهمة
+    const editRepetitionSelect = document.getElementById('edit-task-repetition');
+    const editCustomRepetitionDiv = document.getElementById('edit-custom-repetition-options');
+    
+    if (editRepetitionSelect && editCustomRepetitionDiv) {
+        editRepetitionSelect.addEventListener('change', function() {
+            if (this.value === 'custom') {
+                editCustomRepetitionDiv.style.display = 'block';
+            } else {
+                editCustomRepetitionDiv.style.display = 'none';
+            }
+        });
+    }
+    
+    // منع إغلاق النموذج عند النقر على خيارات التكرار
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#custom-repetition-options') || 
+            e.target.closest('#edit-custom-repetition-options')) {
+            e.stopPropagation();
+        }
+    });
+}
 // ========== تهيئة الصفحة ==========
 function checkDOMElements() {
     console.log("🔍 فحص عناصر DOM...");
