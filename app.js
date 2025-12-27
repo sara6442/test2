@@ -98,6 +98,25 @@ const AppState = {
     redoStack: []
 };
 
+function openAddCategoryModal() {
+    // إعادة تعيين الحقول
+    const nameInput = document.getElementById('category-name');
+    const colorInput = document.getElementById('category-color');
+    const timeframeInput = document.getElementById('category-timeframe');
+    
+    if (nameInput) nameInput.value = '';
+    if (colorInput) colorInput.value = '#5a76e8';
+    if (timeframeInput) timeframeInput.value = '60';
+    
+    // فتح النافذة
+    const modal = document.getElementById('category-modal');
+    const title = document.getElementById('category-modal-title');
+    
+    if (title) title.textContent = 'إضافة فئة جديدة';
+    if (modal) modal.classList.add('active');
+    AppState.currentCategoryId = null;
+}
+
 // ========== وظائف التكرار ==========
 // دالة التحقق من التكرار
 function isDateInRepetition(taskDate, targetDate, repetition) {
@@ -1313,17 +1332,17 @@ function renderTasks() {
             
             // عرض باقي المهام
             otherTasks.forEach(task => {
-                renderTaskCard(task, html);
+                html += renderSingleTaskCard(task);
             });
         } else {
             tasksToShow.forEach(task => {
-                renderTaskCard(task, html);
+                html += renderSingleTaskCard(task);
             });
         }
     } else {
         // عرض جميع المهام بالترتيب الطبيعي
         tasksToShow.forEach(task => {
-            renderTaskCard(task, html);
+            html += renderSingleTaskCard(task);
         });
     }
     
@@ -1337,15 +1356,13 @@ function renderTasks() {
         setupTaskTooltips();
     }, 100);
 }
-
-// دالة مساعدة لعرض بطاقة المهمة
-function renderTaskCard(task, html) {
+function renderSingleTaskCard(task) {
     const category = getCategoryById(task.categoryId);
     const isDeleted = AppState.currentFilter === 'deleted';
     const isOverdue = isTaskOverdue(task) && !task.completed;
     
     if (isDeleted) {
-        html += `
+        return `
             <div class="task-card deleted" data-id="${task.id}">
                 <div class="task-content">
                     <div class="task-title" style="color: #999; text-decoration: line-through;">${task.title}</div>
@@ -1377,7 +1394,7 @@ function renderTaskCard(task, html) {
             </div>
         `;
     } else {
-        html += `
+        return `
             <div class="task-card ${task.completed ? 'completed' : ''}" 
                  data-id="${task.id}"
                  style="position: relative;"
@@ -4478,61 +4495,59 @@ function checkDOMElements() {
     }
 }
 
+// استبدل دالة initializePage كاملة بهذا الكود المبسط:
 function initializePage() {
-    console.log("🚀 بدء تهيئة الصفحة...");
-    checkCSS();
-    checkDOMElements();
+    console.log("📱 تهيئة التطبيق...");
+    
+    // 1. تحميل البيانات
     initializeData();
-    initializeThemes();
-    setupEventDelegation();
-    setupAllEvents();
-    setupNotesEvents();
-    ensureFilterBar();
-    setupSearch();
     
-    // إخفاء شريط الإحصائيات
-    const statsBar = document.querySelector('.categories-stats-bar');
-    if (statsBar) {
-        statsBar.style.display = 'none';
-        statsBar.style.marginBottom = '0';
-    }
+    // 2. عرض المهام مباشرة
+    renderTasks();
     
-    // تحديث التاريخ الحالي
-    const currentDateElement = document.getElementById('current-date');
-    if (currentDateElement) {
-        const now = new Date();
-        currentDateElement.textContent = now.toLocaleDateString('ar-SA', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+    // 3. ربط حدث إضافة مهمة فقط
+    const addBtn = document.getElementById('add-task-btn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            console.log("➕ زر الإضافة تم النقر");
+            openAddTaskModal();
         });
     }
     
-    // تحميل جميع العروض
-    renderTasks();
-    renderCategories();
-    renderNotes();
-    renderCalendar();
+    // 4. ربط حدث حفظ المهمة
+    const saveBtn = document.getElementById('save-task');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("💾 حفظ المهمة...");
+            saveNewTask();
+        });
+    }
     
-    // عرض المهام كصفحة افتراضية
-    switchView('tasks');
+    console.log("✅ جاهز");
+}
+// دالة جديدة لربط الأحداث الأساسية فقط
+function setupBasicEvents() {
+    // زر إضافة مهمة
+    document.getElementById('add-task-btn')?.addEventListener('click', openAddTaskModal);
     
-    // إعداد أحداث التكرار
-    setupRepetitionEvents();
+    // زر حفظ مهمة
+    document.getElementById('save-task')?.addEventListener('click', saveNewTask);
     
-    // إعداد التلميحات
-    setTimeout(() => {
-        setupTaskTooltips();
-    }, 500);
+    // الأزرار التنقلية
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+            switchView(this.dataset.view);
+        });
+    });
     
-    // إعادة ربط أحداث الإعدادات
-    setTimeout(() => {
-        setupSettingsEvents();
-        console.log("✅ تم إعادة ربط أحداث الإعدادات");
-    }, 1000);
-    
-    console.log("🎉 التطبيق جاهز للاستخدام!");
+    // زر إغلاق النوافذ
+    document.querySelectorAll('.close-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) modal.classList.remove('active');
+        });
+    });
 }
 
 // ========== دالة التصحيح السريع ==========
@@ -4646,6 +4661,38 @@ window.addEventListener('DOMContentLoaded', function() {
         if (warning) warning.remove();
     }, 5000);
 });
+
+// أضف هذه الدالة في نهاية app.js (قبل آخر سطر):
+function debugApp() {
+    console.log("🔧 حالة التطبيق الحالية:");
+    console.log("- عدد المهام:", AppState.tasks.length);
+    console.log("- عدد الفئات:", AppState.categories.length);
+    console.log("- العرض الحالي:", AppState.currentView);
+    console.log("- الفلتر الحالي:", AppState.currentFilter);
+    
+    // اختبار إضافة مهمة مباشرة
+    const testTask = {
+        id: 'test_' + Date.now(),
+        title: 'مهمة تجريبية',
+        description: 'هذه مهمة للاختبار فقط',
+        categoryId: AppState.categories[0]?.id || 'work',
+        duration: 30,
+        date: new Date().toISOString().split('T')[0],
+        time: '12:00',
+        priority: 'medium',
+        completed: false,
+        createdAt: new Date().toISOString()
+    };
+    
+    AppState.tasks.push(testTask);
+    saveTasks();
+    renderTasks();
+    
+    console.log("✅ تم إضافة مهمة تجريبية");
+}
+
+// إضافة الدالة إلى window للوصول من الكونسول
+window.debugApp = debugApp;
 
 window.addEventListener('DOMContentLoaded', function() {
     initializePage();
