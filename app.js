@@ -2262,7 +2262,7 @@ function renderCategories() {
                             <span><i class="fas fa-calendar"></i> ${formatDate(task.date)} (اليوم)</span>
                             <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
                             ${task.repetition && task.repetition.type !== 'none' ? 
-                                `<span style="color: var(--theme-primary);"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                                `<span class="repetition-badge-inline"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
                         </div>
                     </div>
                 `;
@@ -3169,8 +3169,8 @@ function renderDailyCalendar(container) {
                                     <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
                                     <span><i class="fas fa-clock"></i> ${task.time}</span>
                                     <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
-                                    ${task.repetition && task.repetition.type !== 'none' ? 
-                                        `<span style="color:var(--theme-primary);"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                                   ${task.repetition && task.repetition.type !== 'none' ? 
+                                    `<span class="repetition-badge-inline"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
                                 </div>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
