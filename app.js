@@ -1424,6 +1424,7 @@ function addTaskAnyway(taskData) {
 }
 
 // ========== عرض المهام ==========
+// ========== عرض المهام ==========
 function renderTasks() {
     const container = document.getElementById('tasks-list');
     if (!container) return;
@@ -1431,7 +1432,8 @@ function renderTasks() {
     let tasksData = {};
     const today = new Date().toISOString().split('T')[0];
     
-     const filteredTasks = filterTasksForMainView(AppState.tasks);
+    // استخدام المهام المصفاة للصفحة الرئيسية
+    const filteredTasks = filterTasksForMainView(AppState.tasks);
     
     // تصنيف المهام حسب الفلتر
     switch(AppState.currentFilter) {
@@ -1473,7 +1475,7 @@ function renderTasks() {
             break;
             
         case 'completed':
-            const completedTasks = AppState.tasks.filter(task => task.completed);
+            const completedTasks = filteredTasks.filter(task => task.completed);
             completedTasks.sort((a, b) => {
                 const dateA = a.date ? new Date(a.date) : new Date(0);
                 const dateB = b.date ? new Date(b.date) : new Date(0);
@@ -1493,7 +1495,7 @@ function renderTasks() {
             break;
             
         case 'overdue':
-            const overdueOnlyTasks = AppState.tasks.filter(task => isTaskOverdue(task) && !task.completed);
+            const overdueOnlyTasks = filteredTasks.filter(task => isTaskOverdue(task) && !task.completed);
             overdueOnlyTasks.sort((a, b) => {
                 const dateA = a.date ? new Date(a.date) : new Date(0);
                 const dateB = b.date ? new Date(b.date) : new Date(0);
@@ -1502,8 +1504,8 @@ function renderTasks() {
             tasksData = { overdue: overdueOnlyTasks };
             break;
             
-            case 'all':
-            const allTasks = filteredTasks.slice(); // نسخة من المصفوفة المصفاة            const allTasks = AppState.tasks.slice(); // نسخة من المصفوفة
+        case 'all':
+            const allTasks = filteredTasks.slice(); // نسخة من المصفوفة المصفاة
             const allOverdue = allTasks.filter(task => isTaskOverdue(task) && !task.completed);
             const allToday = allTasks.filter(task => task.date === today);
             const allFuture = allTasks.filter(task => !isTaskOverdue(task) && task.date > today && !task.completed);
@@ -1574,100 +1576,92 @@ function renderTasks() {
         
         // عرض المهام اللاحقة
         if (tasksData.future && tasksData.future.length > 0) {
-    html += `
-        <div class="tasks-section" style="margin-bottom: 30px;">
-            <div class="section-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--success-color);">
-                <i class="fas fa-calendar-alt" style="color: var(--success-color);"></i>
-                <h3 style="margin: 0; color: var(--success-color);">مهام لاحقاً (${tasksData.future.length})</h3>
-            </div>
-    `;
-    
-    // تجميع المهام المستقبلية حسب الأقسام الجديدة
-    const next7Days = [];
-    const laterTasks = [];
-    
-    tasksData.future.forEach(task => {
-        const taskDate = new Date(task.date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        taskDate.setHours(0, 0, 0, 0);
-        
-        const diffTime = taskDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays <= 7) {
-            next7Days.push({...task, diffDays});
-        } else {
-            laterTasks.push({...task, diffDays});
-        }
-    });
-    
-    // ترتيب المهام حسب التاريخ
-    next7Days.sort((a, b) => new Date(a.date) - new Date(b.date));
-    laterTasks.sort((a, b) => new Date(a.date) - new Date(b.date));
-    
-    // قسم "خلال 7 أيام"
-    if (next7Days.length > 0) {
-        html += `
-            <div class="date-group" style="margin-bottom: 25px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: linear-gradient(135deg, rgba(76, 201, 240, 0.1), rgba(76, 201, 240, 0.05)); border-radius: 10px; border-right: 4px solid #4cc9f0;">
-                    <i class="fas fa-calendar-week" style="color: #4cc9f0; font-size: 1.2rem;"></i>
-                    <h4 style="margin: 0; color: var(--theme-text); font-weight: 600; font-size: 1.1rem;">خلال 7 أيام (${next7Days.length})</h4>
-                </div>
-        `;
-        
-        next7Days.forEach(task => {
-            const taskDate = new Date(task.date);
-            const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-            const dayName = dayNames[taskDate.getDay()];
-            const dateStr = taskDate.toLocaleDateString('ar-SA', { 
-                day: 'numeric', 
-                month: 'short' 
+            html += `
+                <div class="tasks-section" style="margin-bottom: 30px;">
+                    <div class="section-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--theme-primary);">
+                        <i class="fas fa-calendar-alt" style="color: var(--theme-primary);"></i>
+                        <h3 style="margin: 0; color: var(--theme-primary);">مهام لاحقاً (${tasksData.future.length})</h3>
+                    </div>
+            `;
+            
+            // تجميع المهام المستقبلية حسب الأقسام الجديدة
+            const next7Days = [];
+            const laterTasks = [];
+            
+            tasksData.future.forEach(task => {
+                const taskDate = new Date(task.date);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                taskDate.setHours(0, 0, 0, 0);
+                
+                const diffDays = Math.ceil((taskDate - today) / (1000 * 60 * 60 * 24));
+                
+                if (diffDays <= 7) {
+                    next7Days.push({...task, diffDays});
+                } else {
+                    laterTasks.push({...task, diffDays});
+                }
             });
             
-            // إضافة شارة إذا كانت المهمة غداً
-            let dateDisplay = `${dayName} ${dateStr}`;
-            if (task.diffDays === 1) {
-                dateDisplay = `<span style="color: var(--theme-primary); font-weight: 600;">${dayName} ${dateStr} (غداً)</span>`;
-            } else if (task.diffDays === 2) {
-                dateDisplay = `<span style="color: #f8961e; font-weight: 600;">${dayName} ${dateStr} (بعد غد)</span>`;
+            // ترتيب المهام حسب التاريخ
+            next7Days.sort((a, b) => new Date(a.date) - new Date(b.date));
+            laterTasks.sort((a, b) => new Date(a.date) - new Date(b.date));
+            
+            // قسم "خلال 7 أيام"
+            if (next7Days.length > 0) {
+                html += `
+                    <div class="date-group" style="margin-bottom: 25px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: linear-gradient(135deg, rgba(76, 201, 240, 0.1), rgba(76, 201, 240, 0.05)); border-radius: 10px; border-right: 4px solid #4cc9f0;">
+                            <i class="fas fa-calendar-week" style="color: #4cc9f0; font-size: 1.2rem;"></i>
+                            <h4 style="margin: 0; color: var(--theme-text); font-weight: 600; font-size: 1.1rem;">خلال 7 أيام (${next7Days.length})</h4>
+                        </div>
+                `;
+                
+                next7Days.forEach(task => {
+                    const taskDate = new Date(task.date);
+                    const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+                    const dayName = dayNames[taskDate.getDay()];
+                    const dateStr = taskDate.toLocaleDateString('ar-SA', { 
+                        day: 'numeric', 
+                        month: 'long',
+                        year: 'numeric'
+                    }).replace(' هـ', '');
+                    
+                    html += renderSingleTaskCard(task, `${dayName} ${dateStr}`);
+                });
+                
+                html += `</div>`;
             }
             
-            html += renderSingleTaskCard(task, dateDisplay);
-        });
-        
-        html += `</div>`;
-    }
-    
-    // قسم "لاحقاً"
-    if (laterTasks.length > 0) {
-        html += `
-            <div class="date-group" style="margin-bottom: 25px;">
-                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: linear-gradient(135deg, rgba(248, 150, 30, 0.1), rgba(248, 150, 30, 0.05)); border-radius: 10px; border-right: 4px solid #f8961e;">
-                    <i class="fas fa-calendar-plus" style="color: #f8961e; font-size: 1.2rem;"></i>
-                    <h4 style="margin: 0; color: var(--theme-text); font-weight: 600; font-size: 1.1rem;">لاحقاً (${laterTasks.length})</h4>
-                </div>
-        `;
-        
-        laterTasks.forEach(task => {
-            const taskDate = new Date(task.date);
-            const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-            const dayName = dayNames[taskDate.getDay()];
-            const dateStr = taskDate.toLocaleDateString('ar-SA', { 
-                day: 'numeric', 
-                month: 'short',
-                year: taskDate.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
-            }).replace(/,?\s*هجري\s*/, ''); // إزالة "هجري" إذا ظهر
+            // قسم "لاحقاً"
+            if (laterTasks.length > 0) {
+                html += `
+                    <div class="date-group" style="margin-bottom: 25px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: linear-gradient(135deg, rgba(248, 150, 30, 0.1), rgba(248, 150, 30, 0.05)); border-radius: 10px; border-right: 4px solid #f8961e;">
+                            <i class="fas fa-calendar-plus" style="color: #f8961e; font-size: 1.2rem;"></i>
+                            <h4 style="margin: 0; color: var(--theme-text); font-weight: 600; font-size: 1.1rem;">لاحقاً (${laterTasks.length})</h4>
+                        </div>
+                `;
+                
+                laterTasks.forEach(task => {
+                    const taskDate = new Date(task.date);
+                    const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+                    const dayName = dayNames[taskDate.getDay()];
+                    const dateStr = taskDate.toLocaleDateString('ar-SA', { 
+                        day: 'numeric', 
+                        month: 'long',
+                        year: 'numeric'
+                    }).replace(' هـ', '');
+                    
+                    html += renderSingleTaskCard(task, `${dayName} ${dateStr}`);
+                });
+                
+                html += `</div>`;
+            }
             
-            html += renderSingleTaskCard(task, `${dayName} ${dateStr}`);
-        });
-        
-              html += `</div>`;
+            html += `</div>`;
         }
-        
-        html += `</div>`;
-    }
-} else if (AppState.currentFilter === 'all') {
+    } else if (AppState.currentFilter === 'all') {
         // عرض جميع المهام في أقسام
         if (tasksData.overdue && tasksData.overdue.length > 0) {
             html += `
@@ -1696,9 +1690,9 @@ function renderTasks() {
         if (tasksData.future && tasksData.future.length > 0) {
             html += `
                 <div class="tasks-section">
-                    <div class="section-header" style="border-bottom-color: var(--success-color);">
+                    <div class="section-header" style="border-bottom-color: var(--theme-primary);">
                         <i class="fas fa-calendar-alt"></i>
-                        <h3 style="color: var(--success-color);">مهام لاحقاً (${tasksData.future.length})</h3>
+                        <h3 style="color: var(--theme-primary);">مهام لاحقاً (${tasksData.future.length})</h3>
                     </div>
             `;
             // تجميع حسب التاريخ
@@ -1710,16 +1704,18 @@ function renderTasks() {
             
             Object.keys(groupedByDate).sort().forEach(date => {
                 const dateTasks = groupedByDate[date];
-                const dateStr = new Date(date).toLocaleDateString('ar-SA', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
+                const taskDate = new Date(date);
+                const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+                const dayName = dayNames[taskDate.getDay()];
+                const dateStr = taskDate.toLocaleDateString('ar-SA', { 
+                    day: 'numeric', 
                     month: 'long', 
-                    day: 'numeric' 
-                });
+                    year: 'numeric' 
+                }).replace(' هـ', '');
                 
                 html += `
                     <div class="date-group">
-                        <h4><i class="fas fa-calendar"></i> ${dateStr}</h4>
+                        <h4><i class="fas fa-calendar"></i> ${dayName} ${dateStr}</h4>
                 `;
                 dateTasks.forEach(task => html += renderSingleTaskCard(task));
                 html += `</div>`;
