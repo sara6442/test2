@@ -922,7 +922,7 @@ function addTask(taskData) {
 }
 
 
-   function toggleTaskCompletion(taskId) {
+  function toggleTaskCompletion(taskId) {
     console.log("🔧 تبديل حالة إكمال المهمة:", taskId);
     
     const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
@@ -938,7 +938,7 @@ function addTask(taskData) {
     if (task.repetition && task.repetition.type !== 'none') {
         if (!isCurrentlyCompleted) {
             // إذا كانت غير مكتملة ونريد إكمالها
-            const nextDate = calculateNextRepetitionDate(task.date, task.repetition);
+            const nextDate = getNextAvailableRepetitionDate(task);
             
             // التحقق من تاريخ انتهاء التكرار
             let shouldRepeat = true;
@@ -951,12 +951,15 @@ function addTask(taskData) {
             }
             
             if (shouldRepeat) {
-                // نقل المهمة للتاريخ التالي
+                // نقل المهمة للتاريخ التالي المتاح فقط
                 AppState.tasks[taskIndex].date = nextDate;
                 AppState.tasks[taskIndex].completed = false;
                 delete AppState.tasks[taskIndex].completedAt;
                 
                 console.log(`🔄 تم نقل المهمة "${task.title}" إلى تاريخ ${nextDate}`);
+                
+                // التحقق من عدم وجود مهام متكررة أخرى في نفس التاريخ
+                ensureNoDuplicateRepeatedTasks(task.id, nextDate);
             } else {
                 // إذا انتهى التكرار، نكمل المهمة ولا ننقلها
                 AppState.tasks[taskIndex].completed = true;
@@ -964,8 +967,8 @@ function addTask(taskData) {
                 console.log(`⏹️ انتهى التكرار للمهمة "${task.title}"`);
             }
         } else {
-            // إذا كانت مكتملة ونريد إلغاء إكمالها، نرجعها للتاريخ السابق
-            const prevDate = calculatePreviousRepetitionDate(task.date, task.repetition);
+            // إذا كانت مكتملة ونريد إلغاء إكمالها، نرجعها للتاريخ السابق المناسب
+            const prevDate = getPreviousRepetitionDate(task);
             AppState.tasks[taskIndex].date = prevDate;
             AppState.tasks[taskIndex].completed = false;
             delete AppState.tasks[taskIndex].completedAt;
@@ -985,6 +988,88 @@ function addTask(taskData) {
     
     saveTasks();
     refreshCurrentView();
+}
+// ========== دالة مساعدة: إيجاد التاريخ السابق للتكرار ==========
+function getPreviousRepetitionDate(task) {
+    if (!task.repetition || task.repetition.type === 'none') return task.date;
+    
+    const currentDate = new Date(task.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    let prevDate = new Date(currentDate);
+    
+    // البحث عن أقرب تاريخ سابق متاح للتكرار
+    switch(task.repetition.type) {
+        case 'daily':
+            prevDate.setDate(prevDate.getDate() - 1);
+            while (prevDate > today) {
+                prevDate.setDate(prevDate.getDate() - 1);
+            }
+            break;
+            
+        case 'weekly':
+            const originalDay = new Date(task.createdAt || task.date).getDay();
+            prevDate.setDate(prevDate.getDate() - 7);
+            while (prevDate > today || prevDate.getDay() !== originalDay) {
+                prevDate.setDate(prevDate.getDate() - 7);
+            }
+            break;
+            
+        case 'monthly':
+            prevDate.setMonth(prevDate.getMonth() - 1);
+            while (prevDate > today) {
+                prevDate.setMonth(prevDate.getMonth() - 1);
+            }
+            break;
+            
+        case 'custom':
+            if (task.repetition.days && task.repetition.days.length > 0) {
+                // البحث عن أقرب يوم مخصص سابق
+                let found = false;
+                let attempts = 0;
+                const maxAttempts = 365;
+                
+                while (!found && attempts < maxAttempts) {
+                    prevDate.setDate(prevDate.getDate() - 1);
+                    const currentDay = prevDate.getDay();
+                    
+                    if (task.repetition.days.includes(currentDay) && prevDate <= today) {
+                        found = true;
+                    }
+                    attempts++;
+                }
+            }
+            break;
+    }
+    
+    return prevDate.toISOString().split('T')[0];
+}
+
+// ========== دالة مساعدة: منع المهام المتكررة المكررة ==========
+function ensureNoDuplicateRepeatedTasks(taskId, nextDate) {
+    const task = AppState.tasks.find(t => t.id === taskId);
+    if (!task) return;
+    
+    // البحث عن أي مهام متكررة أخرى لنفس المهمة الأصلية في نفس التاريخ
+    const duplicateTasks = AppState.tasks.filter(t => 
+        t.id !== taskId && // ليست نفس المهمة
+        t.title === task.title && // نفس العنوان
+        t.categoryId === task.categoryId && // نفس الفئة
+        t.date === nextDate && // نفس التاريخ
+        t.repetition && // لها تكرار
+        task.repetition && // المهمة الأصلية لها تكرار
+        JSON.stringify(t.repetition) === JSON.stringify(task.repetition) // نفس التكرار
+    );
+    
+    // حذف المهام المكررة
+    duplicateTasks.forEach(duplicate => {
+        const index = AppState.tasks.findIndex(t => t.id === duplicate.id);
+        if (index !== -1) {
+            AppState.tasks.splice(index, 1);
+            console.log(`🧹 تم إزالة المهمة المكررة: "${duplicate.title}" في ${nextDate}`);
+        }
+    });
 }
 
 // دالة مساعدة: حساب التاريخ السابق للتكرار
@@ -1346,10 +1431,12 @@ function renderTasks() {
     let tasksData = {};
     const today = new Date().toISOString().split('T')[0];
     
+     const filteredTasks = filterTasksForMainView(AppState.tasks);
+    
     // تصنيف المهام حسب الفلتر
     switch(AppState.currentFilter) {
         case 'pending':
-            const pendingTasks = AppState.tasks.filter(task => !task.completed);
+            const pendingTasks = filteredTasks.filter(task => !task.completed);
             
             // تقسيم المهام إلى ثلاث فئات
             const overdueTasks = pendingTasks.filter(task => isTaskOverdue(task));
@@ -1415,8 +1502,8 @@ function renderTasks() {
             tasksData = { overdue: overdueOnlyTasks };
             break;
             
-        case 'all':
-            const allTasks = AppState.tasks.slice(); // نسخة من المصفوفة
+            case 'all':
+            const allTasks = filteredTasks.slice(); // نسخة من المصفوفة المصفاة            const allTasks = AppState.tasks.slice(); // نسخة من المصفوفة
             const allOverdue = allTasks.filter(task => isTaskOverdue(task) && !task.completed);
             const allToday = allTasks.filter(task => task.date === today);
             const allFuture = allTasks.filter(task => !isTaskOverdue(task) && task.date > today && !task.completed);
@@ -1696,6 +1783,45 @@ function renderTasks() {
     }, 100);
 }
 
+// ========== دالة مساعدة: تصفية المهام للصفحة الرئيسية ==========
+function filterTasksForMainView(tasks) {
+    const today = new Date().toISOString().split('T')[0];
+    const filteredTasks = [];
+    const seenTasks = new Set(); // لتجنب المهام المكررة
+    
+    tasks.forEach(task => {
+        // إذا كانت المهمة مكتملة ومتأخرة، نتخطاها
+        if (task.completed && isTaskOverdue(task)) {
+            return;
+        }
+        
+        // إنشاء مفتاح فريد للمهمة المتكررة
+        let taskKey = task.title + task.categoryId;
+        if (task.repetition && task.repetition.type !== 'none') {
+            // للمهام المتكررة: نأخذ أقرب تاريخ مستقبلي
+            const nextDate = getNextAvailableRepetitionDate(task);
+            taskKey += nextDate;
+        } else {
+            taskKey += task.date;
+        }
+        
+        // إذا لم نر هذه المهمة من قبل، نضيفها
+        if (!seenTasks.has(taskKey)) {
+            seenTasks.add(taskKey);
+            
+            // نسخة من المهمة مع التاريخ المعدل إذا لزم الأمر
+            const taskCopy = {...task};
+            if (task.repetition && task.repetition.type !== 'none') {
+                taskCopy.date = getNextAvailableRepetitionDate(task);
+            }
+            
+            filteredTasks.push(taskCopy);
+        }
+    });
+    
+    return filteredTasks;
+}
+
 // ========== دالة حفظ المهمة الجديدة ==========
 function saveNewTask() {
     console.log("💾 حفظ مهمة جديدة...");
@@ -1808,6 +1934,31 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
     const isCompleted = task.completed;
     const timeUntilNext = getTimeUntilNextRepetition(task);
     
+    // عرض التاريخ بشكل عادي (اليوم، الشهر، السنة)
+    let dateDisplay = customDateDisplay;
+    if (!dateDisplay) {
+        const taskDate = new Date(task.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDate.setHours(0, 0, 0, 0);
+        
+        if (taskDate.getTime() === today.getTime()) {
+            dateDisplay = "اليوم";
+        } else {
+            const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const dayName = dayNames[taskDate.getDay()];
+            
+            // تنسيق التاريخ: اسم اليوم، اليوم، الشهر، السنة
+            const dateStr = taskDate.toLocaleDateString('ar-SA', { 
+                day: 'numeric', 
+                month: 'long', 
+                year: 'numeric' 
+            }).replace(' هـ', '');
+            
+            dateDisplay = `${dayName} ${dateStr}`;
+        }
+    }
+    
     if (isDeleted) {
         return `
             <div class="task-card deleted" data-id="${task.id}">
@@ -1821,7 +1972,7 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                         </div>
                         <div class="task-meta-item">
                             <i class="fas fa-calendar"></i>
-                            <span>${formatDate(task.date)}</span>
+                            <span>${dateDisplay}</span>
                         </div>
                         ${isRepeated ? 
                             `<div class="task-meta-item">
@@ -1910,11 +2061,11 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                                 <span>${category.name}</span>
                             </div>
                             <div class="task-meta-item">
-                                <i class="fas fa-calendar"></i>
-                                <span>${customDateDisplay || formatDate(task.date)}</span>
+                                <i class="fas fa-calendar" style="color: var(--theme-text);"></i>
+                                <span>${dateDisplay}</span>
                             </div>
                             <div class="task-meta-item">
-                                <i class="fas fa-clock"></i>
+                                <i class="fas fa-clock" style="color: var(--theme-text);"></i>
                                 <span>${task.duration} دقيقة</span>
                             </div>
                             <div class="task-meta-item">
@@ -2905,7 +3056,7 @@ function openAddTaskModal(preselectedCategory = null) {
     return date.toISOString().split('T')[0];
 }
 
-// دالة جديدة: حساب الوقت المتبقي حتى التكرار التالي
+// ========== دالة حساب الوقت المتبقي للتكرار (الأيام فقط) ==========
 function getTimeUntilNextRepetition(task) {
     if (!task.repetition || task.repetition.type === 'none' || task.completed) {
         return '';
@@ -2925,39 +3076,76 @@ function getTimeUntilNextRepetition(task) {
     if (taskDate < today) {
         const diffTime = today - taskDate;
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        return `متأخرة ${diffDays} يوم`;
+        return `${diffDays} يوم`;
     }
     
-    // حساب الفرق بالأيام
+    // حساب الفرق بالأيام فقط
     const diffTime = taskDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    if (diffDays === 0) {
-        return 'اليوم';
-    } else if (diffDays === 1) {
-        return 'غداً';
-    } else if (diffDays === 2) {
-        return 'بعد غد';
-    } else if (diffDays > 2 && diffDays <= 7) {
-        const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-        const dayName = dayNames[taskDate.getDay()];
-        return `${dayName} (${diffDays} أيام)`;
-    } else if (diffDays > 7 && diffDays <= 14) {
-        return 'الأسبوع القادم';
-    } else if (diffDays > 14) {
-        const weeks = Math.floor(diffDays / 7);
-        const remainingDays = diffDays % 7;
-        
-        if (remainingDays === 0) {
-            return `بعد ${weeks} أسابيع`;
-        } else {
-            return `بعد ${weeks} أسبوع و ${remainingDays} أيام`;
-        }
-    }
-    
-    return `${diffDays} أيام`;
+    return `${diffDays} يوم`;
 }
 
+// ========== دالة مساعدة: منع التكرار المتعدد في الصفحة الرئيسية ==========
+function getNextAvailableRepetitionDate(task) {
+    if (!task.repetition || task.repetition.type === 'none' || !task.completed) {
+        return task.date;
+    }
+    
+    // المهمة مكتملة ولها تكرار، نبحث عن أقرب تاريخ مستقبلي متاح للتكرار
+    const originalDate = new Date(task.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // بدأنا من التاريخ الأصلي
+    let nextDate = new Date(originalDate);
+    
+    switch(task.repetition.type) {
+        case 'daily':
+            // للتمهية اليومية: التحقق من أن التاريخ في المستقبل
+            while (nextDate <= today) {
+                nextDate.setDate(nextDate.getDate() + 1);
+            }
+            break;
+            
+        case 'weekly':
+            // للتمهية الأسبوعية: نبحث عن أقرب يوم في الأسبوع القادم
+            const originalDay = originalDate.getDay();
+            while (nextDate <= today || nextDate.getDay() !== originalDay) {
+                nextDate.setDate(nextDate.getDate() + 1);
+            }
+            break;
+            
+        case 'monthly':
+            // للتمهية الشهرية: نفس اليوم من الشهر القادم
+            nextDate.setMonth(nextDate.getMonth() + 1);
+            while (nextDate <= today) {
+                nextDate.setMonth(nextDate.getMonth() + 1);
+            }
+            break;
+            
+        case 'custom':
+            if (task.repetition.days && task.repetition.days.length > 0) {
+                // للتمهية المخصصة: البحث عن أقرب يوم من الأيام المحددة
+                let found = false;
+                let attempts = 0;
+                const maxAttempts = 365; // حماية من الحلقة اللانهائية
+                
+                while (!found && attempts < maxAttempts) {
+                    const currentDay = nextDate.getDay();
+                    if (task.repetition.days.includes(currentDay) && nextDate > today) {
+                        found = true;
+                    } else {
+                        nextDate.setDate(nextDate.getDate() + 1);
+                        attempts++;
+                    }
+                }
+            }
+            break;
+    }
+    
+    return nextDate.toISOString().split('T')[0];
+}
 function renderCalendar() {
     console.log("📅 عرض الجدول الزمني...");
     
