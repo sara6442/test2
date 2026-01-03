@@ -1778,6 +1778,7 @@ body {
 }
 
 /* ========== أنماط الأقسام الجديدة ========== */
+/* ========== أنماط الأقسام الجديدة ========== */
 
 /* أنماط الأقسام الأساسية */
 .tasks-section {
@@ -1849,7 +1850,7 @@ body {
     padding: 8px 12px !important;
     background: var(--theme-bg) !important;
     border-radius: 8px !important;
-    border-right: 3px solid var(--theme-primary) !important; /* ← تغير إلى اللون الأساسي */
+    border-right: 3px solid var(--theme-primary) !important; /* ← أزرق/لون أساسي */
     font-size: 0.95rem !important;
     display: flex !important;
     align-items: center !important;
@@ -1924,6 +1925,8 @@ body {
 .theme-blue .section-header {
     background: transparent !important;
 }
+
+/* ========== النهاية ========== */
 
 /* ========== النهاية ========== */
 
