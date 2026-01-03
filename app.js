@@ -125,28 +125,126 @@ function isDateInRepetition(taskDate, targetDate, repetition) {
     const task = new Date(taskDate);
     const target = new Date(targetDate);
     
+    // التأكد أن التاريخ الهدف بعد تاريخ المهمة
     if (target < task) return false;
     
     switch(repetition.type) {
         case 'daily':
-            return true;
+            // كل يوم بعد تاريخ المهمة
+            const daysDiff = Math.floor((target - task) / (24 * 60 * 60 * 1000));
+            return daysDiff >= 0;
+            
         case 'weekly':
+            // كل أسبوع في نفس اليوم
             const weeksDiff = Math.floor((target - task) / (7 * 24 * 60 * 60 * 1000));
+            if (weeksDiff < 0) return false;
+            
+            // التحقق من أن اليوم نفسه من الأسبوع
             const repeatedDate = new Date(task);
             repeatedDate.setDate(repeatedDate.getDate() + (weeksDiff * 7));
             return repeatedDate.toISOString().split('T')[0] === targetDate;
+            
         case 'monthly':
-            return task.getDate() === target.getDate();
+            // كل شهر في نفس اليوم
+            if (target.getDate() !== task.getDate()) return false;
+            
+            // التحقق من أن التاريخ بعد تاريخ المهمة
+            const monthsDiff = (target.getFullYear() - task.getFullYear()) * 12 + 
+                              (target.getMonth() - task.getMonth());
+            return monthsDiff >= 0;
+            
         case 'custom':
             if (repetition.days && repetition.days.length > 0) {
                 const targetDay = target.getDay();
                 const weeksDiff = Math.floor((target - task) / (7 * 24 * 60 * 60 * 1000));
+                
+                // التحقق من أن اليوم ضمن الأيام المحددة وأن التاريخ بعد تاريخ المهمة
                 return weeksDiff >= 0 && repetition.days.includes(targetDay);
             }
             return false;
+            
         default:
             return false;
     }
+}
+
+function createFutureRepeatedTasks(task) {
+    if (!task.repetition || task.repetition.type === 'none') return;
+    
+    console.log(`📅 إنشاء مهام متكررة مستقبلية لـ "${task.title}"`);
+    
+    const taskDate = new Date(task.date);
+    const futureDates = [];
+    const today = new Date();
+    
+    // إنشاء تواريخ للـ 30 يوماً القادمة
+    for (let i = 1; i <= 30; i++) {
+        const date = new Date(taskDate);
+        
+        switch(task.repetition.type) {
+            case 'daily':
+                date.setDate(date.getDate() + i);
+                break;
+            case 'weekly':
+                date.setDate(date.getDate() + (i * 7));
+                break;
+            case 'monthly':
+                date.setMonth(date.getMonth() + i);
+                break;
+            case 'custom':
+                // حساب الأيام المخصصة
+                if (task.repetition.days && task.repetition.days.length > 0) {
+                    const daysToAdd = i * 7; // أسبوع كحد أقصى للبحث
+                    for (let d = 1; d <= daysToAdd; d++) {
+                        const checkDate = new Date(taskDate);
+                        checkDate.setDate(checkDate.getDate() + d);
+                        const dayOfWeek = checkDate.getDay();
+                        
+                        if (task.repetition.days.includes(dayOfWeek)) {
+                            const dateStr = checkDate.toISOString().split('T')[0];
+                            if (!futureDates.includes(dateStr)) {
+                                futureDates.push(dateStr);
+                            }
+                        }
+                    }
+                }
+                continue; // ننتقل للدورة التالية
+        }
+        
+        if (task.repetition.type !== 'custom') {
+            futureDates.push(date.toISOString().split('T')[0]);
+        }
+    }
+    
+    // إضافة المهام المستقبلية
+    futureDates.forEach(futureDate => {
+        // التحقق أن التاريخ في المستقبل
+        if (new Date(futureDate) > today) {
+            const futureTask = {
+                ...task,
+                id: generateId(),
+                date: futureDate,
+                completed: false,
+                createdAt: new Date().toISOString(),
+                isFutureRepetition: true,
+                originalTaskId: task.id
+            };
+            
+            // التحقق من عدم وجود المهمة مسبقاً
+            const exists = AppState.tasks.some(t => 
+                t.title === futureTask.title && 
+                t.date === futureTask.date && 
+                t.categoryId === futureTask.categoryId
+            );
+            
+            if (!exists) {
+                AppState.tasks.push(futureTask);
+            }
+        }
+    });
+    
+    saveTasks();
+    console.log(`✅ تم إنشاء ${futureDates.length} مهمة متكررة مستقبلية`);
 }
 
 // دالة تسمية التكرار
@@ -821,9 +919,57 @@ function addTask(taskData) {
 }
 
 function toggleTaskCompletion(taskId) {
-    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
-    if (taskIndex === -1) return;
+    console.log("🔧 تبديل حالة إكمال المهمة:", taskId);
     
+    const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
+    if (taskIndex === -1) {
+        // قد تكون مهمة متكررة، بحث بالمعرف الأصلي
+        const originalId = taskId.split('_')[0];
+        const originalTask = AppState.tasks.find(t => t.id === originalId);
+        
+        if (!originalTask || !originalTask.repetition || originalTask.repetition.type === 'none') {
+            console.log("❌ المهمة غير موجودة أو ليس لها تكرار");
+            return;
+        }
+        
+        // هذه مهمة متكررة، إكمالها في التاريخ الحالي فقط
+        console.log("✅ هذه مهمة متكررة، سيتم إكمالها لهذا اليوم فقط");
+        alert("تم إكمال المهمة المتكررة لهذا اليوم. ستظهر مرة أخرى في التكرار التالي.");
+        return;
+    }
+    
+    const task = AppState.tasks[taskIndex];
+    
+    // إذا كانت المهمة لها تكرار
+    if (task.repetition && task.repetition.type !== 'none') {
+        // إنشاء تاريخ جديد للتكرار التالي
+        const newDate = calculateNextRepetitionDate(task.date, task.repetition);
+        
+        // إنشاء نسخة جديدة للمهمة للتكرار التالي
+        const newTask = {
+            ...task,
+            id: generateId(),
+            date: newDate,
+            completed: false,
+            createdAt: new Date().toISOString(),
+            originalRepetitionId: task.id // حفظ المرجع للمهمة الأصلية
+        };
+        
+        // إضافة المهمة الجديدة للتكرار التالي
+        AppState.tasks.push(newTask);
+        
+        // تحديث المهمة الحالية لتكون مكتملة
+        AppState.tasks[taskIndex].completed = true;
+        AppState.tasks[taskIndex].completedAt = new Date().toISOString();
+        
+        console.log(`🔄 تم إنشاء تكرار جديد للمهمة "${task.title}" بتاريخ ${newDate}`);
+        
+        saveTasks();
+        refreshCurrentView();
+        return;
+    }
+    
+    // إذا كانت المهمة عادية بدون تكرار
     AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
     
     saveTasks();
@@ -1146,204 +1292,304 @@ function renderTasks() {
     const container = document.getElementById('tasks-list');
     if (!container) return;
     
-    let tasksToShow = [];
+    let tasksData = {};
+    const today = new Date().toISOString().split('T')[0];
     
     // تصنيف المهام حسب الفلتر
     switch(AppState.currentFilter) {
         case 'pending':
             const pendingTasks = AppState.tasks.filter(task => !task.completed);
-            const overdueTasks = pendingTasks.filter(task => isTaskOverdue(task));
-            const normalTasks = pendingTasks.filter(task => !isTaskOverdue(task));
             
+            // تقسيم المهام إلى ثلاث فئات
+            const overdueTasks = pendingTasks.filter(task => isTaskOverdue(task));
+            const todayTasks = pendingTasks.filter(task => task.date === today);
+            const futureTasks = pendingTasks.filter(task => 
+                !isTaskOverdue(task) && task.date > today
+            );
+            
+            // فرز كل مجموعة
             overdueTasks.sort((a, b) => {
                 const dateA = a.date ? new Date(a.date) : new Date(0);
                 const dateB = b.date ? new Date(b.date) : new Date(0);
                 return dateA - dateB;
             });
             
-            normalTasks.sort((a, b) => {
+            todayTasks.sort((a, b) => {
+                const timeA = a.time ? timeStrToMinutes(a.time) : 9999;
+                const timeB = b.time ? timeStrToMinutes(b.time) : 9999;
+                return timeA - timeB;
+            });
+            
+            futureTasks.sort((a, b) => {
                 const dateA = a.date ? new Date(a.date) : new Date(0);
                 const dateB = b.date ? new Date(b.date) : new Date(0);
                 return dateA - dateB;
             });
             
-            tasksToShow = [...overdueTasks, ...normalTasks];
+            // تجميع المهام مع الهيكل الجديد
+            tasksData = {
+                overdue: overdueTasks,
+                today: todayTasks,
+                future: futureTasks
+            };
             break;
             
         case 'completed':
-            tasksToShow = AppState.tasks.filter(task => task.completed);
-            tasksToShow.sort((a, b) => {
-                const dateA = a.date ? new Date(a.date) : new Date(0);
-                const dateB = b.date ? new Date(b.date) : new Date(0);
-                return dateB - dateA;
-            });
-            break;
-            
-        case 'deleted':
-            tasksToShow = AppState.deletedTasks;
-            tasksToShow.sort((a, b) => {
-                const dateA = a.deletedAt ? new Date(a.deletedAt) : new Date(0);
-                const dateB = b.deletedAt ? new Date(b.deletedAt) : new Date(0);
-                return dateB - dateA;
-            });
-            break;
-            
-        case 'overdue':
-            tasksToShow = AppState.tasks.filter(task => isTaskOverdue(task) && !task.completed);
-            tasksToShow.sort((a, b) => {
-                const dateA = a.date ? new Date(a.date) : new Date(0);
-                const dateB = b.date ? new Date(b.date) : new Date(0);
-                return dateA - dateB;
-            });
-            break;
-            
-        case 'all':
             const completedTasks = AppState.tasks.filter(task => task.completed);
-            const allPendingTasks = AppState.tasks.filter(task => !task.completed);
-            const allOverdueTasks = allPendingTasks.filter(task => isTaskOverdue(task));
-            const allNormalTasks = allPendingTasks.filter(task => !isTaskOverdue(task));
-            
-            allOverdueTasks.sort((a, b) => {
-                const dateA = a.date ? new Date(a.date) : new Date(0);
-                const dateB = b.date ? new Date(b.date) : new Date(0);
-                return dateA - dateB;
-            });
-            
-            allNormalTasks.sort((a, b) => {
-                const dateA = a.date ? new Date(a.date) : new Date(0);
-                const dateB = b.date ? new Date(b.date) : new Date(0);
-                return dateA - dateB;
-            });
-            
             completedTasks.sort((a, b) => {
                 const dateA = a.date ? new Date(a.date) : new Date(0);
                 const dateB = b.date ? new Date(b.date) : new Date(0);
                 return dateB - dateA;
             });
+            tasksData = { completed: completedTasks };
+            break;
             
-            tasksToShow = [...allOverdueTasks, ...allNormalTasks, ...completedTasks];
+        case 'deleted':
+            const deletedTasks = AppState.deletedTasks;
+            deletedTasks.sort((a, b) => {
+                const dateA = a.deletedAt ? new Date(a.deletedAt) : new Date(0);
+                const dateB = b.deletedAt ? new Date(b.deletedAt) : new Date(0);
+                return dateB - dateA;
+            });
+            tasksData = { deleted: deletedTasks };
+            break;
+            
+        case 'overdue':
+            const overdueOnlyTasks = AppState.tasks.filter(task => isTaskOverdue(task) && !task.completed);
+            overdueOnlyTasks.sort((a, b) => {
+                const dateA = a.date ? new Date(a.date) : new Date(0);
+                const dateB = b.date ? new Date(b.date) : new Date(0);
+                return dateA - dateB;
+            });
+            tasksData = { overdue: overdueOnlyTasks };
+            break;
+            
+        case 'all':
+            const allTasks = AppState.tasks.slice(); // نسخة من المصفوفة
+            const allOverdue = allTasks.filter(task => isTaskOverdue(task) && !task.completed);
+            const allToday = allTasks.filter(task => task.date === today);
+            const allFuture = allTasks.filter(task => !isTaskOverdue(task) && task.date > today && !task.completed);
+            const allCompleted = allTasks.filter(task => task.completed);
+            
+            allOverdue.sort((a, b) => new Date(a.date) - new Date(b.date));
+            allToday.sort((a, b) => {
+                const timeA = a.time ? timeStrToMinutes(a.time) : 9999;
+                const timeB = b.time ? timeStrToMinutes(b.time) : 9999;
+                return timeA - timeB;
+            });
+            allFuture.sort((a, b) => new Date(a.date) - new Date(b.date));
+            allCompleted.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            tasksData = {
+                overdue: allOverdue,
+                today: allToday,
+                future: allFuture,
+                completed: allCompleted
+            };
             break;
     }
     
-    // إذا لم توجد مهام
-    if (tasksToShow.length === 0) {
-        let message = 'لا توجد مهام';
-        if (AppState.currentFilter === 'pending') message = 'لا توجد مهام نشطة';
-        else if (AppState.currentFilter === 'completed') message = 'لا توجد مهام مكتملة';
-        else if (AppState.currentFilter === 'deleted') message = 'لا توجد مهام محذوفة';
-        else if (AppState.currentFilter === 'overdue') message = 'لا توجد مهام متأخرة';
-        
-        container.innerHTML = `
-            <div class="empty-state" style="text-align: center; padding: 60px 20px; color: var(--gray-color);">
-                <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
-                <h3 style="color: var(--theme-text); margin-bottom: 10px;">${message}</h3>
-                ${AppState.currentFilter === 'pending' ? '<p>اضغط على "إضافة مهمة" لإنشاء مهمتك الأولى</p>' : ''}
-            </div>
-        `;
-        return;
-    }
-    
+    // بناء HTML الجديد مع الأقسام
     let html = '';
     
-    // عرض المهام المتأخرة أولاً (للفلاتر التي تحتوي عليها)
-    if ((AppState.currentFilter === 'pending' || AppState.currentFilter === 'all') && 
-        tasksToShow.some(task => isTaskOverdue(task) && !task.completed)) {
-        
-        const overdueTasks = tasksToShow.filter(task => isTaskOverdue(task) && !task.completed);
-        const otherTasks = tasksToShow.filter(task => !isTaskOverdue(task) || task.completed);
-        
-        if (overdueTasks.length > 0) {
+    if (AppState.currentFilter === 'pending') {
+        // عرض المهام المتأخرة
+        if (tasksData.overdue && tasksData.overdue.length > 0) {
             html += `
-                <div class="overdue-tasks-section" style="margin-bottom: 25px;">
-                    <div class="overdue-tasks-header">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <h4 style="margin: 0; color: var(--danger-color);">المهام المتأخرة (${overdueTasks.length})</h4>
+                <div class="tasks-section" style="margin-bottom: 30px;">
+                    <div class="section-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--danger-color);">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <h3 style="margin: 0; color: var(--danger-color);">المهام المتأخرة (${tasksData.overdue.length})</h3>
                     </div>
-                    <div class="overdue-tasks-list">
             `;
             
-            overdueTasks.forEach(task => {
-                const category = getCategoryById(task.categoryId);
-                const isDeleted = AppState.currentFilter === 'deleted';
-                
-                if (!isDeleted) {
-                    html += `
-                        <div class="task-card overdue-highlight" 
-                             data-id="${task.id}"
-                             title="انقر لتعديل المهمة">
-                            <div style="display: flex; align-items: flex-start; gap: 20px;">
-                                <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} style="margin-top: 5px;">
-                                <div class="task-content" style="flex: 1;">
-                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; padding-right: 10px;">
-                                        <div class="task-title" style="font-weight: 600; font-size: 1.05rem;">
-                                            ${task.title}
-                                        </div>
-                                        <div style="display: flex; gap: 8px;">
-                                            <span class="overdue-badge">
-                                                <i class="fas fa-exclamation-circle"></i> متأخرة
-                                            </span>
-                                            ${task.repetition && task.repetition.type !== 'none' ? 
-                                                `<span style="background: rgba(67, 97, 238, 0.1); color: var(--theme-primary); padding: 2px 8px; border-radius: 12px; font-size: 0.75rem;">
-                                                    <i class="fas fa-redo"></i> ${getRepetitionLabel(task.repetition)}
-                                                </span>` : ''}
-                                        </div>
-                                    </div>
-                                    
-                                    ${task.description ? `<div class="task-description" style="color: var(--gray-color); margin-bottom: 10px;">${task.description}</div>` : ''}
-                                    
-                                    <div class="task-meta">
-                                        <div class="task-meta-item">
-                                            <i class="fas fa-tag" style="color: ${category.color}"></i>
-                                            <span>${category.name}</span>
-                                        </div>
-                                        <div class="task-meta-item">
-                                            <i class="fas fa-calendar"></i>
-                                            <span style="color: var(--danger-color); font-weight: 500;">${formatDate(task.date)} (تأخير)</span>
-                                        </div>
-                                        <div class="task-meta-item">
-                                            <i class="fas fa-clock"></i>
-                                            <span>${task.duration} دقيقة</span>
-                                        </div>
-                                        <div class="task-meta-item">
-                                            <i class="fas fa-flag" style="color: ${
-                                                task.priority === 'high' ? '#f72585' : 
-                                                task.priority === 'medium' ? '#f8961e' : '#4cc9f0'
-                                            }"></i>
-                                            <span>${task.priority === 'high' ? 'عالية' : task.priority === 'medium' ? 'متوسطة' : 'منخفضة'}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="task-actions" style="position: absolute; top: 10px; left: 10px; z-index: 3;">
-                                <button class="btn btn-secondary btn-sm edit-task-btn" data-id="${task.id}" title="تعديل المهمة">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm delete-task-btn" data-id="${task.id}" title="حذف">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            html += `</div></div>`;
-            
-            // عرض باقي المهام
-            otherTasks.forEach(task => {
+            tasksData.overdue.forEach(task => {
                 html += renderSingleTaskCard(task);
             });
+            
+            html += `</div>`;
+        }
+        
+        // عرض مهام اليوم
+        html += `
+            <div class="tasks-section" style="margin-bottom: 30px;">
+                <div class="section-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--theme-primary);">
+                    <i class="fas fa-calendar-day" style="color: var(--theme-primary);"></i>
+                    <h3 style="margin: 0; color: var(--theme-primary);">مهام اليوم (${tasksData.today ? tasksData.today.length : 0})</h3>
+                </div>
+        `;
+        
+        if (!tasksData.today || tasksData.today.length === 0) {
+            html += `
+                <div class="empty-section" style="text-align: center; padding: 40px; color: var(--gray-color);">
+                    <i class="fas fa-sun" style="font-size: 2rem; opacity: 0.3; margin-bottom: 15px;"></i>
+                    <p>لا توجد مهام لهذا اليوم</p>
+                </div>
+            `;
+        } else {
+            tasksData.today.forEach(task => {
+                html += renderSingleTaskCard(task);
+            });
+        }
+        
+        html += `</div>`;
+        
+        // عرض المهام اللاحقة
+        html += `
+            <div class="tasks-section" style="margin-bottom: 30px;">
+                <div class="section-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--success-color);">
+                    <i class="fas fa-calendar-alt" style="color: var(--success-color);"></i>
+                    <h3 style="margin: 0; color: var(--success-color);">مهام لاحقاً (${tasksData.future ? tasksData.future.length : 0})</h3>
+                </div>
+        `;
+        
+        if (!tasksData.future || tasksData.future.length === 0) {
+            html += `
+                <div class="empty-section" style="text-align: center; padding: 40px; color: var(--gray-color);">
+                    <i class="fas fa-calendar-plus" style="font-size: 2rem; opacity: 0.3; margin-bottom: 15px;"></i>
+                    <p>لا توجد مهام مستقبلية</p>
+                </div>
+            `;
+        } else {
+            // تجميع المهام المستقبلية حسب التاريخ
+            const groupedByDate = {};
+            tasksData.future.forEach(task => {
+                if (!groupedByDate[task.date]) {
+                    groupedByDate[task.date] = [];
+                }
+                groupedByDate[task.date].push(task);
+            });
+            
+            // عرض المهام حسب التاريخ
+            Object.keys(groupedByDate).sort().forEach(date => {
+                const dateTasks = groupedByDate[date];
+                const dateObj = new Date(date);
+                const dateStr = dateObj.toLocaleDateString('ar-SA', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                html += `
+                    <div class="date-group" style="margin-bottom: 20px;">
+                        <h4 style="color: var(--theme-text); margin-bottom: 10px; padding: 8px 12px; background: var(--theme-bg); border-radius: 8px; border-right: 3px solid var(--success-color);">
+                            <i class="fas fa-calendar"></i> ${dateStr}
+                        </h4>
+                `;
+                
+                dateTasks.forEach(task => {
+                    html += renderSingleTaskCard(task);
+                });
+                
+                html += `</div>`;
+            });
+        }
+        
+        html += `</div>`;
+    } else if (AppState.currentFilter === 'all') {
+        // عرض جميع المهام في أقسام
+        if (tasksData.overdue && tasksData.overdue.length > 0) {
+            html += `
+                <div class="tasks-section">
+                    <div class="section-header" style="border-bottom-color: var(--danger-color);">
+                        <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                        <h3 style="color: var(--danger-color);">المهام المتأخرة (${tasksData.overdue.length})</h3>
+                    </div>
+            `;
+            tasksData.overdue.forEach(task => html += renderSingleTaskCard(task));
+            html += `</div>`;
+        }
+        
+        if (tasksData.today && tasksData.today.length > 0) {
+            html += `
+                <div class="tasks-section">
+                    <div class="section-header" style="border-bottom-color: var(--theme-primary);">
+                        <i class="fas fa-calendar-day"></i>
+                        <h3 style="color: var(--theme-primary);">مهام اليوم (${tasksData.today.length})</h3>
+                    </div>
+            `;
+            tasksData.today.forEach(task => html += renderSingleTaskCard(task));
+            html += `</div>`;
+        }
+        
+        if (tasksData.future && tasksData.future.length > 0) {
+            html += `
+                <div class="tasks-section">
+                    <div class="section-header" style="border-bottom-color: var(--success-color);">
+                        <i class="fas fa-calendar-alt"></i>
+                        <h3 style="color: var(--success-color);">مهام لاحقاً (${tasksData.future.length})</h3>
+                    </div>
+            `;
+            // تجميع حسب التاريخ
+            const groupedByDate = {};
+            tasksData.future.forEach(task => {
+                if (!groupedByDate[task.date]) groupedByDate[task.date] = [];
+                groupedByDate[task.date].push(task);
+            });
+            
+            Object.keys(groupedByDate).sort().forEach(date => {
+                const dateTasks = groupedByDate[date];
+                const dateStr = new Date(date).toLocaleDateString('ar-SA', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+                
+                html += `
+                    <div class="date-group">
+                        <h4><i class="fas fa-calendar"></i> ${dateStr}</h4>
+                `;
+                dateTasks.forEach(task => html += renderSingleTaskCard(task));
+                html += `</div>`;
+            });
+            
+            html += `</div>`;
+        }
+        
+        if (tasksData.completed && tasksData.completed.length > 0) {
+            html += `
+                <div class="tasks-section">
+                    <div class="section-header" style="border-bottom-color: var(--info-color);">
+                        <i class="fas fa-check-circle"></i>
+                        <h3 style="color: var(--info-color);">مهام مكتملة (${tasksData.completed.length})</h3>
+                    </div>
+            `;
+            tasksData.completed.forEach(task => html += renderSingleTaskCard(task));
+            html += `</div>`;
+        }
+    } else {
+        // الفلاتر الأخرى تظهر كالمعتاد
+        let tasksToShow = [];
+        
+        if (AppState.currentFilter === 'completed') {
+            tasksToShow = tasksData.completed || [];
+        } else if (AppState.currentFilter === 'deleted') {
+            tasksToShow = tasksData.deleted || [];
+        } else if (AppState.currentFilter === 'overdue') {
+            tasksToShow = tasksData.overdue || [];
+        }
+        
+        if (tasksToShow.length === 0) {
+            let message = 'لا توجد مهام';
+            if (AppState.currentFilter === 'pending') message = 'لا توجد مهام نشطة';
+            else if (AppState.currentFilter === 'completed') message = 'لا توجد مهام مكتملة';
+            else if (AppState.currentFilter === 'deleted') message = 'لا توجد مهام محذوفة';
+            else if (AppState.currentFilter === 'overdue') message = 'لا توجد مهام متأخرة';
+            
+            html = `
+                <div class="empty-state" style="text-align: center; padding: 60px 20px; color: var(--gray-color);">
+                    <i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 20px; opacity: 0.3;"></i>
+                    <h3 style="color: var(--theme-text); margin-bottom: 10px;">${message}</h3>
+                    ${AppState.currentFilter === 'pending' ? '<p>اضغط على "إضافة مهمة" لإنشاء مهمتك الأولى</p>' : ''}
+                </div>
+            `;
         } else {
             tasksToShow.forEach(task => {
                 html += renderSingleTaskCard(task);
             });
         }
-    } else {
-        // عرض جميع المهام بالترتيب الطبيعي
-        tasksToShow.forEach(task => {
-            html += renderSingleTaskCard(task);
-        });
     }
     
     container.innerHTML = html;
@@ -1459,6 +1705,8 @@ function renderSingleTaskCard(task) {
     const category = getCategoryById(task.categoryId);
     const isDeleted = AppState.currentFilter === 'deleted';
     const isOverdue = isTaskOverdue(task) && !task.completed;
+    const isRepeated = task.repetition && task.repetition.type !== 'none';
+    const isCompleted = task.completed;
     
     if (isDeleted) {
         return `
@@ -1475,7 +1723,7 @@ function renderSingleTaskCard(task) {
                             <i class="fas fa-calendar"></i>
                             <span>${formatDate(task.date)}</span>
                         </div>
-                        ${task.repetition && task.repetition.type !== 'none' ? 
+                        ${isRepeated ? 
                             `<div class="task-meta-item">
                                 <i class="fas fa-repeat" style="color: var(--theme-primary);"></i>
                                 <span>${getRepetitionLabel(task.repetition)}</span>
@@ -1493,13 +1741,24 @@ function renderSingleTaskCard(task) {
             </div>
         `;
     } else {
+        // إضافة بادئة التكرار
+        let repetitionBadge = '';
+        if (isRepeated && !isCompleted) {
+            repetitionBadge = `
+                <span style="position: absolute; top: 10px; left: 10px; background: rgba(67, 97, 238, 0.1); color: var(--theme-primary); padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; z-index: 2; border: 1px solid rgba(67, 97, 238, 0.3);">
+                    <i class="fas fa-redo"></i> ${getRepetitionLabel(task.repetition)}
+                </span>
+            `;
+        }
+        
         return `
-            <div class="task-card ${task.completed ? 'completed' : ''}" 
+            <div class="task-card ${isCompleted ? 'completed' : ''}" 
                  data-id="${task.id}"
                  style="position: relative;"
                  title="انقر لتعديل المهمة">
+                ${repetitionBadge}
                 <div style="display: flex; align-items: flex-start; gap: 20px;">
-                    <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} style="margin-top: 5px;">
+                    <input type="checkbox" class="task-checkbox" ${isCompleted ? 'checked' : ''} style="margin-top: 5px;">
                     <div class="task-content" style="flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; padding-right: 10px;">
                             <div class="task-title" style="font-weight: 600; font-size: 1.05rem;">
@@ -1507,12 +1766,12 @@ function renderSingleTaskCard(task) {
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center;">
                                 ${isOverdue ? 
-                                    `<span class="overdue-badge" style="background: rgba(247, 37, 133, 0.1); color: #f72585; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
+                                    `<span style="background: rgba(247, 37, 133, 0.1); color: #f72585; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
                                         <i class="fas fa-exclamation-circle"></i> متأخرة
                                     </span>` : ''}
-                                ${task.repetition && task.repetition.type !== 'none' ? 
-                                    `<span style="background: rgba(67, 97, 238, 0.1); color: var(--theme-primary); padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
-                                        <i class="fas fa-redo"></i> ${getRepetitionLabel(task.repetition)}
+                                ${isCompleted ? 
+                                    `<span style="background: rgba(76, 201, 240, 0.1); color: var(--success-color); padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
+                                        <i class="fas fa-check-circle"></i> مكتملة
                                     </span>` : ''}
                             </div>
                         </div>
@@ -1543,7 +1802,7 @@ function renderSingleTaskCard(task) {
                     </div>
                 </div>
                 
-                <div class="task-actions" style="position: absolute; top: 10px; left: 10px; z-index: 3;">
+                <div class="task-actions" style="position: absolute; top: 10px; ${isRepeated ? 'left: 60px;' : 'left: 10px;'} z-index: 3;">
                     <button class="btn btn-secondary btn-sm edit-task-btn" data-id="${task.id}" title="تعديل المهمة">
                         <i class="fas fa-edit"></i>
                     </button>
@@ -1682,7 +1941,19 @@ function setupTaskButtonsEvents() {
         checkbox._bound = true;
         checkbox.addEventListener('change', (e) => {
             const taskId = e.target.closest('.task-card').dataset.id;
-            toggleTaskCompletion(taskId);
+            const task = AppState.tasks.find(t => t.id === taskId);
+            
+            if (task && task.repetition && task.repetition.type !== 'none') {
+                // عرض تأكيد للمهام المتكررة
+                if (confirm(`هذه المهمة متكررة (${getRepetitionLabel(task.repetition)}). هل تريد إكمالها وإنشاء تكرار جديد؟`)) {
+                    toggleTaskCompletion(taskId);
+                } else {
+                    // إعادة الحالة إذا رفض المستخدم
+                    e.target.checked = !e.target.checked;
+                }
+            } else {
+                toggleTaskCompletion(taskId);
+            }
         });
     });
     
@@ -2374,6 +2645,43 @@ function openAddTaskModal(preselectedCategory = null) {
     console.log("✅ نافذة إضافة المهمة مفتوحة");
 }
 
+function calculateNextRepetitionDate(currentDate, repetition) {
+    const date = new Date(currentDate);
+    
+    switch(repetition.type) {
+        case 'daily':
+            date.setDate(date.getDate() + 1);
+            break;
+            
+        case 'weekly':
+            date.setDate(date.getDate() + 7);
+            break;
+            
+        case 'monthly':
+            date.setMonth(date.getMonth() + 1);
+            break;
+            
+        case 'custom':
+            if (repetition.days && repetition.days.length > 0) {
+                // إيجاد أقرب يوم متاح بعد اليوم الحالي
+                const currentDay = date.getDay();
+                const days = repetition.days.sort((a, b) => a - b);
+                
+                let nextDay = days.find(day => day > currentDay);
+                if (!nextDay) {
+                    // إذا لم يجد يوم في الأسبوع الحالي، يأخذ أول يوم في الأسبوع التالي
+                    nextDay = days[0];
+                    date.setDate(date.getDate() + (7 - currentDay + nextDay));
+                } else {
+                    date.setDate(date.getDate() + (nextDay - currentDay));
+                }
+            }
+            break;
+    }
+    
+    return date.toISOString().split('T')[0];
+}
+
 function renderCalendar() {
     console.log("📅 عرض الجدول الزمني...");
     
@@ -2417,7 +2725,7 @@ function renderDailyCalendar(container) {
     let tasksForDay = [];
     
     // أ. المهام الأصلية لهذا التاريخ
-    const originalTasks = AppState.tasks.filter(task => task.date === dateStr);
+    const originalTasks = AppState.tasks.filter(task => task.date === dateStr && !task.completed);
     originalTasks.forEach(task => {
         tasksForDay.push({
             ...task,
@@ -2427,13 +2735,15 @@ function renderDailyCalendar(container) {
     
     // ب. المهام المتكررة
     AppState.tasks.forEach(task => {
-        if (task.repetition && task.repetition.type !== 'none') {
+        if (task.repetition && task.repetition.type !== 'none' && !task.completed) {
             const isRepeated = isDateInRepetition(task.date, dateStr, task.repetition);
             
             if (isRepeated) {
                 // التحقق من عدم وجود نسخة مكررة
                 const existingTask = tasksForDay.find(t => 
-                    t.id === task.id || (t.isRepeated && t.originalId === task.id)
+                    t.id === task.id || 
+                    (t.isRepeated && t.originalId === task.id) ||
+                    (t.originalTaskId === task.id)
                 );
                 
                 if (!existingTask) {
@@ -2468,7 +2778,7 @@ function renderDailyCalendar(container) {
             });
         }
     });
-    
+
     // 2. تصنيف المهام
     const tasksWithTime = tasksForDay.filter(task => task.time);
     const tasksWithoutTime = tasksForDay.filter(task => !task.time);
@@ -4430,14 +4740,13 @@ function openNoteEditor(noteId) {
         setupNotesEditorEvents();
     }, 100);
 }
+
 function saveNewTask() {
-    console.log("💾 حفظ مهمة جديدة (بدون تحقق مزدوج)...");
+    console.log("💾 حفظ مهمة جديدة...");
     
-    // إزالة المستمع مؤقتاً لمنع التكرار
-    const saveBtn = document.getElementById('save-task');
-    if (saveBtn) {
-        saveBtn.disabled = true;
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+    if (isAddingTask) {
+        console.log("⚠️ محاولة إضافة مزدوجة - تم منعها");
+        return;
     }
     
     const titleInput = document.getElementById('task-title');
@@ -4452,7 +4761,6 @@ function saveNewTask() {
     if (!titleInput || !categorySelect) {
         console.error('❌ عناصر النموذج غير موجودة');
         alert('خطأ: النموذج غير مكتمل');
-        reEnableSaveButton();
         return;
     }
     
@@ -4462,14 +4770,12 @@ function saveNewTask() {
     if (!title) {
         alert('يرجى إدخال عنوان المهمة');
         titleInput.focus();
-        reEnableSaveButton();
         return;
     }
     
     if (!category) {
         alert('يرجى اختيار فئة للمهمة');
         categorySelect.focus();
-        reEnableSaveButton();
         return;
     }
     
@@ -4486,13 +4792,14 @@ function saveNewTask() {
             
             if (checkedDays.length === 0) {
                 alert('يرجى اختيار يوم واحد على الأقل للتكرار المخصص');
-                reEnableSaveButton();
                 return;
             }
             
             repetition.days = checkedDays;
         }
     }
+    
+    isAddingTask = true;
     
     // إضافة المهمة
     const newTask = {
@@ -4510,25 +4817,46 @@ function saveNewTask() {
     };
     
     AppState.tasks.push(newTask);
+    
+    // إذا كانت المهمة لها تكرار، إنشاء المهام المتكررة المستقبلية
+    if (repetition && repetition.type !== 'none') {
+        createFutureRepeatedTasks(newTask);
+    }
+    
     saveTasks();
     refreshCurrentView();
     
-    // إغلاق النافذة وإعادة التعيين
     closeModal('add-task-modal');
+    
+    // إعادة تعيين الحقول
     const form = document.getElementById('task-form');
     if (form) form.reset();
     
-    // إعادة تعيين التاريخ
     const today = new Date().toISOString().split('T')[0];
     const dateInputEl = document.getElementById('task-date');
     if (dateInputEl) dateInputEl.value = today;
     
+    const durationInputEl = document.getElementById('task-duration');
+    if (durationInputEl) durationInputEl.value = '30';
+    
+    const prioritySelectEl = document.getElementById('task-priority');
+    if (prioritySelectEl) prioritySelectEl.value = 'medium';
+    
+    const repetitionSelectEl = document.getElementById('task-repetition');
+    if (repetitionSelectEl) repetitionSelectEl.value = 'none';
+    
+    const customRepetitionDiv = document.getElementById('custom-repetition-options');
+    if (customRepetitionDiv) customRepetitionDiv.style.display = 'none';
+    
+    document.querySelectorAll('input[name="repeat-days"]').forEach(cb => {
+        cb.checked = false;
+    });
+    
     console.log("✅ تم حفظ المهمة بنجاح:", newTask.title);
     
-    // إعادة تمكين الزر بعد تأخير
     setTimeout(() => {
-        reEnableSaveButton();
-    }, 1000);
+        isAddingTask = false;
+    }, 500);
 }
 
 // دالة مساعدة لإعادة تمكين زر الحفظ
