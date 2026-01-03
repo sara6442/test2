@@ -4155,6 +4155,38 @@ function setFilter(filterName) {
 }
 
 // ========== إعداد الأحداث ==========
+// ========== إزالة جميع المستمعات ==========
+function removeAllEventListeners() {
+    console.log("🧹 تنظيف المستمعات القديمة...");
+    
+    const elements = [
+        'add-task-btn',
+        'save-task',
+        'save-edit-task',
+        'delete-edit-task',
+        'add-category-btn',
+        'save-category',
+        'add-note-btn',
+        'settings-btn'
+    ];
+    
+    elements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            const newElement = element.cloneNode(true);
+            element.parentNode.replaceChild(newElement, element);
+        }
+    });
+}
+
+// ========== دالة التعامل مع حفظ المهمة ==========
+function handleSaveTaskClick(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log("💾 زر حفظ مهمة تم النقر (مستمع واحد فقط)");
+    saveNewTask();
+}
+
 function setupEventDelegation() {
     console.log("🔗 إعداد Event Delegation...");
     
@@ -4186,94 +4218,72 @@ function setupEventDelegation() {
 function setupAllEvents() {
     console.log("🔧 إعداد جميع الأحداث...");
     
-    // 1. الأحداث العامة
+    // 1. إزالة جميع المستمعات القديمة أولاً
+    removeAllEventListeners();
+    
+    // 2. الأحداث العامة
     setupEventDelegation();
     setupSettingsEvents();
     
-    // 2. زر إضافة مهمة
-    const addTaskBtn = document.getElementById('add-task-btn');
-    if (addTaskBtn) {
-        addTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("➕ زر إضافة مهمة تم النقر");
-            openAddTaskModal();
-        });
-    }
-    
-    // 3. زر حفظ مهمة جديدة
-    const saveTaskBtn = document.getElementById('save-task');
-    if (saveTaskBtn) {
-        saveTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("💾 حفظ المهمة الجديدة");
-            saveNewTask();
-        });
-    }
-    // 3. زر حفظ مهمة جديدة
-    document.getElementById('save-task')?.addEventListener('click', function(e) {
+    // 3. زر إضافة مهمة
+    document.getElementById('add-task-btn')?.addEventListener('click', function(e) {
         e.preventDefault();
         e.stopPropagation();
-        console.log("💾 زر حفظ مهمة تم النقر");
-        saveNewTask();
+        console.log("➕ زر إضافة مهمة تم النقر");
+        openAddTaskModal();
     });
+    
+    // 4. زر حفظ مهمة جديدة - مستمع واحد فقط
+    const saveTaskBtn = document.getElementById('save-task');
+    if (saveTaskBtn) {
+        // إزالة أي مستمعات سابقة
+        const newSaveBtn = saveTaskBtn.cloneNode(true);
+        saveTaskBtn.parentNode.replaceChild(newSaveBtn, saveTaskBtn);
         
-    // 4. زر حفظ تعديل المهمة
-    const saveEditTaskBtn = document.getElementById('save-edit-task');
-    if (saveEditTaskBtn) {
-        saveEditTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            console.log("✏️ حفظ تعديل المهمة");
-            saveEditedTask();
-        });
+        // إضافة مستمع جديد واحد
+        newSaveBtn.addEventListener('click', handleSaveTaskClick);
     }
     
-    // 5. زر حذف في التعديل
-    const deleteEditTaskBtn = document.getElementById('delete-edit-task');
-    if (deleteEditTaskBtn) {
-        deleteEditTaskBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (AppState.currentTaskId) {
-                deleteTask(AppState.currentTaskId);
-                closeModal('edit-task-modal');
-            }
-        });
-    }
+    // 5. زر حفظ تعديل المهمة
+    document.getElementById('save-edit-task')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("✏️ حفظ تعديل المهمة");
+        saveEditedTask();
+    });
     
-    // 6. زر إضافة فئة
-    const addCategoryBtn = document.getElementById('add-category-btn');
-    if (addCategoryBtn) {
-        addCategoryBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            openAddCategoryModal();
-        });
-    }
+    // 6. زر حذف في التعديل
+    document.getElementById('delete-edit-task')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (AppState.currentTaskId) {
+            deleteTask(AppState.currentTaskId);
+            closeModal('edit-task-modal');
+        }
+    });
     
-    // 7. زر حفظ الفئة
-    const saveCategoryBtn = document.getElementById('save-category');
-    if (saveCategoryBtn) {
-        saveCategoryBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            saveCategory();
-        });
-    }
+    // 7. زر إضافة فئة
+    document.getElementById('add-category-btn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        openAddCategoryModal();
+    });
     
-    // 8. زر إضافة ملاحظة
-    const addNoteBtn = document.getElementById('add-note-btn');
-    if (addNoteBtn) {
-        addNoteBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            addNote();
-        });
-    }
+    // 8. زر حفظ الفئة
+    document.getElementById('save-category')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        saveCategory();
+    });
     
-    // 9. أحداث إغلاق النوافذ
+    // 9. زر إضافة ملاحظة
+    document.getElementById('add-note-btn')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        addNote();
+    });
+    
+    // 10. أحداث إغلاق النوافذ
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('modal')) {
             e.target.classList.remove('active');
@@ -4285,10 +4295,8 @@ function setupAllEvents() {
         }
     });
     
-    
     console.log("✅ جميع الأحداث جاهزة");
 }
-
 
 
 // في دالة setupNotesEvents() - إضافة مستمعات الأحداث:
@@ -4422,14 +4430,14 @@ function openNoteEditor(noteId) {
         setupNotesEditorEvents();
     }, 100);
 }
-
-// في دالة saveNewTask() - التعديل:
 function saveNewTask() {
-    console.log("💾 حفظ مهمة جديدة...");
+    console.log("💾 حفظ مهمة جديدة (بدون تحقق مزدوج)...");
     
-    if (isAddingTask) {
-        console.log("⚠️ محاولة إضافة مزدوجة - تم منعها");
-        return;
+    // إزالة المستمع مؤقتاً لمنع التكرار
+    const saveBtn = document.getElementById('save-task');
+    if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
     }
     
     const titleInput = document.getElementById('task-title');
@@ -4442,8 +4450,9 @@ function saveNewTask() {
     const repetitionSelect = document.getElementById('task-repetition');
     
     if (!titleInput || !categorySelect) {
-        console.error('عناصر النموذج غير موجودة');
+        console.error('❌ عناصر النموذج غير موجودة');
         alert('خطأ: النموذج غير مكتمل');
+        reEnableSaveButton();
         return;
     }
     
@@ -4453,12 +4462,14 @@ function saveNewTask() {
     if (!title) {
         alert('يرجى إدخال عنوان المهمة');
         titleInput.focus();
+        reEnableSaveButton();
         return;
     }
     
     if (!category) {
         alert('يرجى اختيار فئة للمهمة');
         categorySelect.focus();
+        reEnableSaveButton();
         return;
     }
     
@@ -4475,6 +4486,7 @@ function saveNewTask() {
             
             if (checkedDays.length === 0) {
                 alert('يرجى اختيار يوم واحد على الأقل للتكرار المخصص');
+                reEnableSaveButton();
                 return;
             }
             
@@ -4482,9 +4494,9 @@ function saveNewTask() {
         }
     }
     
-    isAddingTask = true;
-    
-    addTask({
+    // إضافة المهمة
+    const newTask = {
+        id: generateId(),
         title: title,
         description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
         categoryId: category,
@@ -4492,10 +4504,44 @@ function saveNewTask() {
         date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
         time: timeInput ? timeInput.value : '',
         priority: prioritySelect ? prioritySelect.value : 'medium',
+        completed: false,
+        createdAt: new Date().toISOString(),
         repetition: repetition
-    });
+    };
     
-    console.log("✅ تم حفظ المهمة بنجاح");
+    AppState.tasks.push(newTask);
+    saveTasks();
+    refreshCurrentView();
+    
+    // إغلاق النافذة وإعادة التعيين
+    closeModal('add-task-modal');
+    const form = document.getElementById('task-form');
+    if (form) form.reset();
+    
+    // إعادة تعيين التاريخ
+    const today = new Date().toISOString().split('T')[0];
+    const dateInputEl = document.getElementById('task-date');
+    if (dateInputEl) dateInputEl.value = today;
+    
+    console.log("✅ تم حفظ المهمة بنجاح:", newTask.title);
+    
+    // إعادة تمكين الزر بعد تأخير
+    setTimeout(() => {
+        reEnableSaveButton();
+    }, 1000);
+}
+
+// دالة مساعدة لإعادة تمكين زر الحفظ
+function reEnableSaveButton() {
+    const saveBtn = document.getElementById('save-task');
+    if (saveBtn) {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = 'حفظ المهمة';
+        
+        // إعادة ربط المستمع
+        saveBtn.removeEventListener('click', handleSaveTaskClick);
+        saveBtn.addEventListener('click', handleSaveTaskClick);
+    }
 }
 
 function saveEditedTask() {
@@ -4789,6 +4835,8 @@ window.navigateCalendarWeeks = navigateCalendarWeeks;
 window.changeCalendarMonth = changeCalendarMonth;
 window.showDayTasksModal = showDayTasksModal;
 window.saveNewTask = saveNewTask;
+window.handleSaveTaskClick = handleSaveTaskClick;
+window.removeAllEventListeners = removeAllEventListeners;
 
 // تهيئة عند DOM loaded
 window.addEventListener('DOMContentLoaded', function() {
