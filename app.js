@@ -2166,8 +2166,7 @@ function renderCategories() {
         const overdue = categoryTasks.filter(t => isTaskOverdue(t) && !t.completed);
         const todayPending = categoryTasks.filter(t => !isTaskOverdue(t) && !t.completed);
         const completed = categoryTasks.filter(t => t.completed);
-        const orderedTasks = [...overdue, ...todayPending, ...completed];
-                
+        
         const totalDuration = categoryTasks.reduce((sum, t) => sum + (t.duration || 0), 0);
         const timeframe = category.timeframeMinutes || 60;
         const progressPercent = timeframe > 0 ? Math.min(100, Math.round((totalDuration / timeframe) * 100)) : 0;
@@ -2211,7 +2210,7 @@ function renderCategories() {
                 <div class="category-tasks-container">
         `;
         
-        if (orderedTasks.length === 0) {
+        if (categoryTasks.length === 0) {
             html += `
                 <div style="text-align: center; padding: 20px; color: var(--gray-color);">
                     <i class="fas fa-tasks" style="opacity: 0.3; margin-bottom: 10px;"></i>
@@ -2219,25 +2218,102 @@ function renderCategories() {
                 </div>
             `;
         } else {
-            orderedTasks.forEach(task => {
-                const isOverdue = isTaskOverdue(task);
-                const isToday = task.date === new Date().toISOString().split('T')[0];
+            // إضافة عنوان للمهام المتأخرة إذا كانت موجودة
+            if (overdue.length > 0) {
+                html += `
+                    <div style="margin: 0 0 10px 0; padding: 8px 12px; background: rgba(247, 37, 133, 0.1); border-radius: 8px; border-right: 3px solid var(--danger-color);">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--danger-color); font-weight: 600; font-size: 0.9rem;">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>المهام المتأخرة (${overdue.length})</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // عرض المهام المتأخرة أولاً
+            overdue.forEach(task => {
+                const taskCategory = getCategoryById(task.categoryId);
                 
                 html += `
-                    <div class="category-task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
-                         onclick="openEditTaskModal('${task.id}')"
-                         style="${isOverdue ? 'border-right: 3px solid var(--danger-color) !important; background: linear-gradient(135deg, rgba(247, 37, 133, 0.05), rgba(247, 37, 133, 0.1)) !important;' : ''}">
+                    <div class="category-task-item overdue" 
+                         onclick="openEditTaskModal('${task.id}')">
                         <div class="category-task-title">
                             <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
                                    onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
-                            <span style="${isOverdue ? 'color: var(--danger-color); font-weight: 600;' : ''}">
+                            <span style="color: var(--danger-color); font-weight: 600;">
                                 ${task.title}
-                                ${isOverdue ? ' <i class="fas fa-exclamation-circle" style="color: var(--danger-color);"></i>' : ''}
+                                <i class="fas fa-exclamation-circle" style="color: var(--danger-color); margin-right: 5px;"></i>
                             </span>
                         </div>
                         <div class="category-task-meta">
-                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)} ${isOverdue ? '(متأخرة)' : isToday ? '(اليوم)' : ''}</span>
+                            <span><i class="fas fa-calendar" style="color: var(--danger-color);"></i> ${formatDate(task.date)} (متأخرة)</span>
                             <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // إضافة عنوان لمهام اليوم إذا كانت موجودة
+            if (todayPending.length > 0) {
+                html += `
+                    <div style="margin: 15px 0 10px 0; padding: 8px 12px; background: rgba(67, 97, 238, 0.1); border-radius: 8px; border-right: 3px solid var(--theme-primary);">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--theme-primary); font-weight: 600; font-size: 0.9rem;">
+                            <i class="fas fa-calendar-day"></i>
+                            <span>مهام اليوم (${todayPending.length})</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // عرض مهام اليوم
+            todayPending.forEach(task => {
+                const taskCategory = getCategoryById(task.categoryId);
+                
+                html += `
+                    <div class="category-task-item" 
+                         onclick="openEditTaskModal('${task.id}')">
+                        <div class="category-task-title">
+                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                                   onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
+                            <span>${task.title}</span>
+                        </div>
+                        <div class="category-task-meta">
+                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)} (اليوم)</span>
+                            <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            // إضافة عنوان للمهام المكتملة إذا كانت موجودة
+            if (completed.length > 0) {
+                html += `
+                    <div style="margin: 15px 0 10px 0; padding: 8px 12px; background: rgba(76, 201, 240, 0.1); border-radius: 8px; border-right: 3px solid var(--success-color);">
+                        <div style="display: flex; align-items: center; gap: 8px; color: var(--success-color); font-weight: 600; font-size: 0.9rem;">
+                            <i class="fas fa-check-circle"></i>
+                            <span>مهام مكتملة (${completed.length})</span>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // عرض المهام المكتملة
+            completed.forEach(task => {
+                const taskCategory = getCategoryById(task.categoryId);
+                const wasOverdue = isTaskOverdue(task);
+                
+                html += `
+                    <div class="category-task-item completed" 
+                         onclick="openEditTaskModal('${task.id}')">
+                        <div class="category-task-title">
+                            <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
+                                   onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
+                            <span style="text-decoration: line-through; opacity: 0.7;">${task.title}</span>
+                        </div>
+                        <div class="category-task-meta">
+                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
+                            <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
+                            ${wasOverdue ? '<span style="color: var(--danger-color);"><i class="fas fa-history"></i> كانت متأخرة</span>' : ''}
                         </div>
                     </div>
                 `;
