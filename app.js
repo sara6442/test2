@@ -174,84 +174,6 @@ function isDateInRepetition(taskDate, targetDate, repetition) {
     }
 }
 
-function createFutureRepeatedTasks(task) {
-    if (!task.repetition || task.repetition.type === 'none') return;
-    
-    console.log(`📅 إنشاء مهام متكررة مستقبلية لـ "${task.title}"`);
-    
-    const taskDate = new Date(task.date);
-    const futureDates = [];
-    const today = new Date();
-    
-    // إنشاء تواريخ للـ 30 يوماً القادمة
-    for (let i = 1; i <= 30; i++) {
-        const date = new Date(taskDate);
-        
-        switch(task.repetition.type) {
-            case 'daily':
-                date.setDate(date.getDate() + i);
-                break;
-            case 'weekly':
-                date.setDate(date.getDate() + (i * 7));
-                break;
-            case 'monthly':
-                date.setMonth(date.getMonth() + i);
-                break;
-            case 'custom':
-                // حساب الأيام المخصصة
-                if (task.repetition.days && task.repetition.days.length > 0) {
-                    const daysToAdd = i * 7; // أسبوع كحد أقصى للبحث
-                    for (let d = 1; d <= daysToAdd; d++) {
-                        const checkDate = new Date(taskDate);
-                        checkDate.setDate(checkDate.getDate() + d);
-                        const dayOfWeek = checkDate.getDay();
-                        
-                        if (task.repetition.days.includes(dayOfWeek)) {
-                            const dateStr = checkDate.toISOString().split('T')[0];
-                            if (!futureDates.includes(dateStr)) {
-                                futureDates.push(dateStr);
-                            }
-                        }
-                    }
-                }
-                continue; // ننتقل للدورة التالية
-        }
-        
-        if (task.repetition.type !== 'custom') {
-            futureDates.push(date.toISOString().split('T')[0]);
-        }
-    }
-    
-    // إضافة المهام المستقبلية
-    futureDates.forEach(futureDate => {
-        // التحقق أن التاريخ في المستقبل
-        if (new Date(futureDate) > today) {
-            const futureTask = {
-                ...task,
-                id: generateId(),
-                date: futureDate,
-                completed: false,
-                createdAt: new Date().toISOString(),
-                isFutureRepetition: true,
-                originalTaskId: task.id
-            };
-            
-            // التحقق من عدم وجود المهمة مسبقاً
-            const exists = AppState.tasks.some(t => 
-                t.title === futureTask.title && 
-                t.date === futureTask.date && 
-                t.categoryId === futureTask.categoryId
-            );
-            
-            if (!exists) {
-                AppState.tasks.push(futureTask);
-            }
-        }
-    });
-    
-    saveTasks();
-    console.log(`✅ تم إنشاء ${futureDates.length} مهمة متكررة مستقبلية`);
-}
 
 // ========== دالة مساعدة: إخفاء المهام المتأخرة المكتملة ==========
 function hideCompletedOverdueTasks() {
@@ -1917,12 +1839,19 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                 </div>
             </div>
         `;
-        } else {
+    } else {
+        // حساب إذا كانت المهمة لليوم
+        const taskDate = new Date(task.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDate.setHours(0, 0, 0, 0);
+        const isToday = taskDate.getTime() === today.getTime();
+        
         return `
-            <div class="task-card ${isCompleted ? 'completed' : ''}" 
+            <div class="task-card ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
                  data-id="${task.id}"
-                 style="position: relative; min-height: 140px;"
-                 title="انقر لتعديل المهمة">
+                 style="position: relative; min-height: ${isRepeated ? '140px' : '120px'}; ${isToday ? 'border-right: 5px solid #4cc9f0;' : ''}"
+                 title="${isToday ? 'مهمة اليوم' : ''}">
                 
                 <div class="task-actions" style="position: absolute; top: 10px; left: 10px; z-index: 3;">
                     <button class="btn btn-secondary btn-sm edit-task-btn" data-id="${task.id}" title="تعديل المهمة">
@@ -1940,9 +1869,9 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                         </span>
                     </div>
                     
-                    ${timeUntilNext ? `
-                        <div class="countdown-badge" style="position: absolute; top: 70px; left: 10px; z-index: 2;">
-                            <span style="background: rgba(76, 201, 240, 0.1); color: var(--success-color); padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; border: 1px solid rgba(76, 201, 240, 0.3); display: inline-flex; align-items: center; gap: 4px;">
+                    ${timeUntilNext && !isToday ? `
+                        <div class="countdown-badge">
+                            <span>
                                 <i class="fas fa-clock"></i> ${timeUntilNext}
                             </span>
                         </div>
@@ -1953,7 +1882,7 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                     <input type="checkbox" class="task-checkbox" ${isCompleted ? 'checked' : ''} style="margin-top: 5px;">
                     <div class="task-content" style="flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; padding-right: 10px;">
-                            <div class="task-title" style="font-weight: 600; font-size: 1.05rem;">
+                            <div class="task-title" style="font-weight: 600; font-size: 1.05rem; ${isCompleted ? 'text-decoration: line-through; opacity: 0.7;' : ''}">
                                 ${task.title}
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center;">
@@ -1965,12 +1894,16 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                                     `<span style="background: rgba(76, 201, 240, 0.1); color: var(--success-color); padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
                                         <i class="fas fa-check-circle"></i> مكتملة
                                     </span>` : ''}
+                                ${isToday && !isCompleted ? 
+                                    `<span style="background: rgba(76, 201, 240, 0.1); color: #4cc9f0; padding: 3px 8px; border-radius: 12px; font-size: 0.75rem;">
+                                        <i class="fas fa-sun"></i> اليوم
+                                    </span>` : ''}
                             </div>
                         </div>
                         
-                        ${task.description ? `<div class="task-description" style="color: var(--gray-color); margin-bottom: 10px;">${task.description}</div>` : ''}
+                        ${task.description ? `<div class="task-description" style="color: var(--gray-color); margin-bottom: 10px; ${isCompleted ? 'opacity: 0.7;' : ''}">${task.description}</div>` : ''}
                         
-                        <div class="task-meta">
+                        <div class="task-meta" style="${isCompleted ? 'opacity: 0.7;' : ''}">
                             <div class="task-meta-item">
                                 <i class="fas fa-tag" style="color: ${category.color}"></i>
                                 <span>${category.name}</span>
@@ -1997,7 +1930,7 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
         `;
     }
 }
-
+    
 // ========== تلميحات المهام ==========
 function setupTaskTooltips() {
     // إزالة التلميحات القديمة
@@ -5392,8 +5325,7 @@ function checkDOMElements() {
     } else {
         console.log("✅ جميع عناصر DOM موجودة");
     }
-}
-function initializePage() {
+}function initializePage() {
     console.log("📱 تهيئة التطبيق...");
     
     // 1. تحميل البيانات
@@ -5412,7 +5344,7 @@ function initializePage() {
     setupSearch();
     
     // 6. إعداد أحداث التكرار
-    setupRepetitionEvents(); // تأكد من وجود هذا السطر
+    setupRepetitionEvents();
     
     // 7. إعداد أحداث الملاحظات
     setupNotesEvents();
@@ -5423,7 +5355,7 @@ function initializePage() {
     // 9. تحديث التاريخ الحالي
     updateCurrentDate();
     
-    // 10. ربط حدث الحفظ مباشرة (تأمين إضافي)
+    // 10. ربط حدث الحفظ مباشرة
     setTimeout(() => {
         const saveBtn = document.getElementById('save-task');
         if (saveBtn) {
