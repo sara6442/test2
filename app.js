@@ -1356,6 +1356,105 @@ function renderTasks() {
         setupTaskTooltips();
     }, 100);
 }
+
+// ========== دالة حفظ المهمة الجديدة ==========
+function saveNewTask() {
+    console.log("💾 حفظ مهمة جديدة...");
+    
+    if (isAddingTask) {
+        console.log("⚠️ محاولة إضافة مزدوجة - تم منعها");
+        return;
+    }
+    
+    const titleInput = document.getElementById('task-title');
+    const categorySelect = document.getElementById('task-category');
+    const descriptionTextarea = document.getElementById('task-description');
+    const durationInput = document.getElementById('task-duration');
+    const dateInput = document.getElementById('task-date');
+    const timeInput = document.getElementById('task-time');
+    const prioritySelect = document.getElementById('task-priority');
+    const repetitionSelect = document.getElementById('task-repetition');
+    
+    if (!titleInput || !categorySelect) {
+        console.error('❌ عناصر النموذج غير موجودة');
+        alert('خطأ: النموذج غير مكتمل');
+        return;
+    }
+    
+    const title = titleInput.value.trim();
+    const category = categorySelect.value;
+    
+    if (!title) {
+        alert('يرجى إدخال عنوان المهمة');
+        titleInput.focus();
+        return;
+    }
+    
+    if (!category) {
+        alert('يرجى اختيار فئة للمهمة');
+        categorySelect.focus();
+        return;
+    }
+    
+    // جمع بيانات التكرار
+    let repetition = null;
+    const repetitionType = repetitionSelect.value;
+    
+    if (repetitionType !== 'none') {
+        repetition = { type: repetitionType };
+        
+        if (repetitionType === 'custom') {
+            const checkedDays = Array.from(document.querySelectorAll('input[name="repeat-days"]:checked'))
+                .map(cb => parseInt(cb.value));
+            
+            if (checkedDays.length === 0) {
+                alert('يرجى اختيار يوم واحد على الأقل للتكرار المخصص');
+                return;
+            }
+            
+            repetition.days = checkedDays;
+        }
+    }
+    
+    isAddingTask = true;
+    
+    // إضافة المهمة
+    const newTask = {
+        id: generateId(),
+        title: title,
+        description: descriptionTextarea ? descriptionTextarea.value.trim() : '',
+        categoryId: category,
+        duration: durationInput ? parseInt(durationInput.value) || 30 : 30,
+        date: dateInput ? dateInput.value : new Date().toISOString().split('T')[0],
+        time: timeInput ? timeInput.value : '',
+        priority: prioritySelect ? prioritySelect.value : 'medium',
+        completed: false,
+        createdAt: new Date().toISOString(),
+        repetition: repetition
+    };
+    
+    AppState.tasks.push(newTask);
+    saveTasks();
+    refreshCurrentView();
+    
+    // إغلاق النافذة وإعادة التعيين
+    closeModal('add-task-modal');
+    const form = document.getElementById('task-form');
+    if (form) form.reset();
+    
+    // إعادة تعيين التاريخ
+    const today = new Date().toISOString().split('T')[0];
+    const dateInputEl = document.getElementById('task-date');
+    if (dateInputEl) dateInputEl.value = today;
+    
+    console.log("✅ تم حفظ المهمة بنجاح:", newTask.title);
+    
+    // إعادة تعيين حالة الإضافة بعد تأخير
+    setTimeout(() => {
+        isAddingTask = false;
+    }, 500);
+}
+
 function renderSingleTaskCard(task) {
     const category = getCategoryById(task.categoryId);
     const isDeleted = AppState.currentFilter === 'deleted';
@@ -4112,7 +4211,14 @@ function setupAllEvents() {
             saveNewTask();
         });
     }
-    
+    // 3. زر حفظ مهمة جديدة
+    document.getElementById('save-task')?.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log("💾 زر حفظ مهمة تم النقر");
+        saveNewTask();
+    });
+        
     // 4. زر حفظ تعديل المهمة
     const saveEditTaskBtn = document.getElementById('save-edit-task');
     if (saveEditTaskBtn) {
@@ -4178,6 +4284,7 @@ function setupAllEvents() {
             if (modal) modal.classList.remove('active');
         }
     });
+    
     
     console.log("✅ جميع الأحداث جاهزة");
 }
@@ -4675,6 +4782,7 @@ window.changeCalendarDate = changeCalendarDate;
 window.navigateCalendarWeeks = navigateCalendarWeeks;
 window.changeCalendarMonth = changeCalendarMonth;
 window.showDayTasksModal = showDayTasksModal;
+window.saveNewTask = saveNewTask;
 
 // تهيئة عند DOM loaded
 window.addEventListener('DOMContentLoaded', function() {
