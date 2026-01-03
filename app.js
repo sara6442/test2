@@ -3900,16 +3900,36 @@ function openEditTaskModal(taskId) {
     AppState.currentTaskId = taskId;
     
     const titleInput = document.getElementById('edit-task-title');
+    const categorySelect = document.getElementById('edit-task-category');
     const descriptionInput = document.getElementById('edit-task-description');
     
     if (titleInput) titleInput.value = task.title;
+    
+    // تعيين الفئة
+    if (categorySelect) {
+        categorySelect.innerHTML = '<option value="">-- اختر الفئة --</option>';
+        AppState.categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            if (task.categoryId === category.id) option.selected = true;
+            categorySelect.appendChild(option);
+        });
+    }
+    
     if (descriptionInput) descriptionInput.value = task.description || '';
     
     const dateInput = document.getElementById('edit-task-date');
     const timeInput = document.getElementById('edit-task-time');
     const durationInput = document.getElementById('edit-task-duration');
     const priorityInput = document.getElementById('edit-task-priority');
-       // تعيين تكرار المهمة
+    
+    if (dateInput) dateInput.value = task.date || '';
+    if (timeInput) timeInput.value = task.time || '';
+    if (durationInput) durationInput.value = task.duration || 30;
+    if (priorityInput) priorityInput.value = task.priority || 'medium';
+    
+    // تعيين تكرار المهمة
     const repetitionSelect = document.getElementById('edit-task-repetition');
     const customRepetitionDiv = document.getElementById('edit-custom-repetition-options');
     
@@ -3938,27 +3958,11 @@ function openEditTaskModal(taskId) {
             }
         }
     }
- 
-    if (dateInput) dateInput.value = task.date || '';
-    if (timeInput) timeInput.value = task.time || '';
-    if (durationInput) durationInput.value = task.duration || 30;
-    if (priorityInput) priorityInput.value = task.priority || 'medium';
-    
-    const categorySelect = document.getElementById('edit-task-category');
-    if (categorySelect) {
-        categorySelect.innerHTML = '<option value="">-- اختر الفئة --</option>';
-        AppState.categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            if (task.categoryId === category.id) option.selected = true;
-            categorySelect.appendChild(option);
-        });
-    }
     
     const modal = document.getElementById('edit-task-modal');
     if (modal) modal.classList.add('active');
 }
+
 function openEditCategoryModal(categoryId) {
     console.log("📝 فتح نافذة تعديل الفئة:", categoryId);
     
