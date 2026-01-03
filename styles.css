@@ -1970,4 +1970,54 @@ body {
     accent-color: var(--theme-primary) !important;
 }
 
+/* ========== علامة التكرار المحسنة ========== */
+.repetition-badge-compact {
+    position: absolute;
+    top: 45px;
+    left: 10px;
+    z-index: 2;
+    max-width: calc(100% - 100px);
+    overflow: hidden;
+}
+
+.repetition-badge-compact span {
+    background: rgba(67, 97, 238, 0.1);
+    color: var(--theme-primary);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    border: 1px solid rgba(67, 97, 238, 0.3);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.repetition-badge-compact i.fa-redo {
+    font-size: 0.65rem;
+}
+
+/* تحسين المساحة للمهام ذات التكرار */
+.task-card:has(.repetition-badge-compact) {
+    min-height: 140px;
+}
+
+/* تحسين عرض التكرار في المهام الصغيرة */
+.calendar-task-meta .repetition-badge-inline,
+.category-task-meta .repetition-badge-inline {
+    color: var(--theme-primary);
+    font-size: 0.8rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.calendar-task-meta .repetition-badge-inline i,
+.category-task-meta .repetition-badge-inline i {
+    font-size: 0.7rem;
+}
+
 /* ========== النهاية ========== */
