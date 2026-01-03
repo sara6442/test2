@@ -128,11 +128,17 @@ function isDateInRepetition(taskDate, targetDate, repetition) {
     // التأكد أن التاريخ الهدف بعد تاريخ المهمة
     if (target < task) return false;
     
+    // التحقق من تاريخ انتهاء التكرار
+    if (repetition.endDate) {
+        const endDate = new Date(repetition.endDate);
+        if (target > endDate) return false;
+    }
+    
     switch(repetition.type) {
         case 'daily':
             // كل يوم بعد تاريخ المهمة
             const daysDiff = Math.floor((target - task) / (24 * 60 * 60 * 1000));
-            return daysDiff >= 0;
+            return daysDiff >= 0 && daysDiff % 1 === 0; // كل يوم بالضبط
             
         case 'weekly':
             // كل أسبوع في نفس اليوم
