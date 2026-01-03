@@ -1931,5 +1931,43 @@ body {
     70% { box-shadow: 0 0 0 5px rgba(247, 37, 133, 0); }
     100% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0); }
 }
+/* تحسين مظهر خيارات التكرار في جميع النماذج */
+#custom-repetition-options,
+#edit-custom-repetition-options {
+    background: var(--theme-bg);
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--theme-border);
+    margin-bottom: 15px;
+    animation: fadeIn 0.3s ease;
+}
+
+#custom-repetition-options label,
+#edit-custom-repetition-options label {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 6px 10px !important;
+    background: var(--theme-card) !important;
+    border: 1px solid var(--theme-border) !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+}
+
+#custom-repetition-options label:hover,
+#edit-custom-repetition-options label:hover {
+    background: var(--theme-primary) !important;
+    color: white !important;
+    border-color: var(--theme-primary) !important;
+}
+
+#custom-repetition-options input[type="checkbox"],
+#edit-custom-repetition-options input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    cursor: pointer !important;
+    accent-color: var(--theme-primary) !important;
+}
 
 /* ========== النهاية ========== */
