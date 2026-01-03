@@ -2131,4 +2131,24 @@ body {
     font-weight: 700 !important;
 }
 
+/* في styles.css، إزالة أو تعديل القواعد التي تضع لوناً على أيقونة التاريخ */
+.task-meta-item i.fa-calendar {
+    color: var(--theme-text) !important; /* بدلاً من أي لون آخر */
+}
+
+/* تأكد من أن أيقونة الساعة أيضاً بلون طبيعي */
+.task-meta-item i.fa-clock {
+    color: var(--theme-text) !important;
+}
+
+/* إزالة أي تنسيقات خاصة للأيقونات في المهام */
+.task-meta-item i {
+    color: var(--theme-text) !important;
+}
+
+/* استثناء أيقونة العلامة (الفلاج) تبقى ملونة حسب الأولوية */
+.task-meta-item i.fa-flag {
+    /* هذا سيبقى ملوناً حسب الأولوية */
+}
+
 /* ========== النهاية ========== */
