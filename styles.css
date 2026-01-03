@@ -1778,7 +1778,6 @@ body {
 }
 
 /* ========== أنماط الأقسام الجديدة ========== */
-/* ========== أنماط الأقسام الجديدة ========== */
 
 /* أنماط الأقسام الأساسية */
 .tasks-section {
@@ -1790,7 +1789,7 @@ body {
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-/* رأس القسم - نفس التصميم لكل الأقسام */
+/* رأس القسم */
 .section-header {
     display: flex;
     align-items: center;
@@ -1800,46 +1799,46 @@ body {
     border-bottom: 2px solid;
 }
 
-/* رأس قسم المهام المتأخرة (باللون الأحمر) */
-.tasks-section:nth-child(1) .section-header {
-    border-bottom-color: var(--danger-color);
+/* رأس قسم المهام المتأخرة (أحمر) */
+.section-header .fa-exclamation-triangle {
+    color: var(--danger-color) !important;
 }
 
-.tasks-section:nth-child(1) .section-header i {
-    color: var(--danger-color);
+.tasks-section:has(.fa-exclamation-triangle) .section-header {
+    border-bottom-color: var(--danger-color) !important;
 }
 
-.tasks-section:nth-child(1) .section-header h3 {
-    color: var(--danger-color);
+.tasks-section:has(.fa-exclamation-triangle) .section-header h3 {
+    color: var(--danger-color) !important;
 }
 
-/* رأس قسم مهام اليوم (باللون الأساسي) */
-.tasks-section:nth-child(2) .section-header {
-    border-bottom-color: var(--theme-primary);
+/* رأس قسم مهام اليوم (أزرق) */
+.section-header .fa-calendar-day {
+    color: var(--theme-primary) !important;
 }
 
-.tasks-section:nth-child(2) .section-header i {
-    color: var(--theme-primary);
+.tasks-section:has(.fa-calendar-day) .section-header {
+    border-bottom-color: var(--theme-primary) !important;
 }
 
-.tasks-section:nth-child(2) .section-header h3 {
-    color: var(--theme-primary);
+.tasks-section:has(.fa-calendar-day) .section-header h3 {
+    color: var(--theme-primary) !important;
 }
 
-/* رأس قسم المهام اللاحقة (نفس لون مهام اليوم - اللون الأساسي) */
-.tasks-section:nth-child(3) .section-header {
-    border-bottom-color: var(--theme-primary);
+/* رأس قسم المهام اللاحقة (أزرق - نفس مهام اليوم) */
+.section-header .fa-calendar-alt {
+    color: var(--theme-primary) !important;
 }
 
-.tasks-section:nth-child(3) .section-header i {
-    color: var(--theme-primary);
+.tasks-section:has(.fa-calendar-alt) .section-header {
+    border-bottom-color: var(--theme-primary) !important;
 }
 
-.tasks-section:nth-child(3) .section-header h3 {
-    color: var(--theme-primary);
+.tasks-section:has(.fa-calendar-alt) .section-header h3 {
+    color: var(--theme-primary) !important;
 }
 
-/* مجموعة التواريخ في المهام اللاحقة - بدون خلفية ملونة */
+/* مجموعة التواريخ في المهام اللاحقة */
 .date-group {
     margin-bottom: 20px;
 }
@@ -1850,7 +1849,7 @@ body {
     padding: 8px 12px !important;
     background: var(--theme-bg) !important;
     border-radius: 8px !important;
-    border-right: 3px solid var(--theme-primary) !important; /* ← أزرق/لون أساسي */
+    border-right: 3px solid var(--theme-primary) !important;
     font-size: 0.95rem !important;
     display: flex !important;
     align-items: center !important;
@@ -1909,25 +1908,5 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
 }
 
-/* تحسين الأقسام حسب الثيم */
-.theme-beige .section-header {
-    background: transparent !important;
-}
-
-.theme-gray .section-header {
-    background: transparent !important;
-}
-
-.theme-black .section-header {
-    background: transparent !important;
-}
-
-.theme-blue .section-header {
-    background: transparent !important;
-}
-
 /* ========== النهاية ========== */
-
-/* ========== النهاية ========== */
-
 /* ========== النهاية ========== */
