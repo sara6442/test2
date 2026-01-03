@@ -236,52 +236,63 @@
                         </div>
                     </div>
                     <div class="form-group">
-                            <label for="task-repetition">التكرار</label>
-                            <select id="task-repetition" required>
-                                <option value="none">بدون تكرار</option>
-                                <option value="daily">يومياً</option>
-                                <option value="weekly">أسبوعياً</option>
-                                <option value="monthly">شهرياً</option>
-                                <option value="custom">مخصص (اختر أيام الأسبوع)</option>
-                            </select>
-                        </div>
-                        
-                        <!-- خيارات التكرار المخصص -->
-                        <div id="custom-repetition-options" style="display: none;">
-                            <div class="form-group">
-                                <label>أيام التكرار *</label>
-                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
-                                    <label style="display: flex; align-items: center; gap: 5px;">
-                                        <input type="checkbox" name="repeat-days" value="0">
-                                        <span>الأحد</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 5px;">
-                                        <input type="checkbox" name="repeat-days" value="1">
-                                        <span>الاثنين</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 5px;">
-                                        <input type="checkbox" name="repeat-days" value="2">
-                                        <span>الثلاثاء</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 5px;">
-                                        <input type="checkbox" name="repeat-days" value="3">
-                                        <span>الأربعاء</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 5px;">
-                                        <input type="checkbox" name="repeat-days" value="4">
-                                        <span>الخميس</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 5px;">
-                                        <input type="checkbox" name="repeat-days" value="5">
-                                        <span>الجمعة</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 5px;">
-                                        <input type="checkbox" name="repeat-days" value="6">
-                                        <span>السبت</span>
-                                    </label>
-                                </div>
+                        <label for="task-repetition">التكرار</label>
+                        <select id="task-repetition" required>
+                            <option value="none">بدون تكرار</option>
+                            <option value="daily">يومياً</option>
+                            <option value="weekly">أسبوعياً</option>
+                            <option value="monthly">شهرياً</option>
+                            <option value="custom">مخصص (اختر أيام الأسبوع)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- خيارات التكرار المخصص -->
+                    <div id="custom-repetition-options" style="display: none;">
+                        <div class="form-group">
+                            <label>أيام التكرار *</label>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="repeat-days" value="0">
+                                    <span>الأحد</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="repeat-days" value="1">
+                                    <span>الاثنين</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="repeat-days" value="2">
+                                    <span>الثلاثاء</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="repeat-days" value="3">
+                                    <span>الأربعاء</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="repeat-days" value="4">
+                                    <span>الخميس</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="repeat-days" value="5">
+                                    <span>الجمعة</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 5px;">
+                                    <input type="checkbox" name="repeat-days" value="6">
+                                    <span>السبت</span>
+                                </label>
                             </div>
                         </div>
+                    </div>
+                    
+                    <!-- حقل تاريخ انتهاء التكرار -->
+                    <div id="repetition-end-date-container" style="display: none;">
+                        <div class="form-group">
+                            <label for="repetition-end-date">تاريخ انتهاء التكرار (اختياري)</label>
+                            <input type="date" id="repetition-end-date">
+                            <small style="color: var(--gray-color); font-size: 0.85rem;">
+                                اتركه فارغاً ليكرر إلى الأبد
+                            </small>
+                        </div>
+                    </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="task-duration">المدة (دقائق)</label>
