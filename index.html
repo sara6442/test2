@@ -309,111 +309,113 @@
         </div>
     </div>
 
-    <!-- نافذة تعديل مهمة -->
-    <div class="modal" id="edit-task-modal">
-        <div class="modal-content" style="max-width: 600px;">
-            <div class="modal-header">
-                <h3>تعديل المهمة</h3>
-                <button class="close-btn" onclick="closeModal('edit-task-modal')">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="edit-task-form">
-                    <div class="form-group">
-                        <label for="edit-task-title">عنوان المهمة *</label>
-                        <input type="text" id="edit-task-title" placeholder="أدخل عنوان المهمة" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-task-category">الفئة *</label>
-                        <select id="edit-task-category" required>
-                            <option value="">-- اختر الفئة --</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
+           <!-- نافذة تعديل مهمة -->
+        <div class="modal" id="edit-task-modal">
+            <div class="modal-content" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3>تعديل المهمة</h3>
+                    <button class="close-btn" onclick="closeModal('edit-task-modal')">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-task-form">
                         <div class="form-group">
-                            <label for="edit-task-date">تاريخ الاستحقاق</label>
-                            <input type="date" id="edit-task-date">
+                            <label for="edit-task-title">عنوان المهمة *</label>
+                            <input type="text" id="edit-task-title" placeholder="أدخل عنوان المهمة" required>
                         </div>
                         <div class="form-group">
-                            <label for="edit-task-time">الوقت</label>
-                            <input type="time" id="edit-task-time">
-                        </div>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="edit-task-duration">المدة (دقائق)</label>
-                            <input type="number" id="edit-task-duration" min="1" value="30">
-                        </div>
-                        <div class="form-group">
-                            <label for="edit-task-priority">الأولوية</label>
-                            <select id="edit-task-priority">
-                                <option value="low">منخفضة</option>
-                                <option value="medium" selected>متوسطة</option>
-                                <option value="high">عالية</option>
+                            <label for="edit-task-category">الفئة *</label>
+                            <select id="edit-task-category" required>
+                                <!-- سيتم ملؤها بواسطة JavaScript -->
                             </select>
                         </div>
-                              
-                         <div class="form-group">
-                                <label for="edit-task-repetition">التكرار</label>
-                                <select id="edit-task-repetition">
-                                    <option value="none">بدون تكرار</option>
-                                    <option value="daily">يومياً</option>
-                                    <option value="weekly">أسبوعياً</option>
-                                    <option value="monthly">شهرياً</option>
-                                    <option value="custom">مخصص (اختر أيام الأسبوع)</option>
-                                </select>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-task-date">تاريخ الاستحقاق</label>
+                                <input type="date" id="edit-task-date">
                             </div>
-                            
-                            <!-- خيارات التكرار المخصص -->
-                            <div id="edit-custom-repetition-options" style="display: none;">
-                                <div class="form-group">
-                                    <label>أيام التكرار</label>
-                                    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
-                                        <label style="display: flex; align-items: center; gap: 5px;">
-                                            <input type="checkbox" name="edit-repeat-days" value="0">
-                                            <span>الأحد</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 5px;">
-                                            <input type="checkbox" name="edit-repeat-days" value="1">
-                                            <span>الاثنين</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 5px;">
-                                            <input type="checkbox" name="edit-repeat-days" value="2">
-                                            <span>الثلاثاء</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 5px;">
-                                            <input type="checkbox" name="edit-repeat-days" value="3">
-                                            <span>الأربعاء</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 5px;">
-                                            <input type="checkbox" name="edit-repeat-days" value="4">
-                                            <span>الخميس</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 5px;">
-                                            <input type="checkbox" name="edit-repeat-days" value="5">
-                                            <span>الجمعة</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 5px;">
-                                            <input type="checkbox" name="edit-repeat-days" value="6">
-                                            <span>السبت</span>
-                                        </label>
-                                    </div>
+                            <div class="form-group">
+                                <label for="edit-task-time">الوقت</label>
+                                <input type="time" id="edit-task-time">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-task-repetition">التكرار</label>
+                            <select id="edit-task-repetition">
+                                <option value="none">بدون تكرار</option>
+                                <option value="daily">يومياً</option>
+                                <option value="weekly">أسبوعياً</option>
+                                <option value="monthly">شهرياً</option>
+                                <option value="custom">مخصص (اختر أيام الأسبوع)</option>
+                            </select>
+                        </div>
+                        
+                        <!-- خيارات التكرار المخصص -->
+                        <div id="edit-custom-repetition-options" style="display: none;">
+                            <div class="form-group">
+                                <label>أيام التكرار *</label>
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" name="edit-repeat-days" value="0">
+                                        <span>الأحد</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" name="edit-repeat-days" value="1">
+                                        <span>الاثنين</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" name="edit-repeat-days" value="2">
+                                        <span>الثلاثاء</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" name="edit-repeat-days" value="3">
+                                        <span>الأربعاء</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" name="edit-repeat-days" value="4">
+                                        <span>الخميس</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" name="edit-repeat-days" value="5">
+                                        <span>الجمعة</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 5px;">
+                                        <input type="checkbox" name="edit-repeat-days" value="6">
+                                        <span>السبت</span>
+                                    </label>
                                 </div>
                             </div>
-                
-                    <div class="form-group">
-                        <label for="edit-task-description">الوصف</label>
-                        <textarea id="edit-task-description" placeholder="أدخل وصف المهمة" rows="4"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeModal('edit-task-modal')">إلغاء</button>
-                <button class="btn btn-danger" id="delete-edit-task">حذف المهمة</button>
-                <button class="btn btn-primary" id="save-edit-task">حفظ التعديلات</button>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="edit-task-duration">المدة (دقائق)</label>
+                                <input type="number" id="edit-task-duration" min="1" value="30">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit-task-priority">الأولوية</label>
+                                <select id="edit-task-priority">
+                                    <option value="low">منخفضة</option>
+                                    <option value="medium" selected>متوسطة</option>
+                                    <option value="high">عالية</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="edit-task-description">الوصف</label>
+                            <textarea id="edit-task-description" placeholder="أدخل وصف المهمة" rows="4"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeModal('edit-task-modal')">إلغاء</button>
+                    <button class="btn btn-danger" id="delete-edit-task">حذف المهمة</button>
+                    <button class="btn btn-primary" id="save-edit-task">حفظ التعديلات</button>
+                </div>
             </div>
         </div>
-    </div>
-
     <!-- نافذة إضافة/تعديل فئة -->
     <div class="modal" id="category-modal">
         <div class="modal-content" style="max-width: 500px;">
