@@ -1033,20 +1033,11 @@ function toggleTaskCompletion(taskId) {
     
     // تبديل حالة الإكمال
     AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
-    
-    // إذا كانت المهمة متأخرة وأصبحت مكتملة الآن
+        // إذا كانت المهمة متأخرة وأصبحت مكتملة الآن
     if (isOverdue && AppState.tasks[taskIndex].completed) {
         console.log(`✅ تم إكمال مهمة متأخرة: "${task.title}"`);
-        
-        // إضافة رسالة تأكيد
-        setTimeout(() => {
-            if (AppState.currentView === 'categories') {
-                const category = getCategoryById(task.categoryId);
-                alert(`تم إكمال المهمة المتأخرة "${task.title}". ستختفي من الفئة "${category.name}"`);
-            }
-        }, 100);
+        // تمت إزالة رسالة التأكيد
     }
-    
     // تحديث وقت الإكمال إذا كانت مكتملة
     if (AppState.tasks[taskIndex].completed) {
         AppState.tasks[taskIndex].completedAt = new Date().toISOString();
