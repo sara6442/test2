@@ -293,22 +293,38 @@ function getRepetitionLabel(repetition) {
     
     const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
     
+    let label = '';
+    
     switch(repetition.type) {
         case 'daily':
-            return 'يومياً';
+            label = 'يومياً';
+            break;
         case 'weekly':
-            return 'أسبوعياً';
+            label = 'أسبوعياً';
+            break;
         case 'monthly':
-            return 'شهرياً';
+            label = 'شهرياً';
+            break;
         case 'custom':
             if (repetition.days && repetition.days.length > 0) {
                 const customDays = repetition.days.map(day => dayNames[day]).join('، ');
-                return `أيام: ${customDays}`;
+                label = `أيام: ${customDays}`;
+            } else {
+                label = 'مخصص';
             }
-            return 'مخصص';
+            break;
         default:
             return '';
     }
+    
+    // إضافة تاريخ الانتهاء إذا كان موجوداً
+    if (repetition.endDate) {
+        const endDate = new Date(repetition.endDate);
+        const formattedDate = endDate.toLocaleDateString('ar-SA');
+        label += ` ⏳ حتى ${formattedDate}`;
+    }
+    
+    return label;
 }
 
 // ========== دالة مساعدة: التحقق من إكمال المهام المتأخرة ==========
@@ -1727,6 +1743,12 @@ function saveNewTask() {
     
     if (repetitionType !== 'none') {
         repetition = { type: repetitionType };
+        
+        // جمع تاريخ انتهاء التكرار
+        const endDateInput = document.getElementById('repetition-end-date');
+        if (endDateInput && endDateInput.value) {
+            repetition.endDate = endDateInput.value;
+        }
         
         if (repetitionType === 'custom') {
             const checkedDays = Array.from(document.querySelectorAll('input[name="repeat-days"]:checked'))
@@ -3964,6 +3986,18 @@ function openEditTaskModal(taskId) {
             }
         }
     }
+
+        // تعيين تاريخ انتهاء التكرار
+    const endDateInput = document.getElementById('edit-repetition-end-date');
+    if (endDateInput) {
+        endDateInput.value = task.repetition?.endDate || '';
+    }
+    
+    // إظهار/إخفاء حقل تاريخ انتهاء التكرار
+    if (task.repetition && task.repetition.type !== 'none') {
+        const endDateContainer = document.getElementById('edit-repetition-end-date-container');
+        if (endDateContainer) endDateContainer.style.display = 'block';
+    }
     
     const modal = document.getElementById('edit-task-modal');
     if (modal) modal.classList.add('active');
@@ -5084,6 +5118,12 @@ function saveEditedTask() {
     if (repetitionType !== 'none') {
         repetition = { type: repetitionType };
         
+        // جمع تاريخ انتهاء التكرار
+        const endDateInput = document.getElementById('edit-repetition-end-date');
+        if (endDateInput && endDateInput.value) {
+            repetition.endDate = endDateInput.value;
+        }
+        
         if (repetitionType === 'custom') {
             const checkedDays = Array.from(document.querySelectorAll('input[name="edit-repeat-days"]:checked'))
                 .map(cb => parseInt(cb.value));
@@ -5114,32 +5154,47 @@ function setupRepetitionEvents() {
     // لنموذج إضافة المهمة
     const repetitionSelect = document.getElementById('task-repetition');
     const customRepetitionDiv = document.getElementById('custom-repetition-options');
+    const endDateContainer = document.getElementById('repetition-end-date-container');
     
-    if (repetitionSelect && customRepetitionDiv) {
+    if (repetitionSelect) {
         repetitionSelect.addEventListener('change', function() {
             if (this.value === 'custom') {
-                customRepetitionDiv.style.display = 'block';
+                if (customRepetitionDiv) customRepetitionDiv.style.display = 'block';
+                if (endDateContainer) endDateContainer.style.display = 'block';
+            } else if (this.value !== 'none') {
+                if (customRepetitionDiv) customRepetitionDiv.style.display = 'none';
+                if (endDateContainer) endDateContainer.style.display = 'block';
             } else {
-                customRepetitionDiv.style.display = 'none';
+                if (customRepetitionDiv) customRepetitionDiv.style.display = 'none';
+                if (endDateContainer) endDateContainer.style.display = 'none';
             }
         });
         
         // تحميل أولي
-        if (repetitionSelect.value === 'custom') {
+        if (repetitionSelect.value === 'custom' && customRepetitionDiv) {
             customRepetitionDiv.style.display = 'block';
+            if (endDateContainer) endDateContainer.style.display = 'block';
+        } else if (repetitionSelect.value !== 'none' && endDateContainer) {
+            endDateContainer.style.display = 'block';
         }
     }
     
     // لنموذج تعديل المهمة
     const editRepetitionSelect = document.getElementById('edit-task-repetition');
     const editCustomRepetitionDiv = document.getElementById('edit-custom-repetition-options');
+    const editEndDateContainer = document.getElementById('edit-repetition-end-date-container');
     
-    if (editRepetitionSelect && editCustomRepetitionDiv) {
+    if (editRepetitionSelect) {
         editRepetitionSelect.addEventListener('change', function() {
             if (this.value === 'custom') {
-                editCustomRepetitionDiv.style.display = 'block';
+                if (editCustomRepetitionDiv) editCustomRepetitionDiv.style.display = 'block';
+                if (editEndDateContainer) editEndDateContainer.style.display = 'block';
+            } else if (this.value !== 'none') {
+                if (editCustomRepetitionDiv) editCustomRepetitionDiv.style.display = 'none';
+                if (editEndDateContainer) editEndDateContainer.style.display = 'block';
             } else {
-                editCustomRepetitionDiv.style.display = 'none';
+                if (editCustomRepetitionDiv) editCustomRepetitionDiv.style.display = 'none';
+                if (editEndDateContainer) editEndDateContainer.style.display = 'none';
             }
         });
     }
@@ -5147,11 +5202,14 @@ function setupRepetitionEvents() {
     // منع إغلاق النموذج عند النقر على خيارات التكرار
     document.addEventListener('click', function(e) {
         if (e.target.closest('#custom-repetition-options') || 
-            e.target.closest('#edit-custom-repetition-options')) {
+            e.target.closest('#edit-custom-repetition-options') ||
+            e.target.closest('#repetition-end-date-container') ||
+            e.target.closest('#edit-repetition-end-date-container')) {
             e.stopPropagation();
         }
     });
 }
+
 // ========== تهيئة الصفحة ==========
 function checkDOMElements() {
     console.log("🔍 فحص عناصر DOM...");
@@ -5185,7 +5243,6 @@ function checkDOMElements() {
         console.log("✅ جميع عناصر DOM موجودة");
     }
 }
-
 function initializePage() {
     console.log("📱 تهيئة التطبيق...");
     
@@ -5205,7 +5262,7 @@ function initializePage() {
     setupSearch();
     
     // 6. إعداد أحداث التكرار
-    setupRepetitionEvents();
+    setupRepetitionEvents(); // تأكد من وجود هذا السطر
     
     // 7. إعداد أحداث الملاحظات
     setupNotesEvents();
