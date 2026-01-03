@@ -1841,24 +1841,31 @@ function renderSingleTaskCard(task) {
                 </div>
             </div>
         `;
-    } else {
-        // إضافة بادئة التكرار
-        let repetitionBadge = '';
-        if (isRepeated && !isCompleted) {
-            repetitionBadge = `
-                <span style="position: absolute; top: 10px; left: 10px; background: rgba(67, 97, 238, 0.1); color: var(--theme-primary); padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; z-index: 2; border: 1px solid rgba(67, 97, 238, 0.3);">
-                    <i class="fas fa-redo"></i> ${getRepetitionLabel(task.repetition)}
-                </span>
-            `;
-        }
-        
+      } else {
         return `
             <div class="task-card ${isCompleted ? 'completed' : ''}" 
                  data-id="${task.id}"
-                 style="position: relative;"
+                 style="position: relative; min-height: 140px;"
                  title="انقر لتعديل المهمة">
-                ${repetitionBadge}
-                <div style="display: flex; align-items: flex-start; gap: 20px;">
+                
+                <div class="task-actions" style="position: absolute; top: 10px; left: 10px; z-index: 3;">
+                    <button class="btn btn-secondary btn-sm edit-task-btn" data-id="${task.id}" title="تعديل المهمة">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-task-btn" data-id="${task.id}" title="حذف">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                
+                ${isRepeated && !isCompleted ? `
+                    <div class="repetition-badge-compact">
+                        <span title="${getRepetitionLabel(task.repetition)}">
+                            <i class="fas fa-redo"></i> ${getRepetitionLabel(task.repetition)}
+                        </span>
+                    </div>
+                ` : ''}
+                
+                <div style="display: flex; align-items: flex-start; gap: 20px; margin-right: 60px;">
                     <input type="checkbox" class="task-checkbox" ${isCompleted ? 'checked' : ''} style="margin-top: 5px;">
                     <div class="task-content" style="flex: 1;">
                         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; padding-right: 10px;">
@@ -1902,19 +1909,9 @@ function renderSingleTaskCard(task) {
                         </div>
                     </div>
                 </div>
-                
-                <div class="task-actions" style="position: absolute; top: 10px; ${isRepeated ? 'left: 60px;' : 'left: 10px;'} z-index: 3;">
-                    <button class="btn btn-secondary btn-sm edit-task-btn" data-id="${task.id}" title="تعديل المهمة">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="btn btn-danger btn-sm delete-task-btn" data-id="${task.id}" title="حذف">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
             </div>
         `;
     }
-}
 
 // ========== تلميحات المهام ==========
 function setupTaskTooltips() {
@@ -2254,19 +2251,18 @@ function renderCategories() {
                 const taskCategory = getCategoryById(task.categoryId);
                 
                 html += `
-                    <div class="category-task-item overdue" 
+                    <div class="category-task-item" 
                          onclick="openEditTaskModal('${task.id}')">
                         <div class="category-task-title">
                             <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
                                    onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
-                            <span style="color: var(--danger-color); font-weight: 600;">
-                                ${task.title}
-                                <i class="fas fa-exclamation-circle" style="color: var(--danger-color); margin-right: 5px;"></i>
-                            </span>
+                            <span>${task.title}</span>
                         </div>
                         <div class="category-task-meta">
-                            <span><i class="fas fa-calendar" style="color: var(--danger-color);"></i> ${formatDate(task.date)} (متأخرة)</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)} (اليوم)</span>
                             <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
+                            ${task.repetition && task.repetition.type !== 'none' ? 
+                                `<span style="color: var(--theme-primary);"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
                         </div>
                     </div>
                 `;
@@ -3074,16 +3070,13 @@ function renderDailyCalendar(container) {
                         <div style="flex:1;">
                             <div class="calendar-task-title" style="font-weight:600; color:var(--theme-text);">
                                 ${task.title}
-                                ${isRepeated ? ' <i class="fas fa-redo" style="color:var(--theme-primary); font-size:0.8rem;" title="مهمة متكررة"></i>' : ''}
                                 ${isOverdueFromPast ? ' <i class="fas fa-history" style="color:#f72585; font-size:0.8rem;" title="مهمة متأخرة من تاريخ سابق"></i>' : ''}
                             </div>
                             <div class="calendar-task-meta" style="color:var(--gray-color); font-size:0.9rem; display:flex; gap:10px; margin-top:5px; flex-wrap: wrap;">
                                 <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
+                                <span><i class="fas fa-clock"></i> ${task.time}</span>
                                 <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
-                                ${task.repetition && task.repetition.type !== 'none' ? 
-                                    `<span style="color:var(--theme-primary);"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
-                                ${isOverdueFromPast ? 
-                                    `<span style="color:var(--danger-color);"><i class="fas fa-calendar" title="تاريخها الأصلي: ${formatDate(task.originalDate)}"></i> من ${formatDate(task.originalDate)}</span>` : ''}
+                                ${isRepeated ? `<span style="color:var(--theme-primary);"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
                             </div>
                         </div>
                         <div style="display:flex; gap:6px; align-items:center;">
