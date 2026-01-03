@@ -305,6 +305,28 @@ function getRepetitionLabel(repetition) {
     }
 }
 
+// ========== دالة مساعدة: التحقق من إكمال المهام المتأخرة ==========
+function checkAndHideCompletedOverdueTasks() {
+    console.log("🔍 التحقق من المهام المتأخرة المكتملة...");
+    
+    let hiddenCount = 0;
+    const today = new Date().toISOString().split('T')[0];
+    
+    AppState.tasks.forEach(task => {
+        // إذا كانت المهمة متأخرة ومكتملة
+        if (task.date < today && task.completed) {
+            hiddenCount++;
+            console.log(`📌 مهمة متأخرة مكتملة: "${task.title}" (${task.date})`);
+        }
+    });
+    
+    if (hiddenCount > 0) {
+        console.log(`⚠️ ${hiddenCount} مهمة متأخرة مكتملة (ستختفي من الفئات)`);
+    }
+    
+    return hiddenCount;
+}
+
 // ========== إدارة البيانات ==========
 function initializeData() {
     console.log("تهيئة البيانات...");
@@ -607,7 +629,9 @@ function refreshCurrentView() {
         if (statsBar) statsBar.style.display = 'none';
     }
     else if (AppState.currentView === 'categories') {
-        renderCategories();
+    // التحقق من المهام المتأخرة المكتملة قبل العرض
+    checkAndHideCompletedOverdueTasks();
+    renderCategories();
         if (statsBar) {
             statsBar.style.display = 'block';
             statsBar.style.marginTop = '0';
@@ -1004,30 +1028,33 @@ function toggleTaskCompletion(taskId) {
         return;
     }
     
-       // إذا كانت المهمة عادية بدون تكرار
-    const isOverdue = isTaskOverdue(AppState.tasks[taskIndex]);
+    // إذا كانت المهمة عادية بدون تكرار
+    const isOverdue = isTaskOverdue(task);
     
-    if (isOverdue && !AppState.tasks[taskIndex].completed) {
-        // إذا كانت المهمة متأخرة ويتم إكمالها الآن، احذفها
-        const completedTask = AppState.tasks[taskIndex];
+    // تبديل حالة الإكمال
+    AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
+    
+    // إذا كانت المهمة متأخرة وأصبحت مكتملة الآن
+    if (isOverdue && AppState.tasks[taskIndex].completed) {
+        console.log(`✅ تم إكمال مهمة متأخرة: "${task.title}"`);
         
-        // حفظ نسخة في المهام المحذوفة قبل الحذف
-        AppState.deletedTasks.push({
-            ...completedTask,
-            deletedAt: new Date().toISOString(),
-            completedAt: new Date().toISOString(),
-            overdueCompleted: true
-        });
-        
-        // حذف المهمة من القائمة الرئيسية
-        AppState.tasks.splice(taskIndex, 1);
+        // إضافة رسالة تأكيد
+        setTimeout(() => {
+            if (AppState.currentView === 'categories') {
+                const category = getCategoryById(task.categoryId);
+                alert(`تم إكمال المهمة المتأخرة "${task.title}". ستختفي من الفئة "${category.name}"`);
+            }
+        }, 100);
+    }
+    
+    // تحديث وقت الإكمال إذا كانت مكتملة
+    if (AppState.tasks[taskIndex].completed) {
+        AppState.tasks[taskIndex].completedAt = new Date().toISOString();
     } else {
-        // إذا لم تكن متأخرة أو كانت مكتملة بالفعل، فقط تبديل الحالة
-        AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
+        delete AppState.tasks[taskIndex].completedAt;
     }
     
     saveTasks();
-    saveDeletedTasks();
     refreshCurrentView();
 }
 
@@ -2125,21 +2152,22 @@ function renderCategories() {
         const categoryTasks = AppState.tasks.filter(task => {
             if (task.categoryId !== category.id) return false;
             
-            // عرض فقط مهام اليوم (التاريخ الحالي)
-            if (task.date !== today) return false;
+            // عرض مهام اليوم والمهام المتأخرة غير المكتملة
+            if (task.date === today) {
+                return true; // جميع مهام اليوم (مكتملة وغير مكتملة)
+            } else if (isTaskOverdue(task) && !task.completed) {
+                return true; // المهام المتأخرة غير المكتملة
+            }
             
-            // إخفاء المهام المتأخرة المكتملة
-            if (task.completed && isTaskOverdue(task)) return false;
-            
-            return true;
+            return false;
         });
         
-        // ترتيب المهام
+        // ترتيب المهام: المتأخرة أولاً، ثم مهام اليوم غير المكتملة، ثم المكتملة
         const overdue = categoryTasks.filter(t => isTaskOverdue(t) && !t.completed);
-        const pending = categoryTasks.filter(t => !isTaskOverdue(t) && !t.completed);
+        const todayPending = categoryTasks.filter(t => !isTaskOverdue(t) && !t.completed);
         const completed = categoryTasks.filter(t => t.completed);
-        const orderedTasks = [...overdue, ...pending, ...completed];
-        
+        const orderedTasks = [...overdue, ...todayPending, ...completed];
+                
         const totalDuration = categoryTasks.reduce((sum, t) => sum + (t.duration || 0), 0);
         const timeframe = category.timeframeMinutes || 60;
         const progressPercent = timeframe > 0 ? Math.min(100, Math.round((totalDuration / timeframe) * 100)) : 0;
@@ -2192,19 +2220,24 @@ function renderCategories() {
             `;
         } else {
             orderedTasks.forEach(task => {
-                const isOver = isTaskOverdue(task);
+                const isOverdue = isTaskOverdue(task);
+                const isToday = task.date === new Date().toISOString().split('T')[0];
+                
                 html += `
-                    <div class="category-task-item ${task.completed ? 'completed' : ''}" 
-                         onclick="openEditTaskModal('${task.id}')">
+                    <div class="category-task-item ${task.completed ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
+                         onclick="openEditTaskModal('${task.id}')"
+                         style="${isOverdue ? 'border-right: 3px solid var(--danger-color) !important; background: linear-gradient(135deg, rgba(247, 37, 133, 0.05), rgba(247, 37, 133, 0.1)) !important;' : ''}">
                         <div class="category-task-title">
                             <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
                                    onclick="event.stopPropagation(); toggleTaskCompletion('${task.id}')">
-                            <span>${task.title}</span>
+                            <span style="${isOverdue ? 'color: var(--danger-color); font-weight: 600;' : ''}">
+                                ${task.title}
+                                ${isOverdue ? ' <i class="fas fa-exclamation-circle" style="color: var(--danger-color);"></i>' : ''}
+                            </span>
                         </div>
                         <div class="category-task-meta">
-                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)}</span>
+                            <span><i class="fas fa-calendar"></i> ${formatDate(task.date)} ${isOverdue ? '(متأخرة)' : isToday ? '(اليوم)' : ''}</span>
                             <span><i class="fas fa-clock"></i> ${task.duration} دقيقة</span>
-                            ${isOver ? '<span style="color: var(--danger-color);"><i class="fas fa-exclamation-circle"></i> متأخرة</span>' : ''}
                         </div>
                     </div>
                 `;
@@ -5082,8 +5115,8 @@ function initializePage() {
     // 1. تحميل البيانات
     initializeData();
     
-    // 2. تنظيف المهام المتأخرة المكتملة تلقائياً
-    hideCompletedOverdueTasks();
+    // 2. التحقق من المهام المتأخرة المكتملة
+    checkAndHideCompletedOverdueTasks();
     
     // 3. تهيئة الثيمات
     initializeThemes();
