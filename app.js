@@ -1912,6 +1912,7 @@ function renderSingleTaskCard(task) {
             </div>
         `;
     }
+}
 
 // ========== تلميحات المهام ==========
 function setupTaskTooltips() {
