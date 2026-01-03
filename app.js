@@ -4640,9 +4640,6 @@ function checkDOMElements() {
         console.log("✅ جميع عناصر DOM موجودة");
     }
 }
-
-// استبدل دالة initializePage كاملة بهذا الكود المبسط:
-// استبدل دالة initializePage الموجودة بهذا:
 function initializePage() {
     console.log("📱 تهيئة التطبيق...");
     
@@ -4669,6 +4666,15 @@ function initializePage() {
     
     // 8. تحديث التاريخ الحالي
     updateCurrentDate();
+    
+    // 9. ربط حدث الحفظ مباشرة (تأمين إضافي)
+    setTimeout(() => {
+        const saveBtn = document.getElementById('save-task');
+        if (saveBtn) {
+            saveBtn.addEventListener('click', saveNewTask);
+            console.log("✅ تم ربط زر حفظ المهمة مباشرة");
+        }
+    }, 500);
     
     console.log("✅ التطبيق جاهز للعمل");
 }
