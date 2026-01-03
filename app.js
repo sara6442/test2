@@ -1010,21 +1010,48 @@ function addTask(taskData) {
     }
     
     const task = AppState.tasks[taskIndex];
+    const isCurrentlyCompleted = task.completed;
     
     // إذا كانت المهمة لها تكرار
     if (task.repetition && task.repetition.type !== 'none') {
-        // حساب التاريخ التالي للتكرار
-        const nextDate = calculateNextRepetitionDate(task.date, task.repetition);
-        
-        // تحديث تاريخ المهمة الحالية ليصبح التاريخ التالي
-        AppState.tasks[taskIndex].date = nextDate;
-        AppState.tasks[taskIndex].completed = false;
-        AppState.tasks[taskIndex].completedAt = undefined;
-        
-        console.log(`🔄 تم نقل المهمة "${task.title}" إلى تاريخ ${nextDate}`);
+        if (!isCurrentlyCompleted) {
+            // إذا كانت غير مكتملة ونريد إكمالها
+            const nextDate = calculateNextRepetitionDate(task.date, task.repetition);
+            
+            // التحقق من تاريخ انتهاء التكرار
+            let shouldRepeat = true;
+            if (task.repetition.endDate) {
+                const endDate = new Date(task.repetition.endDate);
+                const nextDateObj = new Date(nextDate);
+                if (nextDateObj > endDate) {
+                    shouldRepeat = false;
+                }
+            }
+            
+            if (shouldRepeat) {
+                // نقل المهمة للتاريخ التالي
+                AppState.tasks[taskIndex].date = nextDate;
+                AppState.tasks[taskIndex].completed = false;
+                delete AppState.tasks[taskIndex].completedAt;
+                
+                console.log(`🔄 تم نقل المهمة "${task.title}" إلى تاريخ ${nextDate}`);
+            } else {
+                // إذا انتهى التكرار، نكمل المهمة ولا ننقلها
+                AppState.tasks[taskIndex].completed = true;
+                AppState.tasks[taskIndex].completedAt = new Date().toISOString();
+                console.log(`⏹️ انتهى التكرار للمهمة "${task.title}"`);
+            }
+        } else {
+            // إذا كانت مكتملة ونريد إلغاء إكمالها، نرجعها للتاريخ السابق
+            const prevDate = calculatePreviousRepetitionDate(task.date, task.repetition);
+            AppState.tasks[taskIndex].date = prevDate;
+            AppState.tasks[taskIndex].completed = false;
+            delete AppState.tasks[taskIndex].completedAt;
+            console.log(`↩️ تم إلغاء إكمال المهمة "${task.title}" وإعادتها لـ ${prevDate}`);
+        }
     } else {
         // إذا كانت المهمة عادية بدون تكرار
-        AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
+        AppState.tasks[taskIndex].completed = !isCurrentlyCompleted;
         
         // تحديث وقت الإكمال إذا كانت مكتملة
         if (AppState.tasks[taskIndex].completed) {
@@ -1036,6 +1063,46 @@ function addTask(taskData) {
     
     saveTasks();
     refreshCurrentView();
+}
+
+// دالة مساعدة: حساب التاريخ السابق للتكرار
+function calculatePreviousRepetitionDate(currentDate, repetition) {
+    const date = new Date(currentDate);
+    
+    switch(repetition.type) {
+        case 'daily':
+            date.setDate(date.getDate() - 1);
+            break;
+            
+        case 'weekly':
+            date.setDate(date.getDate() - 7);
+            break;
+            
+        case 'monthly':
+            date.setMonth(date.getMonth() - 1);
+            break;
+            
+        case 'custom':
+            if (repetition.days && repetition.days.length > 0) {
+                // إيجاد أقرب يوم متاح قبل اليوم الحالي
+                const currentDay = date.getDay();
+                const days = repetition.days.sort((a, b) => a - b);
+                
+                // البحث عن أول يوم قبل اليوم الحالي
+                let prevDay = days.reverse().find(day => day < currentDay);
+                
+                if (!prevDay) {
+                    // إذا لم يجد يوم في الأسبوع الحالي، يأخذ آخر يوم في الأسبوع السابق
+                    prevDay = days[0]; // أول عنصر بعد الترتيب العكسي هو الأكبر
+                    date.setDate(date.getDate() - (currentDay - prevDay + 7));
+                } else {
+                    date.setDate(date.getDate() - (currentDay - prevDay));
+                }
+            }
+            break;
+    }
+    
+    return date.toISOString().split('T')[0];
 }
 
 function updateTask(taskId, taskData) {
@@ -1497,59 +1564,100 @@ function renderTasks() {
         html += `</div>`;
         
         // عرض المهام اللاحقة
+        if (tasksData.future && tasksData.future.length > 0) {
+    html += `
+        <div class="tasks-section" style="margin-bottom: 30px;">
+            <div class="section-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--success-color);">
+                <i class="fas fa-calendar-alt" style="color: var(--success-color);"></i>
+                <h3 style="margin: 0; color: var(--success-color);">مهام لاحقاً (${tasksData.future.length})</h3>
+            </div>
+    `;
+    
+    // تجميع المهام المستقبلية حسب الأقسام الجديدة
+    const next7Days = [];
+    const laterTasks = [];
+    
+    tasksData.future.forEach(task => {
+        const taskDate = new Date(task.date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        taskDate.setHours(0, 0, 0, 0);
+        
+        const diffTime = taskDate - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays <= 7) {
+            next7Days.push({...task, diffDays});
+        } else {
+            laterTasks.push({...task, diffDays});
+        }
+    });
+    
+    // ترتيب المهام حسب التاريخ
+    next7Days.sort((a, b) => new Date(a.date) - new Date(b.date));
+    laterTasks.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // قسم "خلال 7 أيام"
+    if (next7Days.length > 0) {
         html += `
-            <div class="tasks-section" style="margin-bottom: 30px;">
-                <div class="section-header" style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid var(--success-color);">
-                    <i class="fas fa-calendar-alt" style="color: var(--success-color);"></i>
-                    <h3 style="margin: 0; color: var(--success-color);">مهام لاحقاً (${tasksData.future ? tasksData.future.length : 0})</h3>
+            <div class="date-group" style="margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: linear-gradient(135deg, rgba(76, 201, 240, 0.1), rgba(76, 201, 240, 0.05)); border-radius: 10px; border-right: 4px solid #4cc9f0;">
+                    <i class="fas fa-calendar-week" style="color: #4cc9f0; font-size: 1.2rem;"></i>
+                    <h4 style="margin: 0; color: var(--theme-text); font-weight: 600; font-size: 1.1rem;">خلال 7 أيام (${next7Days.length})</h4>
                 </div>
         `;
         
-        if (!tasksData.future || tasksData.future.length === 0) {
-            html += `
-                <div class="empty-section" style="text-align: center; padding: 40px; color: var(--gray-color);">
-                    <i class="fas fa-calendar-plus" style="font-size: 2rem; opacity: 0.3; margin-bottom: 15px;"></i>
-                    <p>لا توجد مهام مستقبلية</p>
-                </div>
-            `;
-        } else {
-            // تجميع المهام المستقبلية حسب التاريخ
-            const groupedByDate = {};
-            tasksData.future.forEach(task => {
-                if (!groupedByDate[task.date]) {
-                    groupedByDate[task.date] = [];
-                }
-                groupedByDate[task.date].push(task);
+        next7Days.forEach(task => {
+            const taskDate = new Date(task.date);
+            const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const dayName = dayNames[taskDate.getDay()];
+            const dateStr = taskDate.toLocaleDateString('ar-SA', { 
+                day: 'numeric', 
+                month: 'short' 
             });
             
-            // عرض المهام حسب التاريخ
-            Object.keys(groupedByDate).sort().forEach(date => {
-                const dateTasks = groupedByDate[date];
-                const dateObj = new Date(date);
-                const dateStr = dateObj.toLocaleDateString('ar-SA', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                });
-                
-                html += `
-                    <div class="date-group" style="margin-bottom: 20px;">
-                        <h4 style="color: var(--theme-text); margin-bottom: 10px; padding: 8px 12px; background: var(--theme-bg); border-radius: 8px; border-right: 3px solid var(--success-color);">
-                            <i class="fas fa-calendar"></i> ${dateStr}
-                        </h4>
-                `;
-                
-                dateTasks.forEach(task => {
-                    html += renderSingleTaskCard(task);
-                });
-                
-                html += `</div>`;
-            });
-        }
+            // إضافة شارة إذا كانت المهمة غداً
+            let dateDisplay = `${dayName} ${dateStr}`;
+            if (task.diffDays === 1) {
+                dateDisplay = `<span style="color: var(--theme-primary); font-weight: 600;">${dayName} ${dateStr} (غداً)</span>`;
+            } else if (task.diffDays === 2) {
+                dateDisplay = `<span style="color: #f8961e; font-weight: 600;">${dayName} ${dateStr} (بعد غد)</span>`;
+            }
+            
+            html += renderSingleTaskCard(task, dateDisplay);
+        });
         
         html += `</div>`;
-    } else if (AppState.currentFilter === 'all') {
+    }
+    
+    // قسم "لاحقاً"
+    if (laterTasks.length > 0) {
+        html += `
+            <div class="date-group" style="margin-bottom: 25px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px; padding: 10px 15px; background: linear-gradient(135deg, rgba(248, 150, 30, 0.1), rgba(248, 150, 30, 0.05)); border-radius: 10px; border-right: 4px solid #f8961e;">
+                    <i class="fas fa-calendar-plus" style="color: #f8961e; font-size: 1.2rem;"></i>
+                    <h4 style="margin: 0; color: var(--theme-text); font-weight: 600; font-size: 1.1rem;">لاحقاً (${laterTasks.length})</h4>
+                </div>
+        `;
+        
+        laterTasks.forEach(task => {
+            const taskDate = new Date(task.date);
+            const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const dayName = dayNames[taskDate.getDay()];
+            const dateStr = taskDate.toLocaleDateString('ar-SA', { 
+                day: 'numeric', 
+                month: 'short',
+                year: taskDate.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+            }).replace(/,?\s*هجري\s*/, ''); // إزالة "هجري" إذا ظهر
+            
+            html += renderSingleTaskCard(task, `${dayName} ${dateStr}`);
+        });
+        
+        html += `</div>`;
+    }
+    
+    html += `</div>`;
+} else if (AppState.currentFilter === 'all') {
         // عرض جميع المهام في أقسام
         if (tasksData.overdue && tasksData.overdue.length > 0) {
             html += `
@@ -2805,9 +2913,9 @@ function openAddTaskModal(preselectedCategory = null) {
     }, 300);
     
     console.log("✅ نافذة إضافة المهمة مفتوحة");
-}
-function calculateNextRepetitionDate(currentDate, repetition) {
+}function calculateNextRepetitionDate(currentDate, repetition) {
     const date = new Date(currentDate);
+    const originalDate = new Date(currentDate); // حفظ التاريخ الأصلي
     
     switch(repetition.type) {
         case 'daily':
@@ -2820,6 +2928,10 @@ function calculateNextRepetitionDate(currentDate, repetition) {
             
         case 'monthly':
             date.setMonth(date.getMonth() + 1);
+            // تأكد من بقاء اليوم نفسه (إذا كان اليوم 31 وشهر جديد ليس له 31، نأخذ آخر يوم)
+            if (date.getDate() !== originalDate.getDate()) {
+                date.setDate(0); // آخر يوم من الشهر السابق
+            }
             break;
             
         case 'custom':
@@ -2828,18 +2940,32 @@ function calculateNextRepetitionDate(currentDate, repetition) {
                 const currentDay = date.getDay();
                 const days = repetition.days.sort((a, b) => a - b);
                 
+                let nextDay = null;
+                let daysToAdd = 0;
+                
                 // البحث عن أول يوم بعد اليوم الحالي
-                let nextDay = days.find(day => day > currentDay);
+                for (let i = 0; i < days.length; i++) {
+                    if (days[i] > currentDay) {
+                        nextDay = days[i];
+                        daysToAdd = nextDay - currentDay;
+                        break;
+                    }
+                }
                 
                 if (!nextDay) {
                     // إذا لم يجد يوم في الأسبوع الحالي، يأخذ أول يوم في الأسبوع التالي
                     nextDay = days[0];
-                    date.setDate(date.getDate() + (7 - currentDay + nextDay));
-                } else {
-                    date.setDate(date.getDate() + (nextDay - currentDay));
+                    daysToAdd = (7 - currentDay) + nextDay;
                 }
+                
+                date.setDate(date.getDate() + daysToAdd);
             }
             break;
+    }
+    
+    // التحقق من أن التاريخ الجديد بعد التاريخ الحالي
+    if (date <= originalDate) {
+        date.setDate(originalDate.getDate() + 1);
     }
     
     return date.toISOString().split('T')[0];
@@ -2847,14 +2973,26 @@ function calculateNextRepetitionDate(currentDate, repetition) {
 
 // دالة جديدة: حساب الوقت المتبقي حتى التكرار التالي
 function getTimeUntilNextRepetition(task) {
-    if (!task.repetition || task.repetition.type === 'none') return '';
+    if (!task.repetition || task.repetition.type === 'none' || task.completed) {
+        return '';
+    }
     
     const taskDate = new Date(task.date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    taskDate.setHours(0, 0, 0, 0);
     
-    // إذا كانت المهمة ليست لليوم، لا نعرض العداد
-    if (taskDate > today) return '';
+    // إذا كانت المهمة لليوم، لا نعرض العداد
+    if (taskDate.getTime() === today.getTime()) {
+        return '';
+    }
+    
+    // إذا كانت المهمة في الماضي (متأخرة)
+    if (taskDate < today) {
+        const diffTime = today - taskDate;
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        return `متأخرة ${diffDays} يوم`;
+    }
     
     // حساب الفرق بالأيام
     const diffTime = taskDate - today;
@@ -2864,14 +3002,26 @@ function getTimeUntilNextRepetition(task) {
         return 'اليوم';
     } else if (diffDays === 1) {
         return 'غداً';
-    } else if (diffDays > 1 && diffDays <= 7) {
-        return `بعد ${diffDays} أيام`;
-    } else if (diffDays > 7) {
+    } else if (diffDays === 2) {
+        return 'بعد غد';
+    } else if (diffDays > 2 && diffDays <= 7) {
+        const dayNames = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+        const dayName = dayNames[taskDate.getDay()];
+        return `${dayName} (${diffDays} أيام)`;
+    } else if (diffDays > 7 && diffDays <= 14) {
+        return 'الأسبوع القادم';
+    } else if (diffDays > 14) {
         const weeks = Math.floor(diffDays / 7);
-        return `بعد ${weeks} أسابيع`;
+        const remainingDays = diffDays % 7;
+        
+        if (remainingDays === 0) {
+            return `بعد ${weeks} أسابيع`;
+        } else {
+            return `بعد ${weeks} أسبوع و ${remainingDays} أيام`;
+        }
     }
     
-    return '';
+    return `${diffDays} أيام`;
 }
 
 function renderCalendar() {
