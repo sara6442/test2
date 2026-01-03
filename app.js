@@ -247,6 +247,40 @@ function createFutureRepeatedTasks(task) {
     console.log(`✅ تم إنشاء ${futureDates.length} مهمة متكررة مستقبلية`);
 }
 
+// ========== دالة مساعدة: إخفاء المهام المتأخرة المكتملة ==========
+function hideCompletedOverdueTasks() {
+    console.log("🧹 تنظيف المهام المتأخرة المكتملة...");
+    
+    const today = new Date().toISOString().split('T')[0];
+    let removedCount = 0;
+    
+    for (let i = AppState.tasks.length - 1; i >= 0; i--) {
+        const task = AppState.tasks[i];
+        
+        // إذا كانت المهمة مكتملة ومتأخرة (تاريخها قبل اليوم)
+        if (task.completed && task.date < today) {
+            // نقل المهمة إلى المهام المحذوفة
+            AppState.deletedTasks.push({
+                ...task,
+                deletedAt: new Date().toISOString(),
+                autoRemoved: true
+            });
+            
+            // حذف المهمة من القائمة الرئيسية
+            AppState.tasks.splice(i, 1);
+            removedCount++;
+        }
+    }
+    
+    if (removedCount > 0) {
+        saveTasks();
+        saveDeletedTasks();
+        console.log(`✅ تم إزالة ${removedCount} مهمة متأخرة مكتملة`);
+    }
+    
+    return removedCount;
+}
+
 // دالة تسمية التكرار
 function getRepetitionLabel(repetition) {
     if (!repetition || repetition.type === 'none') return '';
@@ -587,6 +621,7 @@ function refreshCurrentView() {
     
     ensureFilterBar();
 }
+
 // ========== إدارة الثيمات ==========
 function initializeThemes() {
     console.log("تهيئة الثيمات...");
@@ -969,10 +1004,30 @@ function toggleTaskCompletion(taskId) {
         return;
     }
     
-    // إذا كانت المهمة عادية بدون تكرار
-    AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
+       // إذا كانت المهمة عادية بدون تكرار
+    const isOverdue = isTaskOverdue(AppState.tasks[taskIndex]);
+    
+    if (isOverdue && !AppState.tasks[taskIndex].completed) {
+        // إذا كانت المهمة متأخرة ويتم إكمالها الآن، احذفها
+        const completedTask = AppState.tasks[taskIndex];
+        
+        // حفظ نسخة في المهام المحذوفة قبل الحذف
+        AppState.deletedTasks.push({
+            ...completedTask,
+            deletedAt: new Date().toISOString(),
+            completedAt: new Date().toISOString(),
+            overdueCompleted: true
+        });
+        
+        // حذف المهمة من القائمة الرئيسية
+        AppState.tasks.splice(taskIndex, 1);
+    } else {
+        // إذا لم تكن متأخرة أو كانت مكتملة بالفعل، فقط تبديل الحالة
+        AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
+    }
     
     saveTasks();
+    saveDeletedTasks();
     refreshCurrentView();
 }
 
@@ -2066,10 +2121,16 @@ function renderCategories() {
     let html = '';
     
     AppState.categories.forEach(category => {
+        const today = new Date().toISOString().split('T')[0];
         const categoryTasks = AppState.tasks.filter(task => {
             if (task.categoryId !== category.id) return false;
-            const today = new Date().toISOString().split('T')[0];
-            if (task.completed && task.date < today) return false;
+            
+            // عرض فقط مهام اليوم (التاريخ الحالي)
+            if (task.date !== today) return false;
+            
+            // إخفاء المهام المتأخرة المكتملة
+            if (task.completed && isTaskOverdue(task)) return false;
+            
             return true;
         });
         
@@ -5014,34 +5075,38 @@ function checkDOMElements() {
         console.log("✅ جميع عناصر DOM موجودة");
     }
 }
+
 function initializePage() {
     console.log("📱 تهيئة التطبيق...");
     
     // 1. تحميل البيانات
     initializeData();
     
-    // 2. تهيئة الثيمات
+    // 2. تنظيف المهام المتأخرة المكتملة تلقائياً
+    hideCompletedOverdueTasks();
+    
+    // 3. تهيئة الثيمات
     initializeThemes();
     
-    // 3. ربط جميع الأحداث
+    // 4. ربط جميع الأحداث
     setupAllEvents();
     
-    // 4. إعداد البحث
+    // 5. إعداد البحث
     setupSearch();
     
-    // 5. إعداد أحداث التكرار
+    // 6. إعداد أحداث التكرار
     setupRepetitionEvents();
     
-    // 6. إعداد أحداث الملاحظات
+    // 7. إعداد أحداث الملاحظات
     setupNotesEvents();
     
-    // 7. عرض المهام مباشرة
+    // 8. عرض المهام مباشرة
     renderTasks();
     
-    // 8. تحديث التاريخ الحالي
+    // 9. تحديث التاريخ الحالي
     updateCurrentDate();
     
-    // 9. ربط حدث الحفظ مباشرة (تأمين إضافي)
+    // 10. ربط حدث الحفظ مباشرة (تأمين إضافي)
     setTimeout(() => {
         const saveBtn = document.getElementById('save-task');
         if (saveBtn) {
