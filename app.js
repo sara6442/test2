@@ -999,23 +999,13 @@ function addTask(taskData) {
     }, 500);
 }
 
-function toggleTaskCompletion(taskId) {
+
+   function toggleTaskCompletion(taskId) {
     console.log("🔧 تبديل حالة إكمال المهمة:", taskId);
     
     const taskIndex = AppState.tasks.findIndex(task => task.id === taskId);
     if (taskIndex === -1) {
-        // قد تكون مهمة متكررة، بحث بالمعرف الأصلي
-        const originalId = taskId.split('_')[0];
-        const originalTask = AppState.tasks.find(t => t.id === originalId);
-        
-        if (!originalTask || !originalTask.repetition || originalTask.repetition.type === 'none') {
-            console.log("❌ المهمة غير موجودة أو ليس لها تكرار");
-            return;
-        }
-        
-        // هذه مهمة متكررة، إكمالها في التاريخ الحالي فقط
-        console.log("✅ هذه مهمة متكررة، سيتم إكمالها لهذا اليوم فقط");
-        alert("تم إكمال المهمة المتكررة لهذا اليوم. ستظهر مرة أخرى في التكرار التالي.");
+        console.log("❌ المهمة غير موجودة");
         return;
     }
     
@@ -1023,48 +1013,25 @@ function toggleTaskCompletion(taskId) {
     
     // إذا كانت المهمة لها تكرار
     if (task.repetition && task.repetition.type !== 'none') {
-        // إنشاء تاريخ جديد للتكرار التالي
-        const newDate = calculateNextRepetitionDate(task.date, task.repetition);
+        // حساب التاريخ التالي للتكرار
+        const nextDate = calculateNextRepetitionDate(task.date, task.repetition);
         
-        // إنشاء نسخة جديدة للمهمة للتكرار التالي
-        const newTask = {
-            ...task,
-            id: generateId(),
-            date: newDate,
-            completed: false,
-            createdAt: new Date().toISOString(),
-            originalRepetitionId: task.id // حفظ المرجع للمهمة الأصلية
-        };
+        // تحديث تاريخ المهمة الحالية ليصبح التاريخ التالي
+        AppState.tasks[taskIndex].date = nextDate;
+        AppState.tasks[taskIndex].completed = false;
+        AppState.tasks[taskIndex].completedAt = undefined;
         
-        // إضافة المهمة الجديدة للتكرار التالي
-        AppState.tasks.push(newTask);
-        
-        // تحديث المهمة الحالية لتكون مكتملة
-        AppState.tasks[taskIndex].completed = true;
-        AppState.tasks[taskIndex].completedAt = new Date().toISOString();
-        
-        console.log(`🔄 تم إنشاء تكرار جديد للمهمة "${task.title}" بتاريخ ${newDate}`);
-        
-        saveTasks();
-        refreshCurrentView();
-        return;
-    }
-    
-    // إذا كانت المهمة عادية بدون تكرار
-    const isOverdue = isTaskOverdue(task);
-    
-    // تبديل حالة الإكمال
-    AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
-        // إذا كانت المهمة متأخرة وأصبحت مكتملة الآن
-    if (isOverdue && AppState.tasks[taskIndex].completed) {
-        console.log(`✅ تم إكمال مهمة متأخرة: "${task.title}"`);
-        // تمت إزالة رسالة التأكيد
-    }
-    // تحديث وقت الإكمال إذا كانت مكتملة
-    if (AppState.tasks[taskIndex].completed) {
-        AppState.tasks[taskIndex].completedAt = new Date().toISOString();
+        console.log(`🔄 تم نقل المهمة "${task.title}" إلى تاريخ ${nextDate}`);
     } else {
-        delete AppState.tasks[taskIndex].completedAt;
+        // إذا كانت المهمة عادية بدون تكرار
+        AppState.tasks[taskIndex].completed = !AppState.tasks[taskIndex].completed;
+        
+        // تحديث وقت الإكمال إذا كانت مكتملة
+        if (AppState.tasks[taskIndex].completed) {
+            AppState.tasks[taskIndex].completedAt = new Date().toISOString();
+        } else {
+            delete AppState.tasks[taskIndex].completedAt;
+        }
     }
     
     saveTasks();
@@ -1802,12 +1769,13 @@ function saveNewTask() {
     }, 500);
 }
 
-function renderSingleTaskCard(task) {
+function renderSingleTaskCard(task, customDateDisplay = null) {
     const category = getCategoryById(task.categoryId);
     const isDeleted = AppState.currentFilter === 'deleted';
     const isOverdue = isTaskOverdue(task) && !task.completed;
     const isRepeated = task.repetition && task.repetition.type !== 'none';
     const isCompleted = task.completed;
+    const timeUntilNext = getTimeUntilNextRepetition(task);
     
     if (isDeleted) {
         return `
@@ -1841,7 +1809,7 @@ function renderSingleTaskCard(task) {
                 </div>
             </div>
         `;
-      } else {
+        } else {
         return `
             <div class="task-card ${isCompleted ? 'completed' : ''}" 
                  data-id="${task.id}"
@@ -1863,6 +1831,14 @@ function renderSingleTaskCard(task) {
                             <i class="fas fa-redo"></i> ${getRepetitionLabel(task.repetition)}
                         </span>
                     </div>
+                    
+                    ${timeUntilNext ? `
+                        <div class="countdown-badge" style="position: absolute; top: 70px; left: 10px; z-index: 2;">
+                            <span style="background: rgba(76, 201, 240, 0.1); color: var(--success-color); padding: 3px 8px; border-radius: 12px; font-size: 0.7rem; border: 1px solid rgba(76, 201, 240, 0.3); display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fas fa-clock"></i> ${timeUntilNext}
+                            </span>
+                        </div>
+                    ` : ''}
                 ` : ''}
                 
                 <div style="display: flex; align-items: flex-start; gap: 20px; margin-right: 60px;">
@@ -1893,7 +1869,7 @@ function renderSingleTaskCard(task) {
                             </div>
                             <div class="task-meta-item">
                                 <i class="fas fa-calendar"></i>
-                                <span>${formatDate(task.date)}</span>
+                                <span>${customDateDisplay || formatDate(task.date)}</span>
                             </div>
                             <div class="task-meta-item">
                                 <i class="fas fa-clock"></i>
@@ -2830,7 +2806,6 @@ function openAddTaskModal(preselectedCategory = null) {
     
     console.log("✅ نافذة إضافة المهمة مفتوحة");
 }
-
 function calculateNextRepetitionDate(currentDate, repetition) {
     const date = new Date(currentDate);
     
@@ -2853,7 +2828,9 @@ function calculateNextRepetitionDate(currentDate, repetition) {
                 const currentDay = date.getDay();
                 const days = repetition.days.sort((a, b) => a - b);
                 
+                // البحث عن أول يوم بعد اليوم الحالي
                 let nextDay = days.find(day => day > currentDay);
+                
                 if (!nextDay) {
                     // إذا لم يجد يوم في الأسبوع الحالي، يأخذ أول يوم في الأسبوع التالي
                     nextDay = days[0];
@@ -2866,6 +2843,35 @@ function calculateNextRepetitionDate(currentDate, repetition) {
     }
     
     return date.toISOString().split('T')[0];
+}
+
+// دالة جديدة: حساب الوقت المتبقي حتى التكرار التالي
+function getTimeUntilNextRepetition(task) {
+    if (!task.repetition || task.repetition.type === 'none') return '';
+    
+    const taskDate = new Date(task.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // إذا كانت المهمة ليست لليوم، لا نعرض العداد
+    if (taskDate > today) return '';
+    
+    // حساب الفرق بالأيام
+    const diffTime = taskDate - today;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) {
+        return 'اليوم';
+    } else if (diffDays === 1) {
+        return 'غداً';
+    } else if (diffDays > 1 && diffDays <= 7) {
+        return `بعد ${diffDays} أيام`;
+    } else if (diffDays > 7) {
+        const weeks = Math.floor(diffDays / 7);
+        return `بعد ${weeks} أسابيع`;
+    }
+    
+    return '';
 }
 
 function renderCalendar() {
