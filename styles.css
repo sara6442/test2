@@ -1825,17 +1825,17 @@ body {
     color: var(--theme-primary);
 }
 
-/* رأس قسم المهام اللاحقة (باللون الأخضر) */
+/* رأس قسم المهام اللاحقة (نفس لون مهام اليوم - اللون الأساسي) */
 .tasks-section:nth-child(3) .section-header {
-    border-bottom-color: var(--success-color);
+    border-bottom-color: var(--theme-primary);
 }
 
 .tasks-section:nth-child(3) .section-header i {
-    color: var(--success-color);
+    color: var(--theme-primary);
 }
 
 .tasks-section:nth-child(3) .section-header h3 {
-    color: var(--success-color);
+    color: var(--theme-primary);
 }
 
 /* مجموعة التواريخ في المهام اللاحقة - بدون خلفية ملونة */
@@ -1849,7 +1849,7 @@ body {
     padding: 8px 12px !important;
     background: var(--theme-bg) !important;
     border-radius: 8px !important;
-    border-right: 3px solid var(--success-color) !important;
+    border-right: 3px solid var(--theme-primary) !important; /* ← تغير إلى اللون الأساسي */
     font-size: 0.95rem !important;
     display: flex !important;
     align-items: center !important;
