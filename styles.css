@@ -1908,5 +1908,28 @@ body {
     box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important;
 }
 
-/* ========== النهاية ========== */
+/* ========== أنماط المهام المتأخرة في الفئات ========== */
+.category-task-item.overdue {
+    border-right: 3px solid var(--danger-color) !important;
+    background: linear-gradient(135deg, rgba(247, 37, 133, 0.05), rgba(247, 37, 133, 0.1)) !important;
+    animation: pulseOverdue 2s infinite !important;
+}
+
+.category-task-item.overdue:hover {
+    background: linear-gradient(135deg, rgba(247, 37, 133, 0.1), rgba(247, 37, 133, 0.15)) !important;
+    transform: translateX(-5px) !important;
+}
+
+.category-task-item.overdue.completed {
+    opacity: 0.6 !important;
+    animation: none !important;
+    background: linear-gradient(135deg, rgba(247, 37, 133, 0.02), rgba(247, 37, 133, 0.05)) !important;
+}
+
+@keyframes pulseOverdue {
+    0% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0.2); }
+    70% { box-shadow: 0 0 0 5px rgba(247, 37, 133, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(247, 37, 133, 0); }
+}
+
 /* ========== النهاية ========== */
