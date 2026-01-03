@@ -1975,6 +1975,7 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                                 <i class="fas fa-repeat" style="color: var(--theme-primary);"></i>
                                 <span>${getRepetitionLabel(task.repetition)}</span>
                             </div>` : ''}
+        
                     </div>
                 </div>
                 <div class="task-actions">
@@ -2017,7 +2018,7 @@ function renderSingleTaskCard(task, customDateDisplay = null) {
                         </span>
                     </div>
                     
-                    ${timeUntilNext && !isToday ? `
+                   ${timeUntilNext ? `
                         <div class="countdown-badge">
                             <span>
                                 <i class="fas fa-clock"></i> ${timeUntilNext}
@@ -3051,8 +3052,13 @@ function openAddTaskModal(preselectedCategory = null) {
     
     return date.toISOString().split('T')[0];
 }
+// ========== دالة تنسيق الأرقام العربية ==========
+function formatArabicNumber(number) {
+    const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number.toString().split('').map(digit => arabicNumbers[digit] || digit).join('');
+}
 
-// ========== دالة حساب الوقت المتبقي للتكرار (الأيام فقط) ==========
+// ========== دالة نهائية محسنة للوقت المتبقي ==========
 function getTimeUntilNextRepetition(task) {
     if (!task.repetition || task.repetition.type === 'none' || task.completed) {
         return '';
@@ -3063,25 +3069,49 @@ function getTimeUntilNextRepetition(task) {
     today.setHours(0, 0, 0, 0);
     taskDate.setHours(0, 0, 0, 0);
     
-    // إذا كانت المهمة لليوم، لا نعرض العداد
+    // إذا كانت المهمة لليوم
     if (taskDate.getTime() === today.getTime()) {
         return '';
     }
     
-    // إذا كانت المهمة في الماضي (متأخرة)
-    if (taskDate < today) {
-        const diffTime = today - taskDate;
-        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-        return `${diffDays} يوم`;
-    }
-    
-    // حساب الفرق بالأيام فقط
+    // حساب الفرق بالأيام
     const diffTime = taskDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    return `${diffDays} يوم`;
+    if (diffDays < 0) {
+        // إذا كانت المهمة في الماضي (متأخرة)
+        const pastDays = Math.abs(diffDays);
+        
+        if (pastDays === 1) return 'متأخرة منذ يوم';
+        if (pastDays === 2) return 'متأخرة منذ يومين';
+        
+        // صياغة عربية صحيحة
+        const arabicDays = formatArabicNumber(pastDays);
+        
+        if (pastDays >= 3 && pastDays <= 10) {
+            return `متأخرة منذ ${arabicDays} أيام`;
+        } else if (pastDays >= 11 && pastDays <= 99) {
+            return `متأخرة منذ ${arabicDays} يوماً`;
+        } else {
+            return `متأخرة منذ ${arabicDays} يوم`;
+        }
+    }
+    
+    // إذا كانت المهمة في المستقبل
+    if (diffDays === 1) return 'غداً';
+    if (diffDays === 2) return 'بعد غد';
+    
+    // صياغة عربية صحيحة
+    const arabicDays = formatArabicNumber(diffDays);
+    
+    if (diffDays >= 3 && diffDays <= 10) {
+        return `${arabicDays} أيام`;
+    } else if (diffDays >= 11 && diffDays <= 99) {
+        return `${arabicDays} يوماً`;
+    } else {
+        return `${arabicDays} يوم`;
+    }
 }
-
 // ========== دالة مساعدة: منع التكرار المتعدد في الصفحة الرئيسية ==========
 function getNextAvailableRepetitionDate(task) {
     if (!task.repetition || task.repetition.type === 'none' || !task.completed) {
@@ -3173,7 +3203,6 @@ function renderCalendar() {
         setupCalendarTooltips();
     }, 100);
 }
-
 function renderDailyCalendar(container) {
     console.log("📅 عرض الجدول اليومي...");
     const date = AppState.currentCalendarDate;
@@ -3332,6 +3361,8 @@ function renderDailyCalendar(container) {
             const isRepeated = task.isRepeated;
             const isCompleted = task.completed;
             const isOverdueFromPast = task.isOverdueFromPast;
+            // **هنا التعديل المهم: استخدام الدالة المحسنة**
+            const timeUntilNext = getTimeUntilNextRepetition(task);
             
             html += `
                 <div class="calendar-task-card ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
@@ -3351,7 +3382,10 @@ function renderDailyCalendar(container) {
                                 <span><i class="fas fa-tag" style="color:${category.color};"></i> ${category.name}</span>
                                 <span><i class="fas fa-clock"></i> ${task.time}</span>
                                 <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
-                                ${isRepeated ? `<span style="color:var(--theme-primary);"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                                ${isRepeated ? 
+                                    `<span style="color:var(--theme-primary);"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                                ${timeUntilNext ? 
+                                    `<span style="color:${isOverdue ? '#f72585' : '#4cc9f0'};"><i class="fas fa-clock"></i> ${timeUntilNext}</span>` : ''}
                             </div>
                         </div>
                         <div style="display:flex; gap:6px; align-items:center;">
@@ -3424,6 +3458,8 @@ function renderDailyCalendar(container) {
                 const isRepeated = task.isRepeated;
                 const isCompleted = task.completed;
                 const isOverdueFromPast = task.isOverdueFromPast;
+                // **هنا التعديل المهم: استخدام الدالة المحسنة**
+                const timeUntilNext = getTimeUntilNextRepetition(task);
                 
                 html += `
                     <div class="calendar-task-card ${isCompleted ? 'completed' : ''} ${isOverdue ? 'overdue' : ''}" 
@@ -3446,6 +3482,8 @@ function renderDailyCalendar(container) {
                                     <span><i class="fas fa-stopwatch"></i> ${task.duration} د</span>
                                    ${task.repetition && task.repetition.type !== 'none' ? 
                                     `<span class="repetition-badge-inline"><i class="fas fa-repeat"></i> ${getRepetitionLabel(task.repetition)}</span>` : ''}
+                                   ${timeUntilNext ? 
+                                    `<span style="color:${isOverdue ? '#f72585' : '#4cc9f0'};"><i class="fas fa-clock"></i> ${timeUntilNext}</span>` : ''}
                                 </div>
                             </div>
                             <div style="display:flex; gap:6px; align-items:center;">
