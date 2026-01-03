@@ -1575,10 +1575,11 @@ function renderTasks() {
             html += renderSingleTaskCard(task, `${dayName} ${dateStr}`);
         });
         
+              html += `</div>`;
+        }
+        
         html += `</div>`;
     }
-    
-    html += `</div>`;
 } else if (AppState.currentFilter === 'all') {
         // عرض جميع المهام في أقسام
         if (tasksData.overdue && tasksData.overdue.length > 0) {
